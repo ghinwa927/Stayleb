@@ -1,26 +1,113 @@
 @import "tailwindcss";
+@import "../../public/fonts/inter.css";
+@import "../../public/fonts/symbols.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme {
+  --color-surface-dim: #cfdaf2;
+  --color-on-tertiary: #ffffff;
+  --color-on-primary-container: #a4f5f7;
+  --color-surface-container-low: #f0f3ff;
+  --color-outline: #6e7979;
+  --color-tertiary: #68483a;
+  --color-on-background: #111c2d;
+  --color-tertiary-container: #835f51;
+  --color-inverse-primary: #84d4d6;
+  --color-primary-fixed: #a0f0f2;
+  --color-surface: #f9f9ff;
+  --color-on-secondary: #ffffff;
+  --color-on-primary-fixed-variant: #004f51;
+  --color-on-surface-variant: #3e4949;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-primary-fixed: #002021;
+  --color-primary: #00595b;
+  --color-secondary-fixed-dim: #6fd7d6;
+  --color-primary-fixed-dim: #84d4d6;
+  --color-inverse-surface: #263143;
+  --color-on-secondary-fixed: #002020;
+  --color-on-error-container: #93000a;
+  --color-on-secondary-container: #006e6e;
+  --color-inverse-on-surface: #ecf1ff;
+  --color-primary-container: #157375;
+  --color-surface-variant: #d8e3fb;
+  --color-on-tertiary-container: #ffe0d5;
+  --color-error: #ba1a1a;
+  --color-secondary: #006a6a;
+  --color-on-error: #ffffff;
+  --color-secondary-fixed: #8df3f3;
+  --color-error-container: #ffdad6;
+  --color-secondary-container: #8af0f0;
+  --color-surface-container-highest: #d8e3fb;
+  --color-tertiary-fixed: #ffdbcd;
+  --color-surface-container: #e7eeff;
+  --color-surface-tint: #00696b;
+  --color-on-tertiary-fixed-variant: #5f3f32;
+  --color-outline-variant: #bec9c8;
+  --color-on-primary: #ffffff;
+  --color-on-tertiary-fixed: #2d150a;
+  --color-on-surface: #111c2d;
+  --color-on-secondary-fixed-variant: #004f50;
+  --color-surface-bright: #f9f9ff;
+  --color-background: #f9f9ff;
+  --color-surface-container-high: #dee8ff;
+  --color-tertiary-fixed-dim: #eabdab;
+  --spacing-space-md: 1rem;
+  --spacing-space-xs: 0.25rem;
+  --spacing-margin: 2rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-xl: 2rem;
+  --spacing-margin-mobile: 1rem;
+  --spacing-gutter-sm: 1rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-gutter: 1.5rem;
+  --text-headline-lg-mobile: 26px;
+  --text-headline-lg-mobile--line-height: 34px;
+  --text-headline-lg-mobile--letter-spacing: -0.01em;
+  --text-headline-lg-mobile--font-weight: 600;
+  --text-label-md: 12px;
+  --text-label-md--line-height: 16px;
+  --text-label-md--letter-spacing: 0.02em;
+  --text-label-md--font-weight: 600;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 18px;
+  --text-body-sm--font-weight: 400;
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 26px;
+  --text-body-lg--font-weight: 400;
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-lg--font-weight: 600;
+  --text-headline-sm: 20px;
+  --text-headline-sm--line-height: 28px;
+  --text-headline-sm--font-weight: 600;
+  --text-title-md: 16px;
+  --text-title-md--line-height: 24px;
+  --text-title-md--font-weight: 600;
+  --text-display-lg: 40px;
+  --text-display-lg--line-height: 48px;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--letter-spacing: -0.01em;
+  --text-headline-md--font-weight: 600;
+  --text-body-md: 14px;
+  --text-body-md--line-height: 22px;
+  --text-body-md--font-weight: 400;
+  --text-label-sm: 11px;
+  --text-label-sm--line-height: 14px;
+  --text-label-sm--letter-spacing: 0.03em;
+  --text-label-sm--font-weight: 500;
+  --font-headline-lg-mobile: "Inter", sans-serif;
+  --font-label-md: "Inter", sans-serif;
+  --font-body-sm: "Inter", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-headline-lg: "Inter", sans-serif;
+  --font-headline-sm: "Inter", sans-serif;
+  --font-title-md: "Inter", sans-serif;
+  --font-display-lg: "Inter", sans-serif;
+  --font-headline-md: "Inter", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-label-sm: "Inter", sans-serif;
+  --font-sans: "Inter", sans-serif;
 }

@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function NotFound(){return <main className="min-h-screen flex flex-col items-center justify-center px-5 text-center"><span className="text-primary text-sm font-semibold">STAYLEB · 404</span><h1 className="text-3xl font-semibold mt-4">This stay could not be found</h1><p className="text-outline my-5">The page may have moved. Explore another Lebanese retreat.</p><Link href="/" className="button-primary">Back to Discover</Link></main>;}
