@@ -63,3 +63,35 @@ class Property(Base):
     back_populates="property",
     cascade="all, delete-orphan"
 )
+    
+    images = relationship(
+    "PropertyImage",
+    back_populates="property",
+    cascade="all, delete-orphan",
+    order_by="PropertyImage.display_order"
+)
+    
+    property_rules = relationship(
+    "PropertyRule",
+    back_populates="property",
+    cascade="all, delete-orphan"
+)
+
+    property_amenities = relationship(
+    "PropertyAmenity",
+    back_populates="property",
+    cascade="all, delete-orphan"
+)
+
+    blocked_dates = relationship(
+    "PropertyBlockedDate",
+    back_populates="property",
+    cascade="all, delete-orphan"
+)
+
+    @property
+    def amenities(self):
+     return [
+        property_amenity.amenity
+        for property_amenity in self.property_amenities
+    ]

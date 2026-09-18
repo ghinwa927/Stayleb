@@ -37,3 +37,7 @@ class UserResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+
+class ResetPasswordRequest(BaseModel):
+    reset_token: str
+    new_password: str

@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends, Response, Request, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
-from app.schemas.user import RegisterRequest, UserResponse
-from app.services.auth_service import register_user
+from app.schemas.user import RegisterRequest, UserResponse,ResetPasswordRequest
+from app.services.auth_service import register_user,reset_password
 from app.schemas.user import (
     RegisterRequest,
     LoginRequest,
     UserResponse,
-    TokenResponse
+    TokenResponse,
+    ResetPasswordRequest
 )
 from app.services.auth_service import (
     register_user,
@@ -209,3 +210,25 @@ def verify_reset_otp_route(
             status_code=400,
             detail=str(e),
         )
+
+@router.post("/reset-password")
+def reset_password_route(
+    data: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    return reset_password(
+        db=db,
+        reset_token=data.reset_token,
+        new_password=data.new_password,
+    )
+
+@router.post("/reset-password")
+def reset_password_route(
+    data: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    return reset_password(
+        db=db,
+        reset_token=data.reset_token,
+        new_password=data.new_password,
+    )
