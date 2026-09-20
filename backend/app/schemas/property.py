@@ -142,3 +142,20 @@ class PropertyResponse(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class PropertySearchResponse(BaseModel):
+    items: list[PropertySearchItem]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+class StayPricingResponse(BaseModel):
+    number_of_nights: int
+    total_price: Decimal
+    average_price_per_night: Decimal
+    lowest_nightly_price: Decimal
+    highest_nightly_price: Decimal
+
+class PropertySearchItem(PropertyResponse):
+    stay_pricing: StayPricingResponse | None = None

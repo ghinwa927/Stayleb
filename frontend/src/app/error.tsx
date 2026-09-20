@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({reset}:{error:Error & {digest?:string};reset:()=>void}){return <main className="p-10 max-w-xl mx-auto text-center"><h1 className="text-2xl font-semibold">We couldn’t load this page.</h1><p className="text-slate-500 my-5">Please try again to continue planning your stay.</p><button onClick={reset} className="primary-button">Try again</button></main>;}

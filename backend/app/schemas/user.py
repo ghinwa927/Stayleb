@@ -41,3 +41,14 @@ class TokenResponse(BaseModel):
 class ResetPasswordRequest(BaseModel):
     reset_token: str
     new_password: str
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class UpdateProfileRequest(BaseModel):
+    full_name: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None

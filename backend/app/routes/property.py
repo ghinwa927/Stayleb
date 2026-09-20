@@ -1,12 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status,Query
 from sqlalchemy.orm import Session
+
+from datetime import date
+from decimal import Decimal
+from typing import Literal
 
 from app.database.database import get_db
 from app.models.user import User
+from app.services.property_search_service import search_properties
 from app.schemas.property import (
     PropertyCreate,
     PropertyUpdate,
     PropertyResponse,
+    PropertySearchResponse
 )
 from app.services.property_service import (
     create_property,
@@ -45,6 +51,100 @@ def create_property_route(
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+
+@router.get(
+    "",
+    response_model=PropertySearchResponse,
+)
+def public_search_properties(
+    location: str | None = Query(
+        None,
+        min_length=1,
+        max_length=150,
+    ),
+    check_in: date | None = None,
+    check_out: date | None = None,
+    guests: int | None = Query(
+        None,
+        ge=1,
+    ),
+    min_price: Decimal | None = Query(
+        None,
+        ge=0,
+    ),
+    max_price: Decimal | None = Query(
+        None,
+        ge=0,
+    ),
+    property_type: Literal[
+        "chalet",
+        "furnished_house",
+    ] | None = None,
+    bedrooms: int | None = Query(
+        None,
+        ge=0,
+    ),
+    bathrooms: int | None = Query(
+        None,
+        ge=1,
+    ),
+    amenity_ids: list[int] | None = Query(None),
+    sort: Literal[
+        "recommended",
+        "price_low",
+        "price_high",
+        "newest",
+    ] = "recommended",
+    page: int = Query(
+        1,
+        ge=1,
+    ),
+    page_size: int = Query(
+        12,
+        ge=1,
+        le=50,
+    ),
+    db: Session = Depends(get_db),
+):
+    if (check_in is None) != (check_out is None):
+        raise HTTPException(
+            status_code=400,
+            detail="Both check_in and check_out must be provided together",
+        )
+
+    if (
+        min_price is not None
+        and max_price is not None
+        and min_price > max_price
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="min_price cannot be greater than max_price",
+        )
+
+    try:
+        return search_properties(
+            db=db,
+            location=location,
+            check_in=check_in,
+            check_out=check_out,
+            guests=guests,
+            min_price=min_price,
+            max_price=max_price,
+            property_type=property_type,
+            bedrooms=bedrooms,
+            bathrooms=bathrooms,
+            amenity_ids=amenity_ids,
+            sort=sort,
+            page=page,
+            page_size=page_size,
+        )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
             detail=str(e),
         )
 

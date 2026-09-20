@@ -46,6 +46,7 @@ def admin_create_amenity(
             db=db,
             name=data.name,
             description=data.description,
+            category=data.category,
         )
 
     except ValueError as e:

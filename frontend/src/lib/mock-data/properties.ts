@@ -1,13 +1,13 @@
-import type { Property } from '@/lib/types';
+import type { Property, Booking, Review } from '@/lib/types';
 export const properties: Property[] = [
-  { id: 'batroun-sunset', name: 'Batroun Sunset Coastal Retreat', region: 'Batroun', area: 'Batroun, North Lebanon', image: '/images/af75ed5b6b6a6f0d.jpg', price: 160, rating: 4.9, reviews: 128, guests: 6, bedrooms: 3, bathrooms: 2, amenities: ['24/7 Solar Power', 'Private Pool', 'Sea View'], status: 'Approved' },
-  { id: 'cedars-summit', name: 'Cedars Summit Stone Lodge', region: 'Faraya', area: 'Faraya, Mount Lebanon', image: '/images/81723d32ab713d6e.jpg', price: 185, rating: 4.9, reviews: 94, guests: 8, bedrooms: 4, bathrooms: 3, amenities: ['24/7 Solar Power', 'Fireplace', 'Mountain View'], status: 'Approved' },
-  { id: 'azure-coast', name: 'Azure Coast Beachfront Chalet', region: 'Sour', area: 'Sour, South Lebanon', image: '/images/1f566744ddc73f8d.jpg', price: 120, rating: 4.8, reviews: 86, guests: 4, bedrooms: 2, bathrooms: 2, amenities: ['24/7 Solar Power', 'Private Pool', 'Beach Access'], status: 'Approved' },
-  { id: 'saida-heritage', name: 'Saida Heritage Garden Villa', region: 'Saida', area: 'Saida, South Lebanon', image: '/images/fc1018e8d13663f9.jpg', price: 95, rating: 4.7, reviews: 72, guests: 5, bedrooms: 2, bathrooms: 1, amenities: ['Fast Wi-Fi', 'Garden', 'Traditional House'], status: 'Approved' },
-  { id: 'tyre-port', name: 'Tyre Port Traditional Villa', region: 'Sour', area: 'Tyre Old Port, Sour', image: '/images/dc0b315b162e2a76.jpg', price: 140, rating: 4.9, reviews: 45, guests: 6, bedrooms: 3, bathrooms: 2, amenities: ['24/7 Solar Power', 'Sea View', 'Fast Wi-Fi'], status: 'Approved' },
-  { id: 'al-fanar', name: 'Al-Fanar Horizon Lodge', region: 'Sour', area: 'Al-Fanar, Sour', image: '/images/af75ed5b6b6a6f0d.jpg', price: 175, rating: 4.8, reviews: 38, guests: 4, bedrooms: 2, bathrooms: 2, amenities: ['Private Pool', 'Sea View', 'Fast Wi-Fi'], status: 'Approved' },
-  { id: 'citrus-orchard', name: 'Sour Citrus Orchard Chalet', region: 'Sour', area: 'Abbasiyeh, Sour', image: '/images/fc1018e8d13663f9.jpg', price: 85, rating: 4.6, reviews: 29, guests: 5, bedrooms: 2, bathrooms: 1, amenities: ['Garden', 'BBQ Area', '24/7 Solar Power'], status: 'Approved' },
-  { id: 'mediterranean-stone', name: 'Mediterranean Stone Retreat', region: 'Sour', area: 'Naqoura Coast, Sour', image: '/images/1f566744ddc73f8d.jpg', price: 210, rating: 4.9, reviews: 62, guests: 8, bedrooms: 4, bathrooms: 3, amenities: ['Private Pool', 'Beach Access', '24/7 Solar Power'], status: 'Approved' },
-  { id: 'byblos-horizon', name: 'Byblos Horizon Bay Villa', region: 'Byblos', area: 'Amchit, Byblos', image: '/images/a17c09290530d2aa.jpg', price: 150, rating: 4.8, reviews: 41, guests: 6, bedrooms: 3, bathrooms: 2, amenities: ['Sea View', 'Fast Wi-Fi', 'Private Pool'], status: 'Approved' },
+ { id:'cedar-peak',name:'Cedar Peak Stone Chalet',location:'Faraya Mzaar, Mount Lebanon',nightlyRate:220,guests:6,bedrooms:3,rating:4.98,amenities:['24/7 power','Wi-Fi','Fireplace','Heated Jacuzzi','Mountain view'],image:'/images/e8899428208cea05.jpg' },
+ { id:'batroun-sunset',name:'Batroun Sunset Seaside Villa',location:'Batroun, North Lebanon',nightlyRate:275,guests:8,bedrooms:4,rating:4.94,amenities:['Sea view','Private pool','Wi-Fi','24/7 power'],image:'/images/c331cbbd0aed5d63.jpg' },
+ { id:'chouf-heritage',name:'Chouf Heritage Guesthouse',location:'Deir el Qamar, Chouf',nightlyRate:140,guests:4,bedrooms:2,rating:4.96,amenities:['Courtyard','Breakfast','Wi-Fi','Mountain view'],image:'/images/d4f8855b10361ee0.jpg' },
 ];
-export const ownerProperties: Property[] = properties.slice(0, 6).map((property, index) => ({ ...property, status: index === 4 ? 'Pending' : index === 5 ? 'Action Required' : 'Approved' }));
+export const bookings: Booking[] = [
+ {id:'stay-001',propertyId:'cedar-peak',guest:'Maya Haddad',checkIn:'2026-09-25',checkOut:'2026-09-28',guests:4,total:740,status:'Confirmed',paymentMethod:'Card'},
+ {id:'stay-002',propertyId:'batroun-sunset',guest:'Maya Haddad',checkIn:'2026-10-12',checkOut:'2026-10-15',guests:4,total:865,status:'Pending',paymentMethod:'Cash'},
+ {id:'stay-003',propertyId:'chouf-heritage',guest:'Nour Khoury',checkIn:'2026-08-10',checkOut:'2026-08-13',guests:2,total:460,status:'Completed',paymentMethod:'Card'},
+];
+export const reviews: Review[] = [{id:'review-001',propertyId:'batroun-sunset',guest:'Maya Haddad',rating:5,comment:'Beautiful stone architecture, thoughtful hosts, and unforgettable sunsets over the Mediterranean.',date:'2026-09-12'}];
+export function getProperty(id: string) { return properties.find(property=>property.id===id) ?? properties[0]; }

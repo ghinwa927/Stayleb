@@ -1,6 +1,7 @@
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
 from app.models.password_reset_otp import PasswordResetOTP
+from app.models.booking import Booking
 from app.models.user import User
 from app.models.property import Property
 from app.models.property_seasonal_price import PropertySeasonalPrice
@@ -11,3 +12,4 @@ from app.models.rule import Rule
 from app.models.property_rule import PropertyRule
 from app.models.property_blocked_date import PropertyBlockedDate
 from app.models.platform_setting import PlatformSetting
+from app.models.payment import Payment

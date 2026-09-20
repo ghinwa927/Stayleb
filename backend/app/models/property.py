@@ -89,6 +89,12 @@ class Property(Base):
     cascade="all, delete-orphan"
 )
 
+    bookings = relationship(
+    "Booking",
+    back_populates="property",
+    cascade="all, delete-orphan",
+)
+
     @property
     def amenities(self):
      return [

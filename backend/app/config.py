@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     imagekit_private_key: str
     imagekit_url_endpoint: str
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 120
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     model_config = SettingsConfigDict(

@@ -44,3 +44,4 @@ class PropertyRuleResponse(BaseModel):
     value: str | None
 
     model_config = ConfigDict(from_attributes=True)
+    

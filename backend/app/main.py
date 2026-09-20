@@ -22,6 +22,8 @@ from app.routes.admin_user import router as admin_user_router
 from app.routes.admin_amenity import router as admin_amenity_router
 from app.routes.admin_rule import router as admin_rule_router
 from app.routes.admin_setting import router as admin_setting_router
+from app.routes.bookings import router as booking_router
+from app.routes.payments import router as payment_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -53,6 +55,8 @@ app.include_router(admin_user_router)
 app.include_router(admin_amenity_router)
 app.include_router(admin_rule_router)
 app.include_router(admin_setting_router)
+app.include_router(booking_router)
+app.include_router(payment_router)
 
 @app.get("/")
 def root():
