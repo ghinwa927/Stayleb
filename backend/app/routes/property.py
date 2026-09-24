@@ -18,6 +18,7 @@ from app.services.property_service import (
     create_property,
     get_owner_properties,
     get_owner_property_by_id,
+    get_approved_property_by_id,
     update_property,
     delete_property,
 )
@@ -90,6 +91,10 @@ def public_search_properties(
         None,
         ge=1,
     ),
+    beds: int | None = Query(
+        None,
+        ge=1,
+    ),
     amenity_ids: list[int] | None = Query(None),
     sort: Literal[
         "recommended",
@@ -136,6 +141,7 @@ def public_search_properties(
             property_type=property_type,
             bedrooms=bedrooms,
             bathrooms=bathrooms,
+            beds=beds,
             amenity_ids=amenity_ids,
             sort=sort,
             page=page,
@@ -147,6 +153,77 @@ def public_search_properties(
             status_code=400,
             detail=str(e),
         )
+
+@router.get(
+    "/public/{property_id}",
+    response_model=PropertyResponse,
+)
+def get_public_property_route(
+    property_id: int,
+    db: Session = Depends(get_db),
+):
+    try:
+        return get_approved_property_by_id(
+            db=db,
+            property_id=property_id,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+
+
+@router.get(
+    "/{property_id}/availability",
+    tags=["Properties"],
+)
+def get_public_availability_route(
+    property_id: int,
+    db: Session = Depends(get_db),
+):
+    # Public availability: owner blocked dates + confirmed/pending bookings
+    try:
+        prop = get_approved_property_by_id(
+            db=db,
+            property_id=property_id,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+    from app.models.property_blocked_date import PropertyBlockedDate
+    from app.models.booking import Booking
+    blocked = db.query(PropertyBlockedDate).filter(
+        PropertyBlockedDate.property_id == property_id
+    ).all()
+    bookings = db.query(Booking).filter(
+        Booking.property_id == property_id,
+        Booking.status.in_(["pending", "confirmed", "paid"]),
+    ).all()
+    return {
+        "property_id": property_id,
+        "blocked_dates": [
+            {
+                "id": b.id,
+                "start_date": b.start_date,
+                "end_date": b.end_date,
+                "reason": b.reason,
+            }
+            for b in blocked
+        ],
+        "booked_dates": [
+            {
+                "id": bk.id,
+                "check_in": bk.check_in,
+                "check_out": bk.check_out,
+                "status": bk.status,
+            }
+            for bk in bookings
+        ],
+    }
+
 
 @router.get(
     "/my-properties",

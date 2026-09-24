@@ -1,5 +1,5 @@
 from enum import Enum
-
+from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
 
@@ -28,10 +28,18 @@ class UserResponse(BaseModel):
     phone: str | None
     role: str
     is_active: bool
+    created_at: datetime
 
     model_config = {
         "from_attributes": True
     }
+
+class UserListResponse(BaseModel):
+    items: list[UserResponse]
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
 
 
 class TokenResponse(BaseModel):

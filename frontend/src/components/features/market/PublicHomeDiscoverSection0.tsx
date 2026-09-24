@@ -1,7 +1,6 @@
 import { LocalImage } from "@/components/ui/LocalImage";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
-import { FavoriteButton } from "@/components/features/makert/ListingSearch";
 import { ActionButton } from "@/components/ui/Interactions";
 
 export function PublicHomeDiscoverSection0() { return <>
@@ -74,7 +73,6 @@ export function PublicHomeDiscoverSection0() { return <>
 <Icon name="local_fire_department" className="material-symbols-outlined text-primary text-[14px]" />
 <span className={""}>{"Fireplace & Spa"}</span>
 </div>
-<FavoriteButton id={"cedar-peak"} />
 </div>
 <div className={"p-space-md flex flex-col flex-1 justify-between"}>
 <div>
@@ -97,7 +95,7 @@ export function PublicHomeDiscoverSection0() { return <>
 <span className={"font-headline-sm text-headline-sm text-primary font-bold"}>{"$220"}</span>
 <span className={"font-caption text-caption text-on-surface-variant"}>{"/ night"}</span>
 </div>
-<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
+<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/market/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
 </div>
 </div>
 </div>
@@ -109,7 +107,6 @@ export function PublicHomeDiscoverSection0() { return <>
 <Icon name="bolt" className="material-symbols-outlined text-secondary text-[14px]" />
 <span className={""}>{"24/7 Power Solars"}</span>
 </div>
-<FavoriteButton id={"faqra-glass"} />
 </div>
 <div className={"p-space-md flex flex-col flex-1 justify-between"}>
 <div>
@@ -132,7 +129,7 @@ export function PublicHomeDiscoverSection0() { return <>
 <span className={"font-headline-sm text-headline-sm text-primary font-bold"}>{"$340"}</span>
 <span className={"font-caption text-caption text-on-surface-variant"}>{"/ night"}</span>
 </div>
-<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
+<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/market/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
 </div>
 </div>
 </div>
@@ -144,7 +141,6 @@ export function PublicHomeDiscoverSection0() { return <>
 <Icon name="downhill_skiing" className="material-symbols-outlined text-primary text-[14px]" />
 <span className={""}>{"Ski-in/Ski-out"}</span>
 </div>
-<FavoriteButton id={"cedar-peak"} />
 </div>
 <div className={"p-space-md flex flex-col flex-1 justify-between"}>
 <div>
@@ -167,7 +163,7 @@ export function PublicHomeDiscoverSection0() { return <>
 <span className={"font-headline-sm text-headline-sm text-primary font-bold"}>{"$180"}</span>
 <span className={"font-caption text-caption text-on-surface-variant"}>{"/ night"}</span>
 </div>
-<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
+<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/market/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
 </div>
 </div>
 </div>
@@ -179,7 +175,6 @@ export function PublicHomeDiscoverSection0() { return <>
 <Icon name="local_florist" className="material-symbols-outlined text-tertiary text-[14px]" />
 <span className={""}>{"Pine Forest"}</span>
 </div>
-<FavoriteButton id={"cedar-peak"} />
 </div>
 <div className={"p-space-md flex flex-col flex-1 justify-between"}>
 <div>
@@ -202,7 +197,7 @@ export function PublicHomeDiscoverSection0() { return <>
 <span className={"font-headline-sm text-headline-sm text-primary font-bold"}>{"$165"}</span>
 <span className={"font-caption text-caption text-on-surface-variant"}>{"/ night"}</span>
 </div>
-<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
+<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/market/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
 </div>
 </div>
 </div>
@@ -236,7 +231,6 @@ export function PublicHomeDiscoverSection0() { return <>
 <Icon name="pool" className="material-symbols-outlined text-secondary text-[14px]" />
 <span className={""}>{"Private Infinity Pool"}</span>
 </div>
-<FavoriteButton id={"batroun-sunset"} />
 </div>
 <div className={"p-space-md flex flex-col flex-1 justify-between"}>
 <div>
@@ -259,7 +253,7 @@ export function PublicHomeDiscoverSection0() { return <>
 <span className={"font-headline-sm text-headline-sm text-primary font-bold"}>{"$275"}</span>
 <span className={"font-caption text-caption text-on-surface-variant"}>{"/ night"}</span>
 </div>
-<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
+<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/market/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
 </div>
 </div>
 </div>
@@ -271,7 +265,6 @@ export function PublicHomeDiscoverSection0() { return <>
 <Icon name="history_edu" className="material-symbols-outlined text-primary text-[14px]" />
 <span className={""}>{"Phoenician Heritage"}</span>
 </div>
-<FavoriteButton id={"old-port"} />
 </div>
 <div className={"p-space-md flex flex-col flex-1 justify-between"}>
 <div>
@@ -294,7 +287,7 @@ export function PublicHomeDiscoverSection0() { return <>
 <span className={"font-headline-sm text-headline-sm text-primary font-bold"}>{"$195"}</span>
 <span className={"font-caption text-caption text-on-surface-variant"}>{"/ night"}</span>
 </div>
-<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
+<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/market/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
 </div>
 </div>
 </div>
@@ -306,7 +299,6 @@ export function PublicHomeDiscoverSection0() { return <>
 <Icon name="beach_access" className="material-symbols-outlined text-secondary text-[14px]" />
 <span className={""}>{"Sandy Beachfront"}</span>
 </div>
-<FavoriteButton id={"cedar-peak"} />
 </div>
 <div className={"p-space-md flex flex-col flex-1 justify-between"}>
 <div>
@@ -329,7 +321,7 @@ export function PublicHomeDiscoverSection0() { return <>
 <span className={"font-headline-sm text-headline-sm text-primary font-bold"}>{"$150"}</span>
 <span className={"font-caption text-caption text-on-surface-variant"}>{"/ night"}</span>
 </div>
-<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
+<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/market/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
 </div>
 </div>
 </div>
@@ -341,7 +333,6 @@ export function PublicHomeDiscoverSection0() { return <>
 <Icon name="sailing" className="material-symbols-outlined text-primary text-[14px]" />
 <span className={""}>{"Cliff Sea Access"}</span>
 </div>
-<FavoriteButton id={"amchit-cliff"} />
 </div>
 <div className={"p-space-md flex flex-col flex-1 justify-between"}>
 <div>
@@ -364,7 +355,7 @@ export function PublicHomeDiscoverSection0() { return <>
 <span className={"font-headline-sm text-headline-sm text-primary font-bold"}>{"$135"}</span>
 <span className={"font-caption text-caption text-on-surface-variant"}>{"/ night"}</span>
 </div>
-<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
+<Link className={"px-space-sm py-space-xxs rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm font-semibold transition-all"} href={"/market/book/cedar-peak"}>{"\n              Instant Book\n            "}</Link>
 </div>
 </div>
 </div>

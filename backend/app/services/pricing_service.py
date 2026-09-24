@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from sqlalchemy.orm import Session
 
@@ -29,12 +29,15 @@ def calculate_stay_price(
     )
 
     nightly_prices: list[Decimal] = []
+    nightly_breakdown: list[dict] = []
 
     current_date = check_in
 
     while current_date < check_out:
 
         nightly_price = property.price_per_night
+        pricing_source = "base"
+        season_name = None
 
         for season in seasonal_prices:
             if (
@@ -42,10 +45,19 @@ def calculate_stay_price(
                 <= season.end_date
             ):
                 nightly_price = season.price_per_night
+                pricing_source = "seasonal"
+                season_name = season.season_name
                 break
 
-        nightly_prices.append(
-            Decimal(nightly_price)
+        price_dec = Decimal(nightly_price).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        nightly_prices.append(price_dec)
+        nightly_breakdown.append(
+            {
+                "date": current_date,
+                "price": price_dec,
+                "pricing_source": pricing_source,
+                "season_name": season_name,
+            }
         )
 
         current_date += timedelta(days=1)
@@ -59,13 +71,14 @@ def calculate_stay_price(
 
     average_price_per_night = (
         total_price / number_of_nights
-    )
+    ) if number_of_nights else Decimal("0.00")
 
     return {
         "number_of_nights": number_of_nights,
         "nightly_prices": nightly_prices,
+        "nightly_breakdown": nightly_breakdown,
         "total_price": total_price,
         "average_price_per_night": average_price_per_night,
-        "lowest_nightly_price": min(nightly_prices),
-        "highest_nightly_price": max(nightly_prices),
+        "lowest_nightly_price": min(nightly_prices) if nightly_prices else Decimal("0.00"),
+        "highest_nightly_price": max(nightly_prices) if nightly_prices else Decimal("0.00"),
     }

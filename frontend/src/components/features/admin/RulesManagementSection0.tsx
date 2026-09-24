@@ -100,13 +100,13 @@ export function RulesManagementSection0() {
           <div className="flex flex-col w-full">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg">
               <div className="flex flex-col gap-space-xxs">
-                <div className="flex items-center gap-space-xs font-label-sm text-label-sm text-[#157375]">
+                <div className="flex items-center gap-space-xs font-label-sm text-label-sm text-[#46B1B1]">
                   <span>Administration</span>
                   <Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
                   <span className="text-primary font-semibold">Rules Management</span>
                 </div>
-                <h1 className="font-headline-lg text-headline-lg text-[#157375] tracking-tight">Master Property Rules Directory</h1>
-                <p className="font-body-md text-body-md text-[#157375] max-w-3xl">Define and manage reusable conduct policies and rental constraints enforced across StayLeb listings.</p>
+                <h1 className="font-headline-lg text-headline-lg text-[#46B1B1] tracking-tight">Master Property Rules Directory</h1>
+                <p className="font-body-md text-body-md text-[#46B1B1] max-w-3xl">Define and manage reusable conduct policies and rental constraints enforced across StayLeb listings.</p>
               </div>
               <div className="flex items-center gap-space-xs shrink-0">
                 <button onClick={() => { setEditing(null); setForm({ name: "", description: "", category: "Nighttime Serenity", is_active: true }); setShowModal(true); }} className="flex items-center gap-space-xs px-space-md py-2.5 bg-primary text-white rounded-xl font-label-md text-label-md shadow-sm hover:opacity-95">
@@ -125,15 +125,15 @@ export function RulesManagementSection0() {
               </div>
               <div className="overflow-x-auto">
                 {loading ? (
-                  <div className="p-8 text-center text-[#157375]">Loading…</div>
+                  <div className="p-8 text-center text-[#46B1B1]">Loading…</div>
                 ) : error ? (
                   <div className="p-8 text-center text-error">{error}</div>
                 ) : filtered.length === 0 ? (
-                  <div className="p-8 text-center text-[#157375]">No rules found.</div>
+                  <div className="p-8 text-center text-[#46B1B1]">No rules found.</div>
                 ) : (
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="bg-surface-container-low text-[#157375] font-caption text-caption uppercase tracking-wider">
+                      <tr className="bg-surface-container-low text-[#46B1B1] font-caption text-caption uppercase tracking-wider">
                         <th className="py-space-sm px-space-md">Rule Policy Name</th>
                         <th className="py-space-sm px-space-md">Category</th>
                         <th className="py-space-sm px-space-md">Description</th>
@@ -144,13 +144,13 @@ export function RulesManagementSection0() {
                     <tbody>
                       {filtered.map((r) => (
                         <tr key={r.id} className="hover:bg-teal-50/50">
-                          <td className="py-space-sm px-space-md font-semibold text-[#157375]">{r.name}</td>
+                          <td className="py-space-sm px-space-md font-semibold text-[#46B1B1]">{r.name}</td>
                           <td className="py-space-sm px-space-md">
-                            <span className="px-2.5 py-1 rounded-full bg-[#157375]/10 text-[#157375] text-xs font-semibold border border-[#157375]/20">{r.category || "General"}</span>
+                            <span className="px-2.5 py-1 rounded-full bg-primary/10 text-[#46B1B1] text-xs font-semibold border border-[#157375]/20">{r.category || "General"}</span>
                           </td>
-                          <td className="py-space-sm px-space-md max-w-xs text-[#157375]/80 line-clamp-2">{r.description || "—"}</td>
+                          <td className="py-space-sm px-space-md max-w-xs text-[#46B1B1]/80 line-clamp-2">{r.description || "—"}</td>
                           <td className="py-space-sm px-space-md">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-caption text-caption font-semibold ${r.is_active === false ? "bg-slate-100 text-slate-500 border border-slate-200" : "bg-[#157375]/10 text-[#157375] border border-[#157375]/20"}`}>
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-caption text-caption font-semibold ${r.is_active === false ? "bg-slate-100 text-[#46B1B1]/70 border border-slate-200" : "bg-primary/10 text-[#46B1B1] border border-[#157375]/20"}`}>
                               {r.is_active === false ? "Inactive" : "Active"}
                             </span>
                           </td>
@@ -164,7 +164,7 @@ export function RulesManagementSection0() {
                                   setForm({ name: r.name, description: r.description || "", category: cat, is_active: r.is_active !== false });
                                   setShowModal(true);
                                 }}
-                                className="p-2 rounded-lg bg-[#157375]/10 text-[#157375] hover:bg-[#157375] hover:text-white transition-colors"
+                                className="p-2 rounded-lg bg-primary/10 text-[#46B1B1] hover:bg-primary hover:text-white transition-colors"
                                 title="Edit rule"
                               >
                                 <Icon name="edit" className="material-symbols-outlined text-[18px]" />
@@ -188,10 +188,10 @@ export function RulesManagementSection0() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1E293B]/50 backdrop-blur-sm p-4" onClick={() => setShowModal(false)}>
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-5 bg-gradient-to-r from-[#0f3d3e] to-[#157375] flex items-start justify-between gap-4">
+            <div className="px-6 py-5 bg-gradient-to-r from-[#46B1B1] to-[#3A9E9E] flex items-start justify-between gap-4">
               <div>
                 <h2 className="font-display font-bold text-[18px] tracking-tight text-white flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-full bg-white text-[#0f3d3e] grid place-items-center text-sm font-bold shadow-sm">+</span>
+                  <span className="w-7 h-7 rounded-full bg-white text-[#46B1B1] grid place-items-center text-sm font-bold shadow-sm">+</span>
                   {editing ? "Edit Master Rule" : "Create Master Rule"}
                 </h2>
                 <p className="text-[13px] text-white/80 mt-1">Define a reusable property rule for StayLeb</p>
@@ -202,9 +202,9 @@ export function RulesManagementSection0() {
             </div>
             <form noValidate onSubmit={handleSubmit} className="px-6 py-6 flex flex-col gap-5">
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-[#0f3d3e]">Rule Name *</label>
+                <label className="text-sm font-semibold text-[#46B1B1]">Rule Name *</label>
                 <input
-                  className={`h-11 px-3.5 rounded-xl border bg-white text-[#1E293B] placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all ${fieldErrors.name ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
+                  className={`h-11 px-3.5 rounded-xl border bg-white text-[#46B1B1] placeholder:text-[#46B1B1]/60 focus:outline-none focus:ring-2 transition-all ${fieldErrors.name ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
                   placeholder="Quiet Hours"
                   type="text"
                   value={form.name}
@@ -213,10 +213,10 @@ export function RulesManagementSection0() {
                 {fieldErrors.name && <p className="text-xs text-red-600 mt-1">{fieldErrors.name}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-[#0f3d3e]">Category *</label>
+                <label className="text-sm font-semibold text-[#46B1B1]">Category *</label>
                 <div className="relative">
                   <select
-                    className={`h-11 w-full px-3.5 pr-10 rounded-xl border bg-white text-[#1E293B] focus:outline-none focus:ring-2 transition-all appearance-none cursor-pointer ${fieldErrors.category ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
+                    className={`h-11 w-full px-3.5 pr-10 rounded-xl border bg-white text-[#46B1B1] focus:outline-none focus:ring-2 transition-all appearance-none cursor-pointer ${fieldErrors.category ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
                   >
@@ -228,14 +228,14 @@ export function RulesManagementSection0() {
                     <option value="Media Licensing">Media Licensing</option>
                     <option value="Others">Others</option>
                   </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">▼</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#46B1B1]/60">▼</span>
                 </div>
                 {fieldErrors.category && <p className="text-xs text-red-600 mt-1">{fieldErrors.category}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-[#0f3d3e]">Description</label>
+                <label className="text-sm font-semibold text-[#46B1B1]">Description</label>
                 <textarea
-                  className={`p-3.5 rounded-xl border bg-white text-[#1E293B] placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none ${fieldErrors.description ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
+                  className={`p-3.5 rounded-xl border bg-white text-[#46B1B1] placeholder:text-[#46B1B1]/60 focus:outline-none focus:ring-2 transition-all resize-none ${fieldErrors.description ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
                   placeholder="Guests should keep noise levels low during designated quiet hours to respect neighbors."
                   rows={3}
                   value={form.description}
@@ -244,31 +244,31 @@ export function RulesManagementSection0() {
                 {fieldErrors.description && <p className="text-xs text-red-600 mt-1">{fieldErrors.description}</p>}
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-[#0f3d3e]">Status</label>
+                <label className="text-sm font-semibold text-[#46B1B1]">Status</label>
                 <div className="flex items-center gap-6">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="is_active" checked={form.is_active} onChange={() => setForm({ ...form, is_active: true })} className="w-4 h-4 accent-[#0f3d3e]" />
-                    <span className="flex items-center gap-1.5 text-sm font-medium text-[#0f3d3e]">
-                      <span className="w-2 h-2 rounded-full bg-[#0f3d3e]"></span> Active
+                    <span className="flex items-center gap-1.5 text-sm font-medium text-[#46B1B1]">
+                      <span className="w-2 h-2 rounded-full bg-primary"></span> Active
                     </span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="is_active" checked={!form.is_active} onChange={() => setForm({ ...form, is_active: false })} className="w-4 h-4 accent-slate-400" />
-                    <span className="flex items-center gap-1.5 text-sm text-slate-500">
+                    <span className="flex items-center gap-1.5 text-sm text-[#46B1B1]/70">
                       <span className="w-2 h-2 rounded-full border border-slate-400"></span> Inactive
                     </span>
                   </label>
                 </div>
-                <p className="flex items-start gap-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
-                  <span className="text-[#0f3d3e] mt-0.5">ⓘ</span>
+                <p className="flex items-start gap-1.5 text-xs text-[#46B1B1]/70 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
+                  <span className="text-[#46B1B1] mt-0.5">ⓘ</span>
                   <span>Active rules are available for owners to assign when creating or editing their properties.</span>
                 </p>
               </div>
               <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-slate-100">
-                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-[#1E293B] hover:bg-slate-50 font-medium transition-colors">
+                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-[#46B1B1] hover:bg-slate-50 font-medium transition-colors">
                   Cancel
                 </button>
-                <button type="submit" disabled={busy} className="px-6 py-2.5 rounded-xl bg-[#0f3d3e] text-white hover:bg-[#0a2e2f] font-semibold shadow-sm disabled:opacity-50 transition-colors">
+                <button type="submit" disabled={busy} className="px-6 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 font-semibold shadow-sm disabled:opacity-50 transition-colors">
                   {busy ? "Saving…" : editing ? "Update Rule" : "Create Rule"}
                 </button>
               </div>
@@ -283,13 +283,13 @@ export function RulesManagementSection0() {
               <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${confirmRule.is_active === false ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"}`}>
                 <Icon name={confirmRule.is_active === false ? "check_circle" : "warning"} className="material-symbols-outlined text-[36px]" />
               </div>
-              <h3 className="font-display font-bold text-[19px] tracking-tight text-[#0f3d3e]">{confirmRule.is_active === false ? "Activate Rule?" : "Deactivate Rule?"}</h3>
-              <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                Are you sure you want to <span className="font-semibold text-[#0f3d3e]">{confirmRule.is_active === false ? "activate" : "deactivate"}</span> <span className="font-semibold text-[#0f3d3e]">"{confirmRule.name}"</span>?
+              <h3 className="font-display font-bold text-[19px] tracking-tight text-[#46B1B1]">{confirmRule.is_active === false ? "Activate Rule?" : "Deactivate Rule?"}</h3>
+              <p className="text-sm text-[#46B1B1]/70 mt-2 leading-relaxed">
+                Are you sure you want to <span className="font-semibold text-[#46B1B1]">{confirmRule.is_active === false ? "activate" : "deactivate"}</span> <span className="font-semibold text-[#46B1B1]">"{confirmRule.name}"</span>?
               </p>
             </div>
             <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-center gap-3">
-              <button onClick={() => setConfirmRule(null)} className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-[#1E293B] hover:bg-slate-50 font-medium min-w-[110px]">Cancel</button>
+              <button onClick={() => setConfirmRule(null)} className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-[#46B1B1] hover:bg-slate-50 font-medium min-w-[110px]">Cancel</button>
               <button onClick={confirmToggle} disabled={busy} className={`px-6 py-2.5 rounded-xl text-white font-semibold shadow-sm min-w-[130px] ${confirmRule.is_active === false ? "bg-emerald-600 hover:bg-emerald-700" : "bg-amber-600 hover:bg-amber-700"} disabled:opacity-50`}>
                 {busy ? "Please wait…" : confirmRule.is_active === false ? "Yes, Activate" : "Yes, Deactivate"}
               </button>
@@ -304,11 +304,11 @@ export function RulesManagementSection0() {
               <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-3">
                 <Icon name="error" className="material-symbols-outlined text-[28px]" />
               </div>
-              <h3 className="font-display font-bold text-[17px] text-[#0f3d3e]">Heads up</h3>
-              <p className="text-sm text-slate-600 mt-2 leading-relaxed">{alertMsg}</p>
+              <h3 className="font-display font-bold text-[17px] text-[#46B1B1]">Heads up</h3>
+              <p className="text-sm text-[#46B1B1] mt-2 leading-relaxed">{alertMsg}</p>
             </div>
             <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-center">
-              <button onClick={() => setAlertMsg(null)} className="px-6 py-2.5 rounded-xl bg-[#0f3d3e] text-white hover:bg-[#0a2e2f] font-semibold min-w-[120px]">OK, got it</button>
+              <button onClick={() => setAlertMsg(null)} className="px-6 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 font-semibold min-w-[120px]">OK, got it</button>
             </div>
           </div>
         </div>

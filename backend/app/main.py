@@ -24,8 +24,34 @@ from app.routes.admin_rule import router as admin_rule_router
 from app.routes.admin_setting import router as admin_setting_router
 from app.routes.bookings import router as booking_router
 from app.routes.payments import router as payment_router
+from app.routes.admin_bookings import router as admin_bookings
+from app.routes.admin_settlements import router as admin_settlements
+from app.routes.reviews import router as reviews_router
+from app.routes.admin_reviews import router as admin_reviews
+from app.routes.admin_dashboard import router as admin_dashboard_router
 
 Base.metadata.create_all(bind=engine)
+
+# Attempt to migrate ENUM columns to VARCHAR for booking/payment flexibility.
+# This is safe to run on both MySQL and SQLite: ignore failures on fresh DB.
+try:
+    from sqlalchemy import text as _text
+    with engine.begin() as conn:
+        # MySQL: modify columns if they still use ENUM type
+        try:
+            conn.execute(_text("ALTER TABLE bookings MODIFY status VARCHAR(20) NOT NULL DEFAULT 'pending'"))
+        except Exception:
+            pass
+        try:
+            conn.execute(_text("ALTER TABLE payments MODIFY payment_method VARCHAR(20) NOT NULL"))
+        except Exception:
+            pass
+        try:
+            conn.execute(_text("ALTER TABLE payments MODIFY payment_status VARCHAR(20) NOT NULL DEFAULT 'pending'"))
+        except Exception:
+            pass
+except Exception:
+    pass
 
 app = FastAPI(
     title="StayLeb API",
@@ -57,6 +83,11 @@ app.include_router(admin_rule_router)
 app.include_router(admin_setting_router)
 app.include_router(booking_router)
 app.include_router(payment_router)
+app.include_router(admin_bookings)
+app.include_router(admin_settlements)
+app.include_router(reviews_router)
+app.include_router(admin_reviews)
+app.include_router(admin_dashboard_router)
 
 @app.get("/")
 def root():

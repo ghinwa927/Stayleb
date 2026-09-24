@@ -3,16 +3,35 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { getMyProperties, type PropertyResponse } from "@/services/owner";
+import { getOwnerReviewStats, type OwnerReviewStats } from "@/services/reviews";
 
 export function OwnerDashboardSection0() {
   const [properties, setProperties] = useState<PropertyResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewStats, setReviewStats] = useState<OwnerReviewStats | null>(null);
+  const [reviewStatsLoading, setReviewStatsLoading] = useState(true);
 
   useEffect(() => {
     getMyProperties()
       .then(setProperties)
       .catch(() => setProperties([]))
       .finally(() => setLoading(false));
+  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    async function loadReviewStats() {
+      setReviewStatsLoading(true);
+      try {
+        const s = await getOwnerReviewStats();
+        if (!cancelled) setReviewStats(s);
+      } catch {
+        if (!cancelled) setReviewStats(null);
+      } finally {
+        if (!cancelled) setReviewStatsLoading(false);
+      }
+    }
+    loadReviewStats();
+    return () => { cancelled = true; };
   }, []);
 
   const total = properties.length;
@@ -210,17 +229,51 @@ export function OwnerDashboardSection0() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
-              <div className="lg:col-span-2 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md opacity-60 border border-[#157375]/5">
+              <div className="lg:col-span-2 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md border border-[#157375]/5">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="font-headline-sm text-headline-sm text-[#157375]">Recent Reviews</h2>
-                    <p className="font-body-md text-body-md text-[#157375]/70">Verified traveler feedback — will be connected after review backend.</p>
+                    {reviewStatsLoading ? (
+                      <p className="font-body-md text-body-md text-[#157375]/70 flex items-center gap-2"><span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" /> Loading review stats…</p>
+                    ) : reviewStats && reviewStats.total_reviews > 0 ? (
+                      <p className="font-body-md text-body-md text-[#157375]/70">
+                        Portfolio rating <strong className="text-[#157375]">{Number(reviewStats.overall_rating).toFixed(2)} / 5.0</strong> from {reviewStats.total_reviews} {reviewStats.total_reviews === 1 ? "review" : "reviews"} · via GET /reviews/owner/stats
+                      </p>
+                    ) : (
+                      <p className="font-body-md text-body-md text-[#157375]/70">No verified reviews yet — via GET /reviews/owner/stats</p>
+                    )}
                   </div>
                   <Link href="/owner/reviews" className="font-label-md text-label-md text-[#157375] flex items-center gap-0.5 hover:text-[#0f4a4c]">All Reviews <Icon name="chevron_right" className="material-symbols-outlined text-[16px]" /></Link>
                 </div>
-                <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-xs border border-[#157375]/5">
-                  <p className="font-body-md text-body-md text-[#157375]/70 italic">Review moderation and guest feedback will appear here once the review endpoints are connected. Design preserved for later integration.</p>
-                </div>
+                {reviewStats && reviewStats.total_reviews > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-space-md rounded-xl bg-surface-container-low border border-[#157375]/5">
+                    {[
+                      { label: "Overall", value: reviewStats.overall_rating },
+                      { label: "Cleanliness", value: reviewStats.cleanliness_rating },
+                      { label: "Privacy", value: reviewStats.privacy_rating },
+                      { label: "Wi-Fi", value: reviewStats.wifi_rating },
+                      { label: "Hot Water", value: reviewStats.hot_water_rating },
+                      { label: "Location", value: reviewStats.location_rating },
+                      { label: "Value", value: reviewStats.value_rating },
+                    ].slice(0, 4).map((r) => (
+                      <div key={r.label} className="flex items-center justify-between text-sm">
+                        <span className="text-on-surface-variant">{r.label}</span>
+                        <span className="font-semibold text-[#157375]">{Number(r.value).toFixed(2)} / 5.0</span>
+                      </div>
+                    ))}
+                    <div className="col-span-1 sm:col-span-2 text-xs text-slate-500 text-center pt-2">
+                      Showing summary · View all in <Link href="/owner/reviews" className="text-primary underline">Owner Reviews</Link>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-xs border border-[#157375]/5">
+                    {reviewStatsLoading ? (
+                      <p className="font-body-md text-body-md text-[#157375]/70">Loading…</p>
+                    ) : (
+                      <p className="font-body-md text-body-md text-[#157375]/70 italic">No verified reviews yet. Reviews from completed stays will appear here once guests submit their evaluation.</p>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between gap-space-md border border-[#157375]/5">
                 <div className="flex flex-col gap-space-md">

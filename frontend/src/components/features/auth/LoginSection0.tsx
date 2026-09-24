@@ -44,6 +44,11 @@ export function LoginSection0() {
       window.dispatchEvent(new Event("stayleb-auth"));
 
       const r = role.toLowerCase();
+      const nextPath = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
+      if (nextPath && nextPath.startsWith("/") && !nextPath.startsWith("//")) {
+        router.push(nextPath);
+        return;
+      }
       if (r === "admin") router.push("/admin");
       else if (r === "owner") router.push("/owner");
       else router.push("/account");

@@ -8,10 +8,6 @@ from app.schemas.property_seasonal_price import (
     SeasonalPriceResponse,
 )
 
-from app.schemas.property_seasonal_price import (
-    SeasonalPriceCreate,
-    SeasonalPriceResponse,
-)
 from app.schemas.property_image import (
     PropertyImageCreate,
     PropertyImageResponse,
@@ -143,8 +139,8 @@ class PropertyResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-class PropertySearchResponse(BaseModel):
-    items: list[PropertySearchItem]
+class AdminPropertyListResponse(BaseModel):
+    items: list[PropertyResponse]
     total: int
     page: int
     page_size: int
@@ -159,3 +155,10 @@ class StayPricingResponse(BaseModel):
 
 class PropertySearchItem(PropertyResponse):
     stay_pricing: StayPricingResponse | None = None
+
+class PropertySearchResponse(BaseModel):
+    items: list[PropertySearchItem]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int

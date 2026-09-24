@@ -1,10 +1,10 @@
 from sqlalchemy import (
     Column,
     Integer,
+    String,
     Date,
     DateTime,
     DECIMAL,
-    Enum,
     ForeignKey,
 )
 from sqlalchemy.sql import func
@@ -69,15 +69,41 @@ class Booking(Base):
     )
 
     status = Column(
-        Enum(
-            "pending",
-            "confirmed",
-            "rejected",
-            "cancelled",
-            "completed",
-        ),
-        nullable=False,
-        default="pending",
+      String(20),
+      nullable=False,
+      default="pending",
+    )
+
+    cancelled_at = Column(
+      DateTime,
+      nullable=True,
+    )
+
+    cancellation_percentage = Column(
+      DECIMAL(5, 2),
+      nullable=True,  
+)
+
+    cancellation_fee = Column(
+      DECIMAL(10, 2),
+      nullable=True,
+    )
+
+    cancellation_commission_amount = Column(
+      DECIMAL(10, 2),
+      nullable=False,
+      default=0,
+    )
+
+    owner_cancellation_earnings = Column(
+      DECIMAL(10, 2),
+      nullable=False,
+      default=0,
+    )
+
+    refund_amount = Column(
+      DECIMAL(10, 2),
+      nullable=True,
     )
 
     commission_percentage = Column(
@@ -120,6 +146,20 @@ class Booking(Base):
 
     payment = relationship(
     "Payment",
+    back_populates="booking",
+    uselist=False,
+    cascade="all, delete-orphan",
+)
+
+    commission_settlement = relationship(
+    "CommissionSettlement",
+    back_populates="booking",
+    uselist=False,
+    cascade="all, delete-orphan",
+)
+
+    review = relationship(
+    "Review",
     back_populates="booking",
     uselist=False,
     cascade="all, delete-orphan",

@@ -22,6 +22,7 @@ def search_properties(
     property_type: str | None = None,
     bedrooms: int | None = None,
     bathrooms: int | None = None,
+    beds: int | None = None,
     amenity_ids: list[int] | None = None,
     sort: str = "recommended",
     page: int = 1,
@@ -81,6 +82,15 @@ def search_properties(
     if bathrooms is not None:
         query = query.filter(
             Property.bathrooms >= bathrooms
+        )
+
+    # ---------------------------------
+    # Beds
+    # ---------------------------------
+
+    if beds is not None:
+        query = query.filter(
+            Property.beds >= beds
         )
 
     # ---------------------------------

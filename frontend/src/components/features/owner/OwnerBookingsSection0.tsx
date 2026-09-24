@@ -1,502 +1,477 @@
+"use client";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Swal from "sweetalert2";
 import { Icon } from "@/components/ui/Icon";
-import { RecordRow, RecordStatus } from "@/components/ui/RecordRow";
+import { RecordStatus } from "@/components/ui/RecordRow";
 import { ActionButton, DataTable, SearchInput } from "@/components/ui/Interactions";
+import { getMyProperties, type PropertyResponse } from "@/services/owner";
+import { getPropertyBookings, getOwnerCashRequests, approveBooking, rejectBooking } from "@/services/bookings";
+import { getPaymentByBooking, markCashPaymentPaid, type PaymentResponse } from "@/services/payments";
+import type { BookingResponse } from "@/services/bookings";
 
-export function OwnerBookingsSection0() { return <>
-<main className={"w-full  pt-6 min-h-screen bg-background"}><div className={"flex flex-col w-full"}>
-<div className={"p-space-lg max-w-[1400px] w-full mx-auto space-y-space-lg"}>
+function formatPrice(v: string | number | null | undefined) {
+  const n = Number(v ?? 0);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+}
+function bookingStatusColor(s: string) {
+  const v = s?.toLowerCase();
+  if (v === "pending") return "bg-amber-50 text-amber-700 border border-amber-200";
+  if (v === "confirmed" || v === "paid") return "bg-emerald-50 text-emerald-700 border border-emerald-200";
+  if (v === "cancelled") return "bg-rose-50 text-rose-700 border border-rose-200";
+  if (v === "rejected") return "bg-slate-100 text-slate-600 border border-slate-200";
+  return "bg-slate-100 text-slate-600";
+}
+function paymentBadge(p?: PaymentResponse | null) {
+  if (!p) return { label: "No payment", cls: "bg-slate-100 text-slate-500 border border-slate-200" };
+  const s = p.payment_status.toLowerCase();
+  if (p.payment_method === "cash" && s === "pending") return { label: "Cash · Pending", cls: "bg-amber-50 text-amber-700 border border-amber-200" };
+  if (p.payment_method === "cash" && s === "cancelled") return { label: "Cash · Cancelled", cls: "bg-slate-100 text-slate-600 border border-slate-200" };
+  if (s === "paid") return { label: `${p.payment_method} · Paid`, cls: "bg-emerald-50 text-emerald-700 border border-emerald-200" };
+  if (s === "pending") return { label: `${p.payment_method} · Pending`, cls: "bg-amber-50 text-amber-700 border border-amber-200" };
+  if (s === "refunded") return { label: `${p.payment_method} · Refunded`, cls: "bg-emerald-50 text-emerald-700 border border-emerald-200" };
+  if (s === "partially_refunded") return { label: `${p.payment_method} · Partially Refunded`, cls: "bg-emerald-50 text-emerald-700 border border-emerald-200" };
+  if (s === "failed") return { label: `${p.payment_method} · Failed`, cls: "bg-rose-50 text-rose-700 border border-rose-200" };
+  if (s === "cancelled") return { label: `${p.payment_method} · Cancelled`, cls: "bg-slate-100 text-slate-600 border border-slate-200" };
+  return { label: `${p.payment_method} · ${p.payment_status}`, cls: "bg-slate-100 text-slate-600" };
+}
 
-<div className={"flex flex-col md:flex-row md:items-center justify-between gap-space-md"}>
-<div className={"space-y-space-xxs"}>
-<nav className={"flex items-center gap-space-xs text-on-surface-variant font-caption text-caption mb-1"}>
-<ActionButton className={"hover:text-primary transition-colors flex items-center gap-1"} actionLabel={"space_dashboard Dashboard"} aria-label={"space_dashboard Dashboard"}>
-<Icon name="space_dashboard" className="material-symbols-outlined text-[14px]" />
-<span>{"Dashboard"}</span>
-</ActionButton>
-<span className={"text-outline-variant font-semibold"}>{"/"}</span>
-<span className={"text-on-surface font-semibold text-caption"}>{"Bookings"}</span>
-</nav>
-<h1 className={"font-headline-lg text-headline-lg text-on-surface tracking-tight"}>{"Bookings Management"}</h1>
-<p className={"font-body-md text-body-md text-on-surface-variant max-w-2xl"}>{"\n          Manage guest reservations across your properties. Review pending Cash requests and inspect confirmed bookings.\n        "}</p>
-</div>
+export function OwnerBookingsSection0() {
+  const [properties, setProperties] = useState<PropertyResponse[]>([]);
+  const [bookings, setBookings] = useState<BookingResponse[]>([]);
+  const [payments, setPayments] = useState<Record<string, PaymentResponse>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "pending" | "confirmed" | "cash_pending" | "cancelled">("all");
+  const [search, setSearch] = useState("");
+  const [propertyFilter, setPropertyFilter] = useState<string>("all");
+  const [actionId, setActionId] = useState<string | null>(null);
 
-<div className={"flex items-center gap-space-xs self-start md:self-auto"}>
-<ActionButton className={"inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md text-on-surface font-label-md text-label-md transition-all"} actionLabel={"download Export CSV"} aria-label={"download Export CSV"}>
-<Icon name="download" className="material-symbols-outlined text-[18px] text-primary" />
-<span>{"Export CSV"}</span>
-</ActionButton>
-<ActionButton className={"inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md text-on-surface font-label-md text-label-md transition-all"} actionLabel={"calendar_month Calendar View"} aria-label={"calendar_month Calendar View"}>
-<Icon name="calendar_month" className="material-symbols-outlined text-[18px] text-primary" />
-<span>{"Calendar View"}</span>
-</ActionButton>
-</div>
-</div>
+  async function loadAll() {
+    setLoading(true);
+    setError(null);
+    try {
+      const props = await getMyProperties();
+      setProperties(props);
+      if (props.length === 0) {
+        setBookings([]);
+        setPayments({});
+        setLoading(false);
+        return;
+      }
+      // Fetch bookings per property in parallel with timeout handling
+      const results = await Promise.all(
+        props.map((p) =>
+          Promise.race([
+            getPropertyBookings(p.id).catch(() => [] as BookingResponse[]),
+            new Promise<BookingResponse[]>((_, reject) => setTimeout(() => reject(new Error("timeout")), 8000)),
+          ]).catch(() => [] as BookingResponse[])
+        )
+      );
+      const flat = results.flat();
+      const byId = new Map<number, BookingResponse>();
+      flat.forEach((b) => byId.set(b.id, b));
+      try {
+        const cash = await Promise.race([
+          getOwnerCashRequests(),
+          new Promise<BookingResponse[]>((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
+        ]).catch(() => [] as BookingResponse[]);
+        (cash as BookingResponse[]).forEach((b) => {
+          if (!byId.has(b.id)) byId.set(b.id, b);
+        });
+      } catch {}
+      const all = Array.from(byId.values()).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setBookings(all);
+      setLoading(false);
 
-<div className={"grid grid-cols-1 md:grid-cols-3 gap-space-md"}>
+      // Fetch payments in background — do not block booking display
+      all.forEach(async (b) => {
+        try {
+          const pay = (await Promise.race([
+            getPaymentByBooking(b.id),
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
+          ])) as PaymentResponse;
+          setPayments((prev) => ({ ...prev, [String(b.id)]: pay }));
+        } catch {}
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load bookings");
+      setLoading(false);
+    }
+  }
 
-<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm relative overflow-hidden flex items-center justify-between"}>
-<div className={"space-y-1"}>
-<span className={"font-caption text-caption uppercase tracking-wider text-on-surface-variant font-semibold"}>{"Total Active Reservations"}</span>
-<div className={"flex items-baseline gap-space-xs"}>
-<span className={"font-display text-display text-on-surface tracking-tight"}>{"4"}</span>
-<span className={"font-label-sm text-label-sm text-secondary font-semibold"}>{"Live in pipeline"}</span>
-</div>
-<p className={"font-caption text-caption text-outline"}>{"Across 3 mountain chalets"}</p>
-</div>
-<div className={"w-12 h-12 rounded-xl bg-surface-container-low text-primary flex items-center justify-center"}>
-<Icon name="hotel" className="material-symbols-outlined text-[26px]" />
-</div>
-</div>
+  useEffect(() => {
+    loadAll();
+  }, []);
 
-<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm relative overflow-hidden flex items-center justify-between"}>
-<div className={"space-y-1"}>
-<div className={"flex items-center gap-space-xs"}>
-<span className={"font-caption text-caption uppercase tracking-wider text-tertiary-container font-semibold"}>{"Awaiting Owner Approval"}</span>
-<span className={"w-2 h-2 rounded-full bg-tertiary-container animate-pulse"}></span>
-</div>
-<div className={"flex items-baseline gap-space-xs"}>
-<span className={"font-display text-display text-on-surface tracking-tight"}>{"1"}</span>
-<span className={"px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption font-bold"}>{"$480.00 Cash"}</span>
-</div>
-<p className={"font-caption text-caption text-outline"}>{"Action required within 18 hours"}</p>
-</div>
-<div className={"w-12 h-12 rounded-xl bg-tertiary-fixed text-tertiary-container flex items-center justify-center"}>
-<Icon name="pending_actions" className="material-symbols-outlined text-[26px]" />
-</div>
-</div>
+  const counts = useMemo(() => {
+    const all = bookings.length;
+    const pending = bookings.filter((b) => b.status === "pending").length;
+    const confirmed = bookings.filter((b) => b.status === "confirmed").length;
+    const cancelled = bookings.filter((b) => b.status === "cancelled" || b.status === "rejected").length;
+    const cashPending = bookings.filter((b) => b.status === "confirmed" && payments[String(b.id)]?.payment_method === "cash" && payments[String(b.id)]?.payment_status === "pending").length;
+    return { all, pending, confirmed, cancelled, cashPending };
+  }, [bookings, payments]);
 
-<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm relative overflow-hidden flex items-center justify-between"}>
-<div className={"space-y-1"}>
-<span className={"font-caption text-caption uppercase tracking-wider text-on-surface-variant font-semibold"}>{"Confirmed Arrivals"}</span>
-<div className={"flex items-baseline gap-space-xs"}>
-<span className={"font-display text-display text-on-surface tracking-tight"}>{"3"}</span>
-<span className={"font-label-sm text-label-sm text-primary font-semibold"}>{"Guaranteed"}</span>
-</div>
-<p className={"font-caption text-caption text-outline"}>{"Next guest arriving tomorrow at 15:00"}</p>
-</div>
-<div className={"w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center"}>
-<Icon name="verified_user" className="material-symbols-outlined text-[26px]" />
-</div>
-</div>
-</div>
+  const filtered = useMemo(() => {
+    let list = bookings;
+    if (filter === "pending") list = list.filter((b) => b.status === "pending");
+    else if (filter === "confirmed") list = list.filter((b) => b.status === "confirmed");
+    else if (filter === "cash_pending") list = list.filter((b) => b.status === "confirmed" && payments[String(b.id)]?.payment_method === "cash" && payments[String(b.id)]?.payment_status === "pending");
+    else if (filter === "cancelled") list = list.filter((b) => b.status === "cancelled" || b.status === "rejected");
+    if (propertyFilter !== "all") list = list.filter((b) => String(b.property_id) === propertyFilter);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter((b) => `#${b.id}`.toLowerCase().includes(q) || `#sl-${String(b.id).padStart(4, "0")}`.toLowerCase().includes(q) || String(b.property_id).includes(q) || b.status.toLowerCase().includes(q));
+    }
+    return list;
+  }, [bookings, filter, search, propertyFilter]);
 
-<div className={"bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex flex-col"}>
+  async function handleApprove(id: number) {
+    const booking = bookings.find((b) => b.id === id);
+    const title = booking ? `Approve booking #${id}?` : `Approve cash booking?`;
+    const res = await Swal.fire({
+      title,
+      html: `<div style="text-align:left;font-size:13px;color:#1E293B">Approving will confirm the booking (status → <strong>confirmed</strong>). The payment will <strong>remain</strong> <span style="color:#92400E">Pending Cash</span> — it is <strong>not</strong> marked as paid. Commission becomes owed.</div>`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Approve",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#157375",
+      customClass: { popup: "rounded-2xl" },
+    });
+    if (!res.isConfirmed) return;
+    setActionId(String(id));
+    try {
+      await approveBooking(id);
+      await loadAll();
+      await Swal.fire({ title: "Approved", text: `Booking #${id} is now confirmed. Payment remains Pending Cash.`, icon: "success", confirmButtonColor: "#157375" });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Approve failed";
+      await Swal.fire({ title: "Approve failed", text: msg, icon: "error", confirmButtonColor: "#157375" });
+    } finally {
+      setActionId(null);
+    }
+  }
 
-<div className={"px-space-md pt-space-md bg-surface-container-low/40 flex items-center justify-between flex-wrap gap-space-sm"}>
-<div className={"flex items-center gap-1 overflow-x-auto"}>
-<ActionButton className={"px-space-md py-2.5 rounded-t-lg bg-surface-container-lowest text-primary font-label-md text-label-md font-bold shadow-sm flex items-center gap-space-xs"} actionLabel={"All 6"} aria-label={"All 6"}>
-<span>{"All"}</span>
-<span className={"px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-caption text-caption"}>{"6"}</span>
-</ActionButton>
-<ActionButton className={"px-space-md py-2.5 rounded-t-lg hover:bg-surface-container-low text-on-surface-variant font-label-md text-label-md transition-colors flex items-center gap-space-xs"} actionLabel={"Pending Approval 1"} aria-label={"Pending Approval 1"}>
-<span>{"Pending Approval"}</span>
-<span className={"px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption font-bold"}>{"1"}</span>
-</ActionButton>
-<ActionButton className={"px-space-md py-2.5 rounded-t-lg hover:bg-surface-container-low text-on-surface-variant font-label-md text-label-md transition-colors flex items-center gap-space-xs"} actionLabel={"Confirmed 3"} aria-label={"Confirmed 3"}>
-<RecordStatus initial={"Confirmed"}></RecordStatus>
-<span className={"px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-caption text-caption"}>{"3"}</span>
-</ActionButton>
-<ActionButton className={"px-space-md py-2.5 rounded-t-lg hover:bg-surface-container-low text-on-surface-variant font-label-md text-label-md transition-colors flex items-center gap-space-xs"} actionLabel={"Completed 1"} aria-label={"Completed 1"}>
-<RecordStatus initial={"Completed"}></RecordStatus>
-<span className={"px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-caption text-caption"}>{"1"}</span>
-</ActionButton>
-<ActionButton className={"px-space-md py-2.5 rounded-t-lg hover:bg-surface-container-low text-on-surface-variant font-label-md text-label-md transition-colors flex items-center gap-space-xs"} actionLabel={"Cancelled / Rejected 1"} aria-label={"Cancelled / Rejected 1"}>
-<span>{"Cancelled / Rejected"}</span>
-<span className={"px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-caption text-caption"}>{"1"}</span>
-</ActionButton>
-</div>
-<div className={"flex items-center gap-space-xs pb-space-xs"}>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"Live synchronization"}</span>
-<span className={"w-2 h-2 rounded-full bg-primary animate-ping"}></span>
-</div>
-</div>
+  async function handleReject(id: number) {
+    const res = await Swal.fire({
+      title: `Reject booking #${id}?`,
+      html: `<div style="text-align:left;font-size:13px;color:#1E293B">Rejecting will set status → <strong>rejected</strong> and release dates for other guests. This cannot be undone.</div>`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Reject",
+      cancelButtonText: "Keep",
+      confirmButtonColor: "#E11D48",
+      customClass: { popup: "rounded-2xl" },
+    });
+    if (!res.isConfirmed) return;
+    setActionId(String(id));
+    try {
+      await rejectBooking(id);
+      await loadAll();
+      await Swal.fire({ title: "Rejected", text: `Booking #${id} was rejected.`, icon: "success", confirmButtonColor: "#157375" });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Reject failed";
+      await Swal.fire({ title: "Reject failed", text: msg, icon: "error", confirmButtonColor: "#157375" });
+    } finally {
+      setActionId(null);
+    }
+  }
 
-<div className={"p-space-md bg-surface-container-low/20 grid grid-cols-1 md:grid-cols-12 gap-space-sm items-center"}>
+  async function handleMarkPaid(id: number) {
+    const b = bookings.find((x) => x.id === id);
+    const total = b ? formatPrice(b.total_price) : "";
+    const res = await Swal.fire({
+      title: "Confirm cash payment",
+      html: `<div style="text-align:left;font-size:13px;line-height:1.6;color:#1E293B"><p style="font-weight:600;color:#157375;margin-bottom:8px">Only confirm this after you have actually received the cash payment from the client.</p><div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px"><div style="display:flex;justify-content:space-between"><span>Booking</span><strong>#SL-${String(id).padStart(4, "0")}</strong></div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>Total</span><strong>${total}</strong></div><div style="display:flex;justify-content:space-between;margin-top:6px"><span>Method</span><strong>Cash</strong></div></div><p style="font-size:12px;color:#64748B;margin-top:8px">This sets payment to <strong>paid</strong> and records <em>paid_at</em>.</p></div>`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Confirm Cash Received",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#157375",
+      customClass: { popup: "rounded-2xl" },
+    });
+    if (!res.isConfirmed) return;
+    setActionId(String(id));
+    try {
+      await markCashPaymentPaid(id);
+      await loadAll();
+      await Swal.fire({ title: "Cash payment confirmed successfully.", text: `Payment for booking #SL-${String(id).padStart(4, "0")} is now paid.`, icon: "success", confirmButtonColor: "#157375" });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to mark as paid";
+      await Swal.fire({ title: "Failed to confirm payment", text: msg, icon: "error", confirmButtonColor: "#157375" });
+    } finally {
+      setActionId(null);
+    }
+  }
 
-<div className={"md:col-span-5 relative"}>
-<Icon name="search" className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]" />
-<SearchInput className={"w-full pl-10 pr-space-md h-11 bg-surface-container-lowest rounded-xl text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-secondary shadow-sm placeholder:text-outline-variant"} placeholder={"Search by guest name, phone, or reference (#SLB-...)"} type={"text"} name={"search-by-guest-name,-phone,-or-reference-(#slb-...)"} aria-label={"Search by guest name, phone, or reference (#SLB-...)"}></SearchInput>
-</div>
+  const propMap = useMemo(() => {
+    const m: Record<number, PropertyResponse> = {};
+    properties.forEach((p) => (m[p.id] = p));
+    return m;
+  }, [properties]);
 
-<div className={"md:col-span-4 relative"}>
-<select className={"w-full appearance-none h-11 pl-space-md pr-10 bg-surface-container-lowest rounded-xl text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-secondary shadow-sm cursor-pointer"} aria-label={"Select an option"}>
-<option value={"all"}>{"All Properties (Cedar Peak, Faqra Crest, Faraya Luxe)"}</option>
-<option value={"p1"}>{"Cedar Peak Stone Chalet \u00b7 Faqra"}</option>
-<option value={"p2"}>{"Faqra Crest Modern Villa \u00b7 Club Area"}</option>
-<option value={"p3"}>{"Faraya Luxe Loft 402 \u00b7 Mzaar"}</option>
-</select>
-<Icon name="expand_more" className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]" />
-</div>
+  if (loading) {
+    return (
+      <main className="w-full pt-6 min-h-screen bg-background flex items-center justify-center py-16">
+        <div className="flex flex-col items-center gap-3">
+          <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-slate-500">Loading your bookings…</p>
+        </div>
+      </main>
+    );
+  }
+  if (error) {
+    return (
+      <main className="w-full pt-6 min-h-screen bg-background flex items-center justify-center py-16">
+        <div className="text-center max-w-md px-6">
+          <Icon name="error" className="material-symbols-outlined text-[32px] text-rose-400 mb-2" />
+          <p className="text-sm text-rose-600 mb-3">{error}</p>
+          <button onClick={loadAll} className="px-5 py-2 rounded-lg bg-primary text-white text-sm">Retry</button>
+        </div>
+      </main>
+    );
+  }
 
-<div className={"md:col-span-3 relative"}>
-<ActionButton className={"w-full h-11 px-space-md bg-surface-container-lowest rounded-xl text-on-surface-variant hover:text-on-surface font-label-md text-label-md flex items-center justify-between shadow-sm transition-colors"} actionLabel={"date_range Sep 01 \u2013 Nov 30, 2024 calendar_today"} aria-label={"date_range Sep 01 \u2013 Nov 30, 2024 calendar_today"}>
-<div className={"flex items-center gap-space-xs truncate"}>
-<Icon name="date_range" className="material-symbols-outlined text-[18px] text-primary" />
-<span className={"truncate"}>{"Sep 01 \u2013 Nov 30, 2024"}</span>
-</div>
-<Icon name="calendar_today" className="material-symbols-outlined text-outline text-[18px]" />
-</ActionButton>
-</div>
-</div>
+  return (
+    <>
+      <main className={"w-full  pt-6 min-h-screen bg-background"}>
+        <div className={"flex flex-col w-full"}>
+          <div className={"p-space-lg max-w-[1400px] w-full mx-auto space-y-space-lg"}>
+            <div className={"flex flex-col md:flex-row md:items-center justify-between gap-space-md"}>
+              <div className={"space-y-space-xxs"}>
+                <nav className={"flex items-center gap-space-xs text-on-surface-variant font-caption text-caption mb-1"}>
+                  <Link href="/owner" className="hover:text-primary transition-colors flex items-center gap-1">
+                    <Icon name="space_dashboard" className="material-symbols-outlined text-[14px]" />
+                    <span>Dashboard</span>
+                  </Link>
+                  <span className={"text-outline-variant font-semibold"}>{"/"}</span>
+                  <span className={"text-on-surface font-semibold text-caption"}>{"Bookings"}</span>
+                </nav>
+                <h1 className={"font-headline-lg text-headline-lg text-on-surface tracking-tight"}>{"Bookings Management"}</h1>
+                <p className={"font-body-md text-body-md text-on-surface-variant max-w-2xl"}>Manage guest reservations across your properties. Data from <code className="bg-slate-100 px-1 rounded">GET /bookings/property/&#123;id&#125;</code> + <code className="bg-slate-100 px-1 rounded">GET /bookings/owner/cash-requests</code>.</p>
+              </div>
+              <div className={"flex items-center gap-space-xs self-start md:self-auto"}>
+                <button onClick={loadAll} className={"inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest shadow-sm hover:shadow-md text-on-surface font-label-md text-label-md transition-all"}>
+                  <Icon name="refresh" className="material-symbols-outlined text-[18px] text-primary" />
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
 
-<div className={"mx-space-md mt-space-md p-space-md rounded-xl bg-tertiary-fixed/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md"}>
-<div className={"flex items-center gap-space-sm"}>
-<div className={"w-10 h-10 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center flex-shrink-0"}>
-<Icon name="notification_important" className="material-symbols-outlined text-[20px]" />
-</div>
-<div>
-<div className={"flex items-center gap-space-xs"}>
-<h2 className={"font-title-md text-title-md text-tertiary font-bold"}>{"1 Cash Reservation Pending Confirmation"}</h2>
-<span className={"px-2 py-0.5 rounded-full bg-tertiary text-on-tertiary font-caption text-caption"}>{"Oct 18 \u2013 21"}</span>
-</div>
-<p className={"font-body-md text-body-md text-on-tertiary-fixed-variant"}>{"\n              Maya Haddad requested to pay $480.00 in cash upon arrival at Cedar Peak Stone Chalet. Accept to block the dates on your calendar.\n            "}</p>
-</div>
-</div>
-<div className={"flex items-center gap-space-xs flex-shrink-0"}>
-<Link className={"px-space-md py-2 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md hover:bg-primary transition-all shadow-sm font-semibold flex items-center gap-1.5"} href={"/account/bookings/stay-002/pending"}>
-<Icon name="rule" className="material-symbols-outlined text-[18px]" />
-<span>{"Review Request"}</span>
-</Link>
-</div>
-</div>
+            <div className={"grid grid-cols-1 md:grid-cols-3 gap-space-md"}>
+              <div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between"}>
+                <div className={"space-y-1"}>
+                  <span className={"font-caption text-caption uppercase tracking-wider text-on-surface-variant font-semibold"}>Total Bookings</span>
+                  <div className={"flex items-baseline gap-space-xs"}>
+                    <span className={"font-display text-display text-on-surface tracking-tight"}>{counts.all}</span>
+                    <span className={"font-label-sm text-label-sm text-secondary font-semibold"}>Live from backend</span>
+                  </div>
+                  <p className={"font-caption text-caption text-outline"}>Across {properties.length} propert{properties.length === 1 ? "y" : "ies"}</p>
+                </div>
+                <div className={"w-12 h-12 rounded-xl bg-surface-container-low text-primary flex items-center justify-center"}>
+                  <Icon name="hotel" className="material-symbols-outlined text-[26px]" />
+                </div>
+              </div>
+              <div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between"}>
+                <div className={"space-y-1"}>
+                  <div className={"flex items-center gap-space-xs"}>
+                    <span className={"font-caption text-caption uppercase tracking-wider text-tertiary-container font-semibold"}>Awaiting Owner Approval</span>
+                    <span className={"w-2 h-2 rounded-full bg-tertiary-container animate-pulse"}></span>
+                  </div>
+                  <div className={"flex items-baseline gap-space-xs"}>
+                    <span className={"font-display text-display text-on-surface tracking-tight"}>{bookings.filter((b) => b.status === "pending").length}</span>
+                    <span className={"px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption font-bold"}>{bookings.filter((b) => { const pay = payments[String(b.id)]; return b.status === "pending" && pay?.payment_method === "cash" && pay?.payment_status === "pending"; }).length} pending cash</span>
+                  </div>
+                  <p className={"font-caption text-caption text-outline"}>GET /bookings/owner/cash-requests</p>
+                </div>
+                <div className={"w-12 h-12 rounded-xl bg-tertiary-fixed text-tertiary-container flex items-center justify-center"}>
+                  <Icon name="pending_actions" className="material-symbols-outlined text-[26px]" />
+                </div>
+              </div>
+              <div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between"}>
+                <div className={"space-y-1"}>
+                  <span className={"font-caption text-caption uppercase tracking-wider text-on-surface-variant font-semibold"}>Confirmed Arrivals</span>
+                  <div className={"flex items-baseline gap-space-xs"}>
+                    <span className={"font-display text-display text-on-surface tracking-tight"}>{counts.confirmed}</span>
+                    <span className={"font-label-sm text-label-sm text-primary font-semibold"}>Guaranteed</span>
+                  </div>
+                  <p className={"font-caption text-caption text-outline"}>{counts.cancelled} cancelled/rejected</p>
+                </div>
+                <div className={"w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center"}>
+                  <Icon name="verified_user" className="material-symbols-outlined text-[26px]" />
+                </div>
+              </div>
+            </div>
 
-<div className={"w-full overflow-x-auto mt-space-sm"}>
-<DataTable className={"w-full text-left border-collapse"}>
-<thead>
-<tr className={"bg-surface-container-low text-on-surface-variant font-caption text-caption uppercase tracking-wider"}>
-<th className={"py-3.5 px-space-md font-semibold"}>{"Booking Ref & Property"}</th>
-<th className={"py-3.5 px-space-md font-semibold"}>{"Client / Guest"}</th>
-<th className={"py-3.5 px-space-md font-semibold"}>{"Stay Dates & Nights"}</th>
-<th className={"py-3.5 px-space-md font-semibold"}>{"Payment Method"}</th>
-<th className={"py-3.5 px-space-md font-semibold"}>{"Total"}</th>
-<th className={"py-3.5 px-space-md font-semibold"}>{"Status"}</th>
-<th className={"py-3.5 px-space-md font-semibold text-right"}>{"Actions"}</th>
-</tr>
-</thead>
-<tbody className={"divide-y-0"}>
+            <div className={"bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex flex-col"}>
+              <div className={"px-space-md pt-space-md bg-surface-container-low/40 flex items-center gap-2 overflow-x-auto"}>
+                {(
+                  [
+                    { key: "all", label: "All", count: counts.all },
+                    { key: "pending", label: "Pending", count: counts.pending },
+                    { key: "confirmed", label: "Confirmed", count: counts.confirmed },
+                    { key: "cash_pending", label: "Cash Awaiting Payment", count: counts.cashPending },
+                    { key: "cancelled", label: "Cancelled / Rejected", count: counts.cancelled },
+                  ] as const
+                ).map((t) => (
+                  <button
+                    key={t.key}
+                    onClick={() => setFilter(t.key as any)}
+                    className={`px-space-md py-2.5 rounded-t-lg font-label-md text-label-md flex items-center gap-space-xs whitespace-nowrap ${filter === t.key ? "bg-surface-container-lowest text-primary font-bold shadow-sm" : "hover:bg-surface-container-low text-on-surface-variant"}`}
+                  >
+                    <span>{t.label}</span>
+                    <span className={`px-2 py-0.5 rounded-full font-caption text-caption ${filter === t.key ? "bg-primary text-white" : "bg-surface-container text-on-surface-variant"}`}>{t.count}</span>
+                  </button>
+                ))}
+              </div>
 
-<RecordRow className={"bg-tertiary-fixed/10 hover:bg-tertiary-fixed/20 transition-colors"} initialStatus={""}>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-start gap-space-xs"}>
-<div className={"w-2 h-2 rounded-full bg-tertiary-container mt-1.5"}></div>
-<div>
-<div className={"flex items-center gap-space-xs"}>
-<span className={"font-label-md text-label-md font-bold text-on-surface"}>{"#REQ-9102-CSH"}</span>
-<span className={"px-1.5 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption font-semibold"}>{"Cash On Arrival"}</span>
-</div>
-<span className={"font-body-md text-body-md text-on-surface-variant block mt-0.5"}>{"Cedar Peak Stone Chalet"}</span>
-</div>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-space-xs"}>
-<div className={"w-8 h-8 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-bold text-caption"}>{"MH"}</div>
-<div>
-<span className={"font-label-md text-label-md font-semibold text-on-surface block"}>{"Maya Haddad"}</span>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"2 Guests \u00b7 Beirut, LB"}</span>
-</div>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<span className={"font-label-md text-label-md text-on-surface block font-medium"}>{"Oct 18 \u2013 Oct 21, 2024"}</span>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"3 nights \u00b7 Weekend stay"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-1.5"}>
-<Icon name="payments" className="material-symbols-outlined text-tertiary-container text-[18px]" />
-<span className={"font-label-md text-label-md text-on-surface"}>{"Cash on Arrival"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<span className={"font-title-md text-title-md font-bold text-on-surface block"}>{"$480.00"}</span>
-<span className={"font-caption text-caption text-outline"}>{"USD"}</span>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<span className={"inline-flex items-center gap-1 px-space-xs py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption font-bold"}>
-<span className={"w-1.5 h-1.5 rounded-full bg-tertiary-container"}></span>
-<span>{"Pending Approval"}</span>
-</span>
-</td>
-<td className={"py-space-md px-space-md align-middle text-right"}>
-<div className={"flex items-center justify-end gap-space-xs"}>
-<Link className={"px-space-sm py-1.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold hover:bg-primary transition-all shadow-sm"} href={"/account/bookings/stay-002/pending"}>{"\n                    Review Request\n                  "}</Link>
-<ActionButton className={"w-8 h-8 rounded-lg bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed flex items-center justify-center transition-colors"} title={"Quick Approve"} actionLabel={"check"} aria-label={"check"}>
-<Icon name="check" className="material-symbols-outlined text-[18px]" />
-</ActionButton>
-<ActionButton className={"w-8 h-8 rounded-lg bg-error-container text-on-error-container hover:bg-error hover:text-on-error flex items-center justify-center transition-colors"} title={"Reject Request"} actionLabel={"close"} aria-label={"close"}>
-<Icon name="close" className="material-symbols-outlined text-[18px]" />
-</ActionButton>
-</div>
-</td>
-</RecordRow>
+              <div className={"p-space-md bg-surface-container-low/20 grid grid-cols-1 md:grid-cols-12 gap-space-sm items-center"}>
+                <div className={"md:col-span-5 relative"}>
+                  <Icon name="search" className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]" />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className={"w-full pl-10 pr-space-md h-11 bg-surface-container-lowest rounded-xl text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-secondary shadow-sm placeholder:text-outline-variant"}
+                    placeholder="Search by #SL- ID, property or status"
+                  />
+                </div>
+                <div className={"md:col-span-4 relative"}>
+                  <select value={propertyFilter} onChange={(e) => setPropertyFilter(e.target.value)} className={"w-full appearance-none h-11 pl-space-md pr-10 bg-surface-container-lowest rounded-xl text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-secondary shadow-sm cursor-pointer"}>
+                    <option value="all">All Properties ({properties.length})</option>
+                    {properties.map((p) => (
+                      <option key={p.id} value={String(p.id)}>
+                        {p.title} · {p.location}
+                      </option>
+                    ))}
+                  </select>
+                  <Icon name="expand_more" className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]" />
+                </div>
+                <div className={"md:col-span-3 flex items-center gap-2"}>
+                  <span className="text-xs text-slate-500">{filtered.length} of {bookings.length} shown</span>
+                  {(search || propertyFilter !== "all" || filter !== "all") && (
+                    <button onClick={() => { setSearch(""); setPropertyFilter("all"); setFilter("all"); }} className="text-xs text-primary underline ml-auto">
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+              </div>
 
-<RecordRow className={"bg-surface-container-lowest hover:bg-surface-container-low/50 transition-colors"} initialStatus={"Confirmed"}>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<div className={"flex items-center gap-space-xs"}>
-<span className={"font-label-md text-label-md font-bold text-primary"}>{"#SLB-84920"}</span>
-<span className={"px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-caption text-caption"}>{"Instant Book"}</span>
-</div>
-<span className={"font-body-md text-body-md text-on-surface-variant block mt-0.5"}>{"Cedar Peak Stone Chalet"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-space-xs"}>
-<div className={"w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-caption"}>{"RK"}</div>
-<div>
-<span className={"font-label-md text-label-md font-semibold text-on-surface block"}>{"Rami Kanaan"}</span>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"4 Guests \u00b7 Verified ID"}</span>
-</div>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<span className={"font-label-md text-label-md text-on-surface block font-medium"}>{"Sep 25 \u2013 Sep 28, 2024"}</span>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"3 nights \u00b7 Check-in 15:00"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-1.5"}>
-<Icon name="credit_card" className="material-symbols-outlined text-primary text-[18px]" />
-<span className={"font-label-md text-label-md text-on-surface"}>{"Stripe / Online"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<span className={"font-title-md text-title-md font-bold text-primary block"}>{"$740.00"}</span>
-<span className={"font-caption text-caption text-secondary font-medium"}>{"Paid in full"}</span>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<RecordStatus className={"inline-flex items-center gap-1 px-space-xs py-1 rounded-full bg-secondary-container text-on-secondary-container font-caption text-caption font-semibold"} initial={"Confirmed"}></RecordStatus>
-</td>
-<td className={"py-space-md px-space-md align-middle text-right"}>
-
-<ActionButton className={"px-space-md py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold hover:bg-surface-container-high transition-all"} actionLabel={"View Details"} aria-label={"View Details"}>{"\n                  View Details\n                "}</ActionButton>
-</td>
-</RecordRow>
-
-<RecordRow className={"bg-surface-container-lowest hover:bg-surface-container-low/50 transition-colors"} initialStatus={"Confirmed"}>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<div className={"flex items-center gap-space-xs"}>
-<span className={"font-label-md text-label-md font-bold text-primary"}>{"#SLB-84918"}</span>
-</div>
-<span className={"font-body-md text-body-md text-on-surface-variant block mt-0.5"}>{"Faqra Crest Modern Villa"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-space-xs"}>
-<div className={"w-8 h-8 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-caption"}>{"SM"}</div>
-<div>
-<span className={"font-label-md text-label-md font-semibold text-on-surface block"}>{"Sarah Mouzannar"}</span>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"6 Guests \u00b7 Repeat Guest"}</span>
-</div>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<span className={"font-label-md text-label-md text-on-surface block font-medium"}>{"Oct 02 \u2013 Oct 06, 2024"}</span>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"4 nights \u00b7 Family stay"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-1.5"}>
-<Icon name="credit_card" className="material-symbols-outlined text-primary text-[18px]" />
-<span className={"font-label-md text-label-md text-on-surface"}>{"Stripe / Online"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<span className={"font-title-md text-title-md font-bold text-primary block"}>{"$1,450.00"}</span>
-<span className={"font-caption text-caption text-secondary font-medium"}>{"Paid in full"}</span>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<RecordStatus className={"inline-flex items-center gap-1 px-space-xs py-1 rounded-full bg-secondary-container text-on-secondary-container font-caption text-caption font-semibold"} initial={"Confirmed"}></RecordStatus>
-</td>
-<td className={"py-space-md px-space-md align-middle text-right"}>
-<ActionButton className={"px-space-md py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold hover:bg-surface-container-high transition-all"} actionLabel={"View Details"} aria-label={"View Details"}>{"\n                  View Details\n                "}</ActionButton>
-</td>
-</RecordRow>
-
-<RecordRow className={"bg-surface-container-lowest hover:bg-surface-container-low/50 transition-colors"} initialStatus={"Confirmed"}>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<div className={"flex items-center gap-space-xs"}>
-<span className={"font-label-md text-label-md font-bold text-primary"}>{"#SLB-84880"}</span>
-</div>
-<span className={"font-body-md text-body-md text-on-surface-variant block mt-0.5"}>{"Faraya Luxe Loft 402"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-space-xs"}>
-<div className={"w-8 h-8 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-caption"}>{"JA"}</div>
-<div>
-<span className={"font-label-md text-label-md font-semibold text-on-surface block"}>{"Jad Abou Rjeily"}</span>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"2 Guests"}</span>
-</div>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<span className={"font-label-md text-label-md text-on-surface block font-medium"}>{"Oct 11 \u2013 Oct 13, 2024"}</span>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"2 nights \u00b7 Weekend"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-1.5"}>
-<Icon name="credit_card" className="material-symbols-outlined text-primary text-[18px]" />
-<span className={"font-label-md text-label-md text-on-surface"}>{"Stripe / Online"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<span className={"font-title-md text-title-md font-bold text-primary block"}>{"$390.00"}</span>
-<span className={"font-caption text-caption text-secondary font-medium"}>{"Paid in full"}</span>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<RecordStatus className={"inline-flex items-center gap-1 px-space-xs py-1 rounded-full bg-secondary-container text-on-secondary-container font-caption text-caption font-semibold"} initial={"Confirmed"}></RecordStatus>
-</td>
-<td className={"py-space-md px-space-md align-middle text-right"}>
-<ActionButton className={"px-space-md py-1.5 rounded-lg bg-surface-container text-primary font-label-sm text-label-sm font-semibold hover:bg-surface-container-high transition-all"} actionLabel={"View Details"} aria-label={"View Details"}>{"\n                  View Details\n                "}</ActionButton>
-</td>
-</RecordRow>
-
-<RecordRow className={"bg-surface-container-lowest hover:bg-surface-container-low/50 transition-colors"} initialStatus={"Settled"}>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<div className={"flex items-center gap-space-xs"}>
-<span className={"font-label-md text-label-md font-bold text-on-surface"}>{"#SLB-84710"}</span>
-</div>
-<span className={"font-body-md text-body-md text-on-surface-variant block mt-0.5"}>{"Cedar Peak Stone Chalet"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-space-xs"}>
-<div className={"w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center font-bold text-caption"}>{"KE"}</div>
-<div>
-<span className={"font-label-md text-label-md font-semibold text-on-surface block"}>{"Karim El-Khoury"}</span>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"5 Guests"}</span>
-</div>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<span className={"font-label-md text-label-md text-on-surface block font-medium"}>{"Aug 10 \u2013 Aug 14, 2024"}</span>
-<span className={"font-caption text-caption text-on-surface-variant"}>{"4 nights \u00b7 Past stay"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-1.5"}>
-<Icon name="credit_card" className="material-symbols-outlined text-outline text-[18px]" />
-<span className={"font-label-md text-label-md text-on-surface"}>{"Stripe / Online"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<span className={"font-title-md text-title-md font-bold text-on-surface block"}>{"$980.00"}</span>
-<RecordStatus className={"font-caption text-caption text-outline"} initial={"Settled"}></RecordStatus>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<RecordStatus className={"inline-flex items-center gap-1 px-space-xs py-1 rounded-full bg-surface-container-highest text-on-surface-variant font-caption text-caption font-semibold"} initial={"Completed"}></RecordStatus>
-</td>
-<td className={"py-space-md px-space-md align-middle text-right"}>
-<div className={"flex items-center justify-end gap-space-xs"}>
-<ActionButton className={"px-space-sm py-1.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm font-medium hover:bg-surface-container-high transition-all"} actionLabel={"View Details"} aria-label={"View Details"}>{"\n                    View Details\n                  "}</ActionButton>
-<ActionButton className={"px-space-sm py-1.5 rounded-lg bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold hover:bg-surface-container-highest transition-all flex items-center gap-1"} actionLabel={"View Review 5.0 \u2605"} aria-label={"View Review 5.0 \u2605"}>
-<span>{"View Review"}</span>
-<span className={"text-tertiary-container font-bold"}>{"5.0 \u2605"}</span>
-</ActionButton>
-</div>
-</td>
-</RecordRow>
-
-<RecordRow className={"bg-surface-container-lowest hover:bg-surface-container-low/50 transition-colors opacity-80"} initialStatus={""}>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<div className={"flex items-center gap-space-xs"}>
-<span className={"font-label-md text-label-md font-bold text-outline line-through"}>{"#REQ-8302"}</span>
-<span className={"font-caption text-caption text-error font-medium"}>{"Cash Request"}</span>
-</div>
-<span className={"font-body-md text-body-md text-on-surface-variant block mt-0.5"}>{"Faraya Luxe Loft 402"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-space-xs"}>
-<div className={"w-8 h-8 rounded-full bg-surface-container text-outline flex items-center justify-center font-bold text-caption"}>{"HN"}</div>
-<div>
-<span className={"font-label-md text-label-md font-medium text-on-surface block"}>{"Hadi Nasser"}</span>
-<span className={"font-caption text-caption text-outline"}>{"3 Guests"}</span>
-</div>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div>
-<span className={"font-label-md text-label-md text-outline block"}>{"Jul 02 \u2013 Jul 05, 2024"}</span>
-<span className={"font-caption text-caption text-outline"}>{"3 nights"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<div className={"flex items-center gap-1.5"}>
-<Icon name="money_off" className="material-symbols-outlined text-outline text-[18px]" />
-<span className={"font-label-md text-label-md text-outline"}>{"Cash on Arrival"}</span>
-</div>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<span className={"font-title-md text-title-md font-semibold text-outline line-through block"}>{"$560.00"}</span>
-<span className={"font-caption text-caption text-error"}>{"Uncollected"}</span>
-</td>
-<td className={"py-space-md px-space-md align-middle"}>
-<span className={"inline-flex items-center gap-1 px-space-xs py-1 rounded-full bg-error-container text-on-error-container font-caption text-caption font-semibold"}>
-<span className={"w-1.5 h-1.5 rounded-full bg-error"}></span>
-<span>{"Rejected"}</span>
-</span>
-</td>
-<td className={"py-space-md px-space-md align-middle text-right"}>
-<div className={"flex flex-col items-end gap-1"}>
-<ActionButton className={"px-space-sm py-1.5 rounded-lg bg-surface-container text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high transition-all"} actionLabel={"View Record"} aria-label={"View Record"}>{"\n                    View Record\n                  "}</ActionButton>
-<span className={"font-caption text-caption text-outline italic"}>{"Owner Rejected \u00b7 Dates Released"}</span>
-</div>
-</td>
-</RecordRow>
-</tbody>
-</DataTable>
-</div>
-
-<div className={"p-space-md bg-surface-container-low/30 flex flex-col sm:flex-row items-center justify-between gap-space-sm"}>
-<div className={"flex items-center gap-space-xs text-on-surface-variant font-body-md text-body-md"}>
-<span>{"Showing"}</span>
-<span className={"font-bold text-on-surface"}>{"1\u20136"}</span>
-<span>{"of"}</span>
-<span className={"font-bold text-on-surface"}>{"6"}</span>
-<span>{"reservations"}</span>
-</div>
-<div className={"flex items-center gap-space-xs"}>
-<ActionButton className={"w-9 h-9 rounded-lg bg-surface-container-lowest text-outline-variant flex items-center justify-center cursor-not-allowed"} disabled={true} actionLabel={"chevron_left"} aria-label={"chevron_left"}>
-<Icon name="chevron_left" className="material-symbols-outlined text-[18px]" />
-</ActionButton>
-<ActionButton className={"w-9 h-9 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold flex items-center justify-center"} actionLabel={"1"} aria-label={"1"}>{"\n            1\n          "}</ActionButton>
-<ActionButton className={"w-9 h-9 rounded-lg bg-surface-container-lowest text-outline-variant flex items-center justify-center cursor-not-allowed"} disabled={true} actionLabel={"chevron_right"} aria-label={"chevron_right"}>
-<Icon name="chevron_right" className="material-symbols-outlined text-[18px]" />
-</ActionButton>
-</div>
-</div>
-</div>
-
-<div className={"grid grid-cols-1 md:grid-cols-2 gap-space-md pt-space-xs"}>
-<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm space-y-2"}>
-<div className={"flex items-center gap-space-xs text-primary font-title-md text-title-md font-semibold"}>
-<Icon name="verified" className="material-symbols-outlined text-secondary" />
-<h3>{"Stripe Instant Confirmations"}</h3>
-</div>
-<p className={"font-body-md text-body-md text-on-surface-variant leading-relaxed"}>{"\n          Bookings settled via credit card or digital wallets through Stripe are guaranteed instantly. The calendar dates are locked automatically to prevent double-booking across StayLeb channels.\n        "}</p>
-</div>
-<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm space-y-2"}>
-<div className={"flex items-center gap-space-xs text-tertiary font-title-md text-title-md font-semibold"}>
-<Icon name="schedule" className="material-symbols-outlined text-tertiary-container" />
-<h3>{"Cash on Arrival Protocol"}</h3>
-</div>
-<p className={"font-body-md text-body-md text-on-surface-variant leading-relaxed"}>{"\n          Lebanese guests opting for cash settlement require host verification. You have 24 hours to accept or decline. Upon host decline, the calendar slot is instantly released to other travelers.\n        "}</p>
-</div>
-</div>
-</div>
-</div></main>
-</>; }
+              {bookings.length === 0 ? (
+                <div className="p-12 text-center">
+                  <Icon name="inbox" className="material-symbols-outlined text-[36px] text-slate-400 mb-2" />
+                  <h3 className="font-title-md text-title-md text-on-surface">No bookings found for your properties.</h3>
+                  <p className="text-sm text-slate-500 mt-1">Bookings will appear here once clients reserve your approved properties.</p>
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="p-10 text-center">
+                  <p className="text-sm text-slate-500">No {filter} bookings match your filters.</p>
+                  <button onClick={() => { setFilter("all"); setSearch(""); }} className="mt-2 text-sm text-primary underline">Clear filters</button>
+                </div>
+              ) : (
+                <div className={"w-full overflow-x-auto"}>
+                  <DataTable className={"w-full text-left border-collapse"}>
+                    <thead>
+                      <tr className={"bg-surface-container-low text-on-surface-variant font-caption text-caption uppercase tracking-wider"}>
+                        <th className={"py-3.5 px-space-md font-semibold"}>Booking Ref & Property</th>
+                        <th className={"py-3.5 px-space-md font-semibold"}>Dates & Nights</th>
+                        <th className={"py-3.5 px-space-md font-semibold"}>Payment</th>
+                        <th className={"py-3.5 px-space-md font-semibold text-right"}>Total</th>
+                        <th className={"py-3.5 px-space-md font-semibold"}>Booking Status</th>
+                        <th className={"py-3.5 px-space-md font-semibold text-right"}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className={"divide-y divide-slate-100"}>
+                      {filtered.map((b) => {
+                        const prop = propMap[b.property_id];
+                        const pay = payments[String(b.id)];
+                        const payInfo = paymentBadge(pay);
+                        const isPendingCash = b.status === "pending" && pay?.payment_method === "cash" && pay?.payment_status === "pending";
+                        const isConfirmedCashPending = b.status === "confirmed" && pay?.payment_method === "cash" && pay?.payment_status === "pending";
+                        return (
+                          <tr key={b.id} className={isPendingCash ? "bg-amber-50/40 hover:bg-amber-50/60" : isConfirmedCashPending ? "bg-emerald-50/20 hover:bg-emerald-50/40" : "bg-white hover:bg-surface-container-low/30"}>
+                            <td className={"py-3.5 px-space-md"}>
+                              <div className="flex flex-col">
+                                <Link href={`/owner/bookings/${b.id}`} className="font-mono font-bold text-primary hover:underline">
+                                  #SL-{String(b.id).padStart(4, "0")}
+                                </Link>
+                                <span className="text-sm font-medium text-on-surface truncate max-w-[190px]">{prop?.title || `Property #${b.property_id}`}</span>
+                                <span className="text-xs text-slate-500">{prop?.location || ""} · {b.guests} guests</span>
+                              </div>
+                            </td>
+                            <td className={"py-3.5 px-space-md text-sm"}>
+                              <div className="font-medium text-on-surface">{b.check_in} → {b.check_out}</div>
+                              <div className="text-xs text-slate-500">{b.number_of_nights} nights</div>
+                              {b.status === "cancelled" && b.cancelled_at && <div className="text-xs text-rose-600">Cancelled {new Date(b.cancelled_at).toLocaleDateString()}</div>}
+                            </td>
+                            <td className={"py-3.5 px-space-md"}>
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${payInfo.cls}`}>{payInfo.label}</span>
+                              {b.status === "cancelled" && b.cancellation_fee && (
+                                <div className="text-xs text-slate-500 mt-1">Fee {formatPrice(b.cancellation_fee)} · Refund {formatPrice(b.refund_amount)}</div>
+                              )}
+                              {pay && (pay.payment_status === "refunded" || pay.payment_status === "partially_refunded") && (
+                                <div className="text-xs text-emerald-700">Refunded {formatPrice(pay.refunded_amount)}</div>
+                              )}
+                            </td>
+                            <td className={"py-3.5 px-space-md text-right"}>
+                              <div className="font-semibold text-on-surface">{formatPrice(b.total_price)}</div>
+                              {isPendingCash && <div className="text-xs text-amber-700">Cash pending</div>}
+                            </td>
+                            <td className={"py-3.5 px-space-md"}>
+                              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${bookingStatusColor(b.status)}`}>{b.status}</span>
+                              {isPendingCash && <div className="text-xs text-amber-700 mt-1">Awaiting approval</div>}
+                            </td>
+                            <td className={"py-3.5 px-space-md text-right"}>
+                              <div className="flex items-center justify-end gap-2">
+                                <Link href={`/owner/bookings/${b.id}`} className="px-3 py-1.5 rounded-lg bg-surface-container text-primary text-xs font-semibold hover:bg-surface-container-high">
+                                  View
+                                </Link>
+                                {isPendingCash && (
+                                  <>
+                                    <button
+                                      disabled={actionId === String(b.id)}
+                                      onClick={() => handleApprove(b.id)}
+                                      className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 flex items-center justify-center disabled:opacity-50"
+                                      title="Approve"
+                                    >
+                                      <Icon name="check" className="material-symbols-outlined text-[18px]" />
+                                    </button>
+                                    <button
+                                      disabled={actionId === String(b.id)}
+                                      onClick={() => handleReject(b.id)}
+                                      className="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 flex items-center justify-center disabled:opacity-50"
+                                      title="Reject"
+                                    >
+                                      <Icon name="close" className="material-symbols-outlined text-[18px]" />
+                                    </button>
+                                  </>
+                                )}
+                                {isConfirmedCashPending && (
+                                  <button
+                                    disabled={actionId === String(b.id)}
+                                    onClick={() => handleMarkPaid(b.id)}
+                                    className="px-3 py-1.5 rounded-lg bg-[#157375] text-white text-xs font-semibold hover:bg-[#0f5a5b] flex items-center gap-1 disabled:opacity-50"
+                                    title="Confirm Cash Received"
+                                  >
+                                    {actionId === String(b.id) ? <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Icon name="verified" className="material-symbols-outlined text-[14px]" />}
+                                    <span className="hidden sm:inline">Confirm Cash Received</span>
+                                    <span className="sm:hidden">Paid</span>
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </DataTable>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+    </>
+  );
+}

@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Sparkles,
@@ -18,7 +19,7 @@ import {
 } from "lucide-react";
 import {
   destinations,
-  properties,
+  properties as mockProperties,
   prompts,
   regionOptions,
   type Region,
@@ -26,10 +27,14 @@ import {
 import { PropertyCard } from "./PropertyCard";
 import { Dialog } from "@/components/ui/Dialog";
 import { pause } from "@/lib/auth";
+import { useEffect } from "react";
+import { searchProperties } from "@/services/properties";
+import type { PropertyResponse } from "@/services/owner";
 interface HomeExperienceProps {
   readonly children: ReactNode;
 }
 export function HomeExperience({ children }: HomeExperienceProps) {
+  const router = useRouter();
   const [mode, setMode] = useState<"standard" | "ai">("standard"),
     [region, setRegion] = useState<Region>("faraya"),
     [filter, setFilter] = useState<Region>("all"),
@@ -48,9 +53,55 @@ export function HomeExperience({ children }: HomeExperienceProps) {
   const searchRef = useRef<HTMLDivElement>(null);
   const aiRef = useRef<HTMLInputElement>(null);
   const staysRef = useRef<HTMLElement>(null);
-  const filtered = properties.filter(
+  const [backendProps, setBackendProps] = useState<PropertyResponse[] | null>(null);
+  const [loadingProps, setLoadingProps] = useState(true);
+  const [propsError, setPropsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoadingProps(true);
+      setPropsError(null);
+      try {
+        const locMap: Record<string, string | undefined> = { faraya: "Faraya", batroun: "Batroun", all: undefined };
+        const loc = locMap[filter];
+        const res = await searchProperties({ location: loc, page: 1, page_size: 12, sort: "newest" });
+        if (!cancelled) setBackendProps(res.items as PropertyResponse[]);
+      } catch (e) {
+        if (!cancelled) setPropsError(e instanceof Error ? e.message : "Failed to load properties");
+      } finally {
+        if (!cancelled) setLoadingProps(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [filter]);
+
+  const filtered = mockProperties.filter(
     (p) => filter === "all" || p.region === filter,
   );
+  // Prefer backend data when available
+  const displayProperties = backendProps !== null && backendProps.length > 0
+    ? backendProps.map((p) => ({
+        id: String(p.id),
+        title: p.title,
+        location: p.location,
+        price: Number(p.price_per_night),
+        guests: p.max_guests,
+        beds: p.beds,
+        baths: p.bathrooms,
+        feature: p.property_type === "chalet" ? "Chalet" : "Furnished House",
+        amenities: p.amenities?.map((a: { name: string }) => a.name).slice(0, 3) ?? [],
+        rating: 4.92,
+        reviews: 12,
+        host: "Verified Host",
+        badge: p.status === "approved" ? "Approved & Published" : p.status,
+        isNew: false,
+        region: p.location.toLowerCase().includes("batroun") ? "batroun" as Region : p.location.toLowerCase().includes("faraya") ? "faraya" as Region : "all" as Region,
+        image: p.images?.find((im) => im.is_primary)?.image_url || p.images?.[0]?.image_url || "/images/e8899428208cea05.jpg",
+      }))
+    : filtered;
+
   const dateText = (value: string) =>
     new Date(`${value}T12:00:00`).toLocaleDateString("en-US", {
       month: "short",
@@ -71,28 +122,19 @@ export function HomeExperience({ children }: HomeExperienceProps) {
       aiRef.current?.focus();
       return;
     }
-    setBusy(true);
-    setMessage("");
-    await pause(650);
-    const text = (preset ?? query).toLowerCase();
-    const nextRegion: Region =
-      mode === "standard"
-        ? region
-        : text.includes("batroun")
-          ? "batroun"
-          : text.includes("faraya")
-            ? "faraya"
-            : text.includes("chouf")
-              ? "chouf"
-              : text.includes("byblos") || text.includes("jbeil")
-                ? "jbeil"
-                : "all";
-    setFilter(nextRegion);
-    setBusy(false);
-    setClarify(mode === "ai");
-    setMessage(
-      `Showing ${nextRegion === "all" ? "all featured" : regionOptions.find((r) => r.value === nextRegion)?.label} stays below. Availability is illustrative.`,
-    );
+    if (mode === "standard") {
+      const params = new URLSearchParams();
+      const regionLabelMap: Record<string, string> = { faraya: "Faraya", batroun: "Batroun", zaarour: "Zaarour", bcharre: "Bcharre", faqra: "Faqra" };
+      const loc = regionLabelMap[region];
+      if (loc) params.set("location", loc);
+      if (arrival) params.set("check_in", arrival);
+      if (departure) params.set("check_out", departure);
+      const totalGuests = adults + kids;
+      if (totalGuests) params.set("guests", String(totalGuests));
+      router.push(`/search?${params.toString()}`);
+      return;
+    }
+    router.push("/search");
   }
   function chooseRegion(value: Region) {
     setFilter(value);
@@ -387,13 +429,21 @@ export function HomeExperience({ children }: HomeExperienceProps) {
           </div>
         </div>
         <div className="property-grid">
-          {filtered.map((property) => (
-            <PropertyCard key={property.id} property={property} />
+          {loadingProps ? (
+            <div className="col-span-full py-10 text-center text-sm text-slate-500 flex flex-col items-center gap-2"><span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /> Loading stays…</div>
+          ) : propsError ? (
+            <div className="col-span-full py-10 text-center text-sm text-red-600">{propsError} — showing featured stays.</div>
+          ) : null}
+          {!loadingProps && displayProperties.map((property) => (
+            <PropertyCard key={property.id} property={property as unknown as import("@/lib/mock-data/homepage").PropertyPreview} />
           ))}
+          {!loadingProps && displayProperties.length === 0 && (
+            <div className="col-span-full py-10 text-center text-sm text-slate-500">No stays found for this region.</div>
+          )}
         </div>
         {filter !== "all" && (
           <p className="filter-caption" role="status">
-            {filtered.length} featured stay in this region.{" "}
+            {displayProperties.length} featured stay in this region.{" "}
             <button onClick={() => setFilter("all")}>
               Show all featured stays
             </button>

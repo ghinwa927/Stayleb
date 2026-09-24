@@ -13,3 +13,4 @@ from app.models.property_rule import PropertyRule
 from app.models.property_blocked_date import PropertyBlockedDate
 from app.models.platform_setting import PlatformSetting
 from app.models.payment import Payment
+from app.models.commission_settlement import CommissionSettlement

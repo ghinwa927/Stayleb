@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-
+from datetime import date
 from app.database.database import get_db
 from app.models.user import User
-from app.schemas.user import UserResponse
+from app.schemas.user import UserResponse,UserListResponse
 from app.services.admin_user_service import (
-    get_all_users,
+    get_admin_users,
     get_user_by_id,
     block_user,
     unblock_user,
@@ -19,20 +19,66 @@ router = APIRouter(
 )
 
 
-@router.get("", response_model=list[UserResponse])
-def admin_get_users(
-    role: str | None = Query(
-        default=None,
-        pattern="^(admin|owner|client)$",
-    ),
+@router.get(
+    "",
+    response_model=UserListResponse,
+)
+def list_users(
+    role: str | None = Query(default=None),
     is_active: bool | None = Query(default=None),
+
+    search: str | None = Query(
+        default=None,
+        max_length=100,
+    ),
+
+    sort: str = Query(
+        default="newest",
+        pattern="^(newest|oldest|name_asc|name_desc)$",
+    ),
+
+    created_from: date | None = Query(
+        default=None,
+    ),
+
+    created_to: date | None = Query(
+        default=None,
+    ),
+
+    page: int = Query(
+        default=1,
+        ge=1,
+    ),
+
+    page_size: int = Query(
+        default=20,
+        ge=1,
+        le=100,
+    ),
+
     db: Session = Depends(get_db),
-    current_admin: User = Depends(require_admin),
+    current_user: User = Depends(require_admin),
 ):
-    return get_all_users(
+    if (
+        created_from is not None
+        and created_to is not None
+        and created_from > created_to
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="created_from cannot be after created_to",
+        )
+
+    return get_admin_users(
         db=db,
         role=role,
         is_active=is_active,
+        search=search,
+        sort=sort,
+        created_from=created_from,
+        created_to=created_to,
+        page=page,
+        page_size=page_size,
     )
 
 

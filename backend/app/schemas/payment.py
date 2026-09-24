@@ -20,7 +20,14 @@ class PaymentResponse(BaseModel):
     stripe_payment_id: str | None = None
     paid_at: datetime | None = None
 
+    stripe_refund_id: str | None = None
+    refunded_amount: Decimal
+
     created_at: datetime
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class StripePaymentResponse(BaseModel):
+    payment: PaymentResponse
+    client_secret: str

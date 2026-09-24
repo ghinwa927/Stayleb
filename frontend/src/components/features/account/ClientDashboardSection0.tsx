@@ -14,56 +14,11 @@ export function ClientDashboardSection0() { return <>
 
 <section className={"space-y-6"}>
 <div className={"space-y-1"}>
-<h1 className={"text-headline-lg font-headline-lg text-on-surface tracking-tight"}>{"\n          Welcome back, Maya\n        "}</h1>
+<h1 className={"text-headline-lg font-headline-lg text-[#157375] tracking-tight"}>{"\n          Welcome back, Maya\n        "}</h1>
 <p className={"text-body-lg font-body-lg text-on-surface-variant"}>{"\n          Ready to find your next stay in Lebanon? Browse verified chalets and mountain retreats.\n        "}</p>
 </div>
 
-<div className={"bg-surface-container-lowest rounded-2xl shadow-sm p-2 sm:p-3 space-y-3"}>
-<div className={"grid grid-cols-1 md:grid-cols-12 gap-2 items-center"}>
 
-<div className={"md:col-span-5 flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer"}>
-<Icon name="location_on" className="material-symbols-outlined text-primary-container text-[22px]" />
-<div className={"flex flex-col min-w-0"}>
-<span className={"text-caption font-caption text-outline font-semibold uppercase tracking-wider"}>{"Destination"}</span>
-<input className={"bg-transparent text-body-md font-body-md text-on-surface focus:outline-none placeholder-outline truncate font-medium"} placeholder={"Where to? Batroun, Faraya, Chouf..."} type={"text"} name={"where-to?-batroun,-faraya,-chouf..."} defaultValue={"Batroun, Faraya, Chouf"} aria-label={"Where to? Batroun, Faraya, Chouf..."} />
-</div>
-</div>
-
-<div className={"md:col-span-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer"}>
-<Icon name="calendar_month" className="material-symbols-outlined text-primary-container text-[22px]" />
-<div className={"flex flex-col min-w-0"}>
-<span className={"text-caption font-caption text-outline font-semibold uppercase tracking-wider"}>{"Dates"}</span>
-<span className={"text-body-md font-body-md text-on-surface font-medium truncate"}>{"Oct 12 \u2013 Oct 15, 2024"}</span>
-</div>
-</div>
-
-<div className={"md:col-span-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2"}>
-<div className={"flex-1 flex items-center gap-2.5 px-3 py-3 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer"}>
-<Icon name="group" className="material-symbols-outlined text-primary-container text-[20px]" />
-<div className={"flex flex-col min-w-0"}>
-<span className={"text-caption font-caption text-outline font-semibold uppercase tracking-wider"}>{"Guests"}</span>
-<span className={"text-body-md font-body-md text-on-surface font-medium truncate"}>{"4 Guests"}</span>
-</div>
-</div>
-<Link className={"h-12 sm:h-auto sm:self-stretch px-5 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm transition-all duration-150 active:scale-[0.98]"} href={"/search"}>
-<Icon name="search" className="material-symbols-outlined text-[18px]" />
-<span className={"whitespace-nowrap font-medium"}>{"Search Stays"}</span>
-</Link>
-</div>
-</div>
-
-<div className={"pt-2 px-2 flex flex-wrap items-center gap-3"}>
-<div className={"flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-tertiary font-label-sm text-label-sm font-semibold"}>
-<Icon name="auto_awesome" className="material-symbols-outlined text-[16px] text-tertiary" />
-<span>{"AI Smart Search"}</span>
-</div>
-<ActionButton className={"text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors text-left flex items-center gap-2 group"} actionLabel={"Try: \"Secluded mountain stone chalet in Faqra with heated outdoor pool and fiber internet\" arrow_forward"} aria-label={"Try: \"Secluded mountain stone chalet in Faqra with heated outdoor pool and fiber internet\" arrow_forward"}>
-<span className={"text-outline"}>{"Try:"}</span>
-<span className={"italic underline decoration-dotted decoration-outline group-hover:decoration-primary"}>{"\"Secluded mountain stone chalet in Faqra with heated outdoor pool and fiber internet\""}</span>
-<Icon name="arrow_forward" className="material-symbols-outlined text-[14px] text-tertiary group-hover:translate-x-0.5 transition-transform" />
-</ActionButton>
-</div>
-</div>
 </section>
 
 <section className={"bg-surface-container-lowest rounded-2xl p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5"}>
@@ -73,7 +28,7 @@ export function ClientDashboardSection0() { return <>
 </div>
 <div className={"space-y-1"}>
 <div className={"flex items-center gap-2 flex-wrap"}>
-<h3 className={"text-title-md font-title-md text-on-surface"}>{"How was your recent stay in Batroun?"}</h3>
+<h3 className={"text-title-md font-title-md text-[#157375]"}>{"How was your recent stay in Batroun?"}</h3>
 <span className={"px-2 py-0.5 rounded-md bg-surface-container text-caption font-caption text-on-surface-variant font-medium"}>{"Batroun Sunset Seaside Villa \u00b7 Sep 10, 2024"}</span>
 </div>
 <p className={"text-body-md font-body-md text-on-surface-variant max-w-2xl"}>{"\n            Share your authentic feedback on Cleanliness, Wi-Fi speed, 24/7 Solar power stability, and host hospitality to help Lebanese travelers.\n          "}</p>
@@ -87,7 +42,7 @@ export function ClientDashboardSection0() { return <>
 
 <section className={"space-y-4"}>
 <div className={"flex items-center justify-between"}>
-<h2 className={"text-headline-md font-headline-md text-on-surface"}>{"Your Active Bookings"}</h2>
+<h2 className={"text-headline-md font-headline-md text-[#157375]"}>{"Your Active Bookings"}</h2>
 <ActionButton className={"text-label-md font-label-md text-primary-container font-semibold hover:underline flex items-center gap-1"} actionLabel={"All Trips (4) chevron_right"} aria-label={"All Trips (4) chevron_right"}>
 <span>{"All Trips (4)"}</span>
 <Icon name="chevron_right" className="material-symbols-outlined text-[16px]" />
@@ -108,7 +63,7 @@ export function ClientDashboardSection0() { return <>
 <div className={"flex items-start justify-between gap-2"}>
 <div>
 <span className={"text-caption font-caption text-primary-container font-semibold uppercase tracking-wider"}>{"Upcoming Stay"}</span>
-<h3 className={"text-title-md font-title-md text-on-surface font-semibold line-clamp-1"}>{"Cedar Peak Stone Chalet"}</h3>
+<h3 className={"text-title-md font-title-md text-[#157375] font-semibold line-clamp-1"}>{"Cedar Peak Stone Chalet"}</h3>
 </div>
 </div>
 <div className={"space-y-1.5 text-body-md font-body-md text-on-surface-variant"}>
@@ -118,7 +73,7 @@ export function ClientDashboardSection0() { return <>
 </div>
 <div className={"flex items-center gap-2"}>
 <Icon name="calendar_today" className="material-symbols-outlined text-[18px] text-outline" />
-<span className={"font-medium text-on-surface"}>{"Sep 25 \u2013 Sep 28, 2024 \u00b7 3 nights"}</span>
+<span className={"font-medium text-[#157375]"}>{"Sep 25 \u2013 Sep 28, 2024 \u00b7 3 nights"}</span>
 </div>
 <div className={"flex items-center gap-2"}>
 <Icon name="group" className="material-symbols-outlined text-[18px] text-outline" />
@@ -129,7 +84,7 @@ export function ClientDashboardSection0() { return <>
 <div className={"pt-3 flex items-center justify-between gap-3"}>
 <div className={"flex flex-col"}>
 <span className={"text-caption font-caption text-outline"}>{"Payment Status"}</span>
-<span className={"text-label-sm font-label-sm font-medium text-on-surface flex items-center gap-1"}>
+<span className={"text-label-sm font-label-sm font-medium text-[#157375] flex items-center gap-1"}>
 <Icon name="credit_card" className="material-symbols-outlined text-[14px] text-emerald-700" />{"\n                  Paid Online ($620)\n                "}</span>
 </div>
 <Link className={"px-4 py-2 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-all"} href={"/account/bookings/stay-001"}>{"\n                View Booking Details\n              "}</Link>
@@ -150,7 +105,7 @@ export function ClientDashboardSection0() { return <>
 <div className={"space-y-2"}>
 <div>
 <span className={"text-caption font-caption text-amber-800 font-semibold uppercase tracking-wider"}>{"Awaiting Host"}</span>
-<h3 className={"text-title-md font-title-md text-on-surface font-semibold line-clamp-1"}>{"Sour Sandy Beachfront Bungalow"}</h3>
+<h3 className={"text-title-md font-title-md text-[#157375] font-semibold line-clamp-1"}>{"Sour Sandy Beachfront Bungalow"}</h3>
 </div>
 <div className={"space-y-1.5 text-body-md font-body-md text-on-surface-variant"}>
 <div className={"flex items-center gap-2"}>
@@ -159,14 +114,14 @@ export function ClientDashboardSection0() { return <>
 </div>
 <div className={"flex items-center gap-2"}>
 <Icon name="calendar_today" className="material-symbols-outlined text-[18px] text-outline" />
-<span className={"font-medium text-on-surface"}>{"Oct 18 \u2013 Oct 21, 2024 \u00b7 3 nights"}</span>
+<span className={"font-medium text-[#157375]"}>{"Oct 18 \u2013 Oct 21, 2024 \u00b7 3 nights"}</span>
 </div>
 <div className={"flex items-center gap-2"}>
 <Icon name="group" className="material-symbols-outlined text-[18px] text-outline" />
 <span>{"5 Guests"}</span>
 </div>
 </div>
-<div className={"p-2.5 rounded-xl bg-amber-50/70 text-on-surface text-caption font-caption leading-relaxed flex items-start gap-2"}>
+<div className={"p-2.5 rounded-xl bg-amber-50/70 text-[#157375] text-caption font-caption leading-relaxed flex items-start gap-2"}>
 <Icon name="schedule" className="material-symbols-outlined text-[16px] text-amber-800 shrink-0 mt-0.5" />
 <span>{"Waiting for owner approval. Requested dates are temporarily on hold for you."}</span>
 </div>
@@ -174,10 +129,10 @@ export function ClientDashboardSection0() { return <>
 <div className={"pt-2 flex items-center justify-between gap-3"}>
 <div className={"flex flex-col"}>
 <span className={"text-caption font-caption text-outline"}>{"Selected Payment"}</span>
-<span className={"text-label-sm font-label-sm font-medium text-on-surface flex items-center gap-1"}>
+<span className={"text-label-sm font-label-sm font-medium text-[#157375] flex items-center gap-1"}>
 <Icon name="payments" className="material-symbols-outlined text-[14px] text-amber-800" />{"\n                  Cash on Arrival ($480)\n                "}</span>
 </div>
-<Link className={"px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-all"} href={"/account/bookings/stay-002/pending"}>{"\n                View Request\n              "}</Link>
+<Link className={"px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-[#157375] font-label-md text-label-md transition-all"} href={"/account/bookings/stay-002/pending"}>{"\n                View Request\n              "}</Link>
 </div>
 </div>
 </article>
@@ -187,7 +142,7 @@ export function ClientDashboardSection0() { return <>
 <section className={"space-y-5"}>
 <div className={"flex items-center justify-between"}>
 <div>
-<h2 className={"text-headline-md font-headline-md text-on-surface"}>{"Your Saved Properties"}</h2>
+<h2 className={"text-headline-md font-headline-md text-[#157375]"}>{"Your Saved Properties"}</h2>
 <p className={"text-body-md font-body-md text-on-surface-variant"}>{"Chalets and seaside villas you have favorited"}</p>
 </div>
 <ActionButton className={"text-label-md font-label-md text-primary-container font-semibold hover:underline flex items-center gap-1"} actionLabel={"View All Favorites (3) chevron_right"} aria-label={"View All Favorites (3) chevron_right"}>
@@ -215,7 +170,7 @@ export function ClientDashboardSection0() { return <>
 <span className={"text-outline font-normal"}>{"(42)"}</span>
 </div>
 </div>
-<h4 className={"text-title-md font-title-md text-on-surface font-semibold"}>{"Chouf Heritage Cedar Villa"}</h4>
+<h4 className={"text-title-md font-title-md text-[#157375] font-semibold"}>{"Chouf Heritage Cedar Villa"}</h4>
 <p className={"text-body-md font-body-md text-on-surface-variant line-clamp-1 mt-0.5"}>{"Private heated plunge pool \u00b7 Fiber Wi-Fi \u00b7 Mountain valley view"}</p>
 </div>
 <div className={"pt-2 flex items-baseline justify-between"}>
@@ -247,7 +202,7 @@ export function ClientDashboardSection0() { return <>
 <span className={"text-outline font-normal"}>{"(68)"}</span>
 </div>
 </div>
-<h4 className={"text-title-md font-title-md text-on-surface font-semibold"}>{"The Mediterranean Cove Lodge"}</h4>
+<h4 className={"text-title-md font-title-md text-[#157375] font-semibold"}>{"The Mediterranean Cove Lodge"}</h4>
 <p className={"text-body-md font-body-md text-on-surface-variant line-clamp-1 mt-0.5"}>{"Private cove access \u00b7 24/7 Power \u00b7 Sunset cocktail patio"}</p>
 </div>
 <div className={"pt-2 flex items-baseline justify-between"}>
@@ -278,7 +233,7 @@ export function ClientDashboardSection0() { return <>
 <span className={"text-outline font-normal"}>{"(19)"}</span>
 </div>
 </div>
-<h4 className={"text-title-md font-title-md text-on-surface font-semibold"}>{"Zaarour Peak Chalet & Spa"}</h4>
+<h4 className={"text-title-md font-title-md text-[#157375] font-semibold"}>{"Zaarour Peak Chalet & Spa"}</h4>
 <p className={"text-body-md font-body-md text-on-surface-variant line-clamp-1 mt-0.5"}>{"Wood-burning stove \u00b7 Jacuzzi \u00b7 Fiber connection"}</p>
 </div>
 <div className={"pt-2 flex items-baseline justify-between"}>
@@ -296,14 +251,14 @@ export function ClientDashboardSection0() { return <>
 <section className={"space-y-5"}>
 <div className={"flex items-center justify-between"}>
 <div>
-<h2 className={"text-headline-md font-headline-md text-on-surface"}>{"Explore More Authentic Stays"}</h2>
+<h2 className={"text-headline-md font-headline-md text-[#157375]"}>{"Explore More Authentic Stays"}</h2>
 <p className={"text-body-md font-body-md text-on-surface-variant"}>{"Hand-picked mountain & coastal retreats verified for summer & fall getaways"}</p>
 </div>
 <div className={"hidden sm:flex items-center gap-2"}>
-<ActionButton className={"w-9 h-9 rounded-full bg-surface-container-lowest shadow-sm flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors"} actionLabel={"west"} aria-label={"west"}>
+<ActionButton className={"w-9 h-9 rounded-full bg-surface-container-lowest shadow-sm flex items-center justify-center text-[#157375] hover:bg-surface-container transition-colors"} actionLabel={"west"} aria-label={"west"}>
 <Icon name="west" className="material-symbols-outlined text-[20px]" />
 </ActionButton>
-<ActionButton className={"w-9 h-9 rounded-full bg-surface-container-lowest shadow-sm flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors"} actionLabel={"east"} aria-label={"east"}>
+<ActionButton className={"w-9 h-9 rounded-full bg-surface-container-lowest shadow-sm flex items-center justify-center text-[#157375] hover:bg-surface-container transition-colors"} actionLabel={"east"} aria-label={"east"}>
 <Icon name="east" className="material-symbols-outlined text-[20px]" />
 </ActionButton>
 </div>
@@ -328,7 +283,7 @@ export function ClientDashboardSection0() { return <>
 <span className={"text-outline font-normal"}>{"(53)"}</span>
 </div>
 </div>
-<h4 className={"text-title-md font-title-md text-on-surface font-semibold"}>{"Faqra Modern Glass Villa"}</h4>
+<h4 className={"text-title-md font-title-md text-[#157375] font-semibold"}>{"Faqra Modern Glass Villa"}</h4>
 <p className={"text-body-md font-body-md text-on-surface-variant line-clamp-1 mt-0.5"}>{"Floor-to-ceiling glass \u00b7 24/7 Generator + Solar \u00b7 Ski-in access"}</p>
 </div>
 <div className={"pt-2 flex items-baseline justify-between"}>
@@ -359,7 +314,7 @@ export function ClientDashboardSection0() { return <>
 <span className={"text-outline font-normal"}>{"(89)"}</span>
 </div>
 </div>
-<h4 className={"text-title-md font-title-md text-on-surface font-semibold"}>{"Byblos Old Port Stone House"}</h4>
+<h4 className={"text-title-md font-title-md text-[#157375] font-semibold"}>{"Byblos Old Port Stone House"}</h4>
 <p className={"text-body-md font-body-md text-on-surface-variant line-clamp-1 mt-0.5"}>{"Steps from citadel \u00b7 Restored 19th-century arches \u00b7 Full kitchen"}</p>
 </div>
 <div className={"pt-2 flex items-baseline justify-between"}>
@@ -390,7 +345,7 @@ export function ClientDashboardSection0() { return <>
 <span className={"text-outline font-normal"}>{"(34)"}</span>
 </div>
 </div>
-<h4 className={"text-title-md font-title-md text-on-surface font-semibold"}>{"Kfar Aabida Coastal Stone Lodge"}</h4>
+<h4 className={"text-title-md font-title-md text-[#157375] font-semibold"}>{"Kfar Aabida Coastal Stone Lodge"}</h4>
 <p className={"text-body-md font-body-md text-on-surface-variant line-clamp-1 mt-0.5"}>{"Private sea ladder \u00b7 Rooftop stargazing pergola \u00b7 High-speed Wi-Fi"}</p>
 </div>
 <div className={"pt-2 flex items-baseline justify-between"}>
@@ -412,12 +367,12 @@ export function ClientDashboardSection0() { return <>
 <Icon name="shield" className="material-symbols-outlined text-[20px] text-primary-container" />
 <span className={"text-caption font-caption text-primary-container uppercase font-semibold tracking-wider"}>{"StayLeb Quality Guarantee"}</span>
 </div>
-<h3 className={"text-headline-sm font-headline-sm text-on-surface font-semibold"}>{"Looking for a specific Lebanese region?"}</h3>
+<h3 className={"text-headline-sm font-headline-sm text-[#157375] font-semibold"}>{"Looking for a specific Lebanese region?"}</h3>
 <p className={"text-body-md font-body-md text-on-surface-variant leading-relaxed"}>{"\n            Every property on StayLeb is vetted in-person. We confirm 24/7 electricity via solar systems, high-speed fiber internet, and genuine Lebanese host hospitality.\n          "}</p>
 </div>
 <div className={"flex flex-wrap items-center gap-3 shrink-0"}>
 <Link className={"px-5 py-3 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md shadow-sm transition-all active:scale-[0.98]"} href={"/search"}>{"\n            Discover Properties\n          "}</Link>
-<ActionButton className={"px-4 py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors"} actionLabel={"Ask StayLeb Concierge"} aria-label={"Ask StayLeb Concierge"}>{"\n            Ask StayLeb Concierge\n          "}</ActionButton>
+<ActionButton className={"px-4 py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-[#157375] font-label-md text-label-md transition-colors"} actionLabel={"Ask StayLeb Concierge"} aria-label={"Ask StayLeb Concierge"}>{"\n            Ask StayLeb Concierge\n          "}</ActionButton>
 </div>
 </div>
 </section>

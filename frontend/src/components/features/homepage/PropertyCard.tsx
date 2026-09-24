@@ -1,15 +1,12 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
-import { Heart, Star, BadgeCheck } from "lucide-react";
+import Link from "next/link";
+import { Star, BadgeCheck } from "lucide-react";
 import type { PropertyPreview } from "@/lib/mock-data/homepage";
-import { useFeedback } from "@/components/ui/Feedback";
 interface PropertyCardProps {
   readonly property: PropertyPreview;
 }
 export function PropertyCard({ property: p }: PropertyCardProps) {
-  const [saved, setSaved] = useState(false);
-  const notify = useFeedback();
   return (
     <article className="property-card">
       <div className="property-image">
@@ -23,21 +20,6 @@ export function PropertyCard({ property: p }: PropertyCardProps) {
           <span>{p.location}</span>
           <span>{p.badge}</span>
         </div>
-        <button
-          className={`favorite ${saved ? "saved" : ""}`}
-          aria-label={`${saved ? "Unsave" : "Save"} ${p.title}`}
-          aria-pressed={saved}
-          onClick={() => {
-            setSaved(!saved);
-            notify(
-              saved
-                ? "Stay removed from your saved selection."
-                : "Stay saved for this visit.",
-            );
-          }}
-        >
-          <Heart size={19} fill={saved ? "currentColor" : "none"} />
-        </button>
         <span className={`property-status ${p.isNew ? "new" : ""}`}>
           <BadgeCheck size={12} />
           {p.isNew ? "New Listing" : "Approved & Published"}
@@ -72,15 +54,9 @@ export function PropertyCard({ property: p }: PropertyCardProps) {
         <span>
           <strong>${p.price}</strong> / night
         </span>
-        <button
-          onClick={() =>
-            notify(
-              `${p.title}: $${p.price} per night, up to ${p.guests} guests. Detailed listings are not available in this preview.`,
-            )
-          }
-        >
+        <Link href={`/properties/${p.id}`}>
           Details
-        </button>
+        </Link>
       </div>
     </article>
   );

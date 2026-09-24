@@ -74,8 +74,8 @@ export function CommissionSettingsSection0() {
                   <span>•</span>
                   <span>Global Engine</span>
                 </div>
-                <h1 className="font-headline-lg text-headline-lg text-[#157375] tracking-tight">Platform Commission Configuration</h1>
-                <p className="font-body-md text-body-md text-[#157375] mt-space-xxs">Configure standard marketplace commission rates captured on future bookings. Historical rates remain permanently fixed.</p>
+                <h1 className="font-headline-lg text-headline-lg text-[#46B1B1] tracking-tight">Platform Commission Configuration</h1>
+                <p className="font-body-md text-body-md text-[#46B1B1] mt-space-xxs">Configure standard marketplace commission rates captured on future bookings. Historical rates remain permanently fixed.</p>
               </div>
             </div>
 
@@ -98,14 +98,14 @@ export function CommissionSettingsSection0() {
                     <div className="flex flex-col md:flex-row md:items-baseline gap-space-xs md:gap-space-md mt-space-xs mb-space-lg">
                       <span className="font-display text-[64px] leading-none text-primary font-bold tracking-tight">{settings ? `${Number(settings.commission_percentage).toFixed(1)}%` : `${previewRate.toFixed(1)}%`}</span>
                       <div className="flex flex-col">
-                        <span className="font-title-md text-title-md text-[#157375] font-semibold">Platform Commission Standard</span>
-                        <span className="font-body-md text-body-md text-[#157375]">Applied automatically at payment authorization</span>
+                        <span className="font-title-md text-title-md text-[#46B1B1] font-semibold">Platform Commission Standard</span>
+                        <span className="font-body-md text-body-md text-[#46B1B1]">Applied automatically at payment authorization</span>
                       </div>
                     </div>
                     <div className="bg-surface-container-low rounded-lg p-space-md mb-space-lg">
                       <div className="flex items-center justify-between mb-space-xs">
-                        <span className="font-label-md text-label-md text-[#157375] font-semibold">Effective Split Demonstration</span>
-                        <span className="font-caption text-caption text-[#157375]">Ref. $200.00 Nightly Base</span>
+                        <span className="font-label-md text-label-md text-[#46B1B1] font-semibold">Effective Split Demonstration</span>
+                        <span className="font-caption text-caption text-[#46B1B1]">Ref. $200.00 Nightly Base</span>
                       </div>
                       <div className="h-4 w-full bg-surface-container-highest rounded-full overflow-hidden flex mb-space-xs">
                         <div className="h-full bg-primary-container transition-all duration-500 rounded-l-full" style={{ width: `${previewRate}%` }}></div>
@@ -115,24 +115,24 @@ export function CommissionSettingsSection0() {
                         <div className="flex items-center gap-space-xs">
                           <div className="w-3 h-3 rounded bg-primary-container shrink-0"></div>
                           <div className="flex flex-col min-w-0">
-                            <span className="font-caption text-caption text-[#157375]">StayLeb Platform Revenue</span>
+                            <span className="font-caption text-caption text-[#46B1B1]">StayLeb Platform Revenue</span>
                             <span className="font-label-md text-label-md font-bold text-primary">${commission.toFixed(2)} ({previewRate.toFixed(1)}%)</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-space-xs">
                           <div className="w-3 h-3 rounded bg-surface-dim shrink-0"></div>
                           <div className="flex flex-col min-w-0">
-                            <span className="font-caption text-caption text-[#157375]">Chalet Host Retained</span>
-                            <span className="font-label-md text-label-md font-bold text-[#157375]">${owner.toFixed(2)} ({(100 - previewRate).toFixed(1)}%)</span>
+                            <span className="font-caption text-caption text-[#46B1B1]">Chalet Host Retained</span>
+                            <span className="font-label-md text-label-md font-bold text-[#46B1B1]">${owner.toFixed(2)} ({(100 - previewRate).toFixed(1)}%)</span>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="pt-space-md bg-surface-container-lowest flex items-center justify-between text-[#157375]">
+                  <div className="pt-space-md bg-surface-container-lowest flex items-center justify-between text-[#46B1B1]">
                     <div className="flex items-center gap-space-xs">
                       <Icon name="history_edu" className="material-symbols-outlined text-[18px] text-outline" />
-                      <span className="font-caption text-caption">Currency: <strong className="text-[#157375]">{settings?.currency || "USD"}</strong></span>
+                      <span className="font-caption text-caption">Currency: <strong className="text-[#46B1B1]">{settings?.currency || "USD"}</strong></span>
                     </div>
                   </div>
                 </div>
@@ -141,28 +141,28 @@ export function CommissionSettingsSection0() {
                   <div>
                     <div className="flex items-center gap-space-xs mb-space-xs">
                       <Icon name="tune" className="material-symbols-outlined text-primary text-[22px]" />
-                      <h2 className="font-headline-sm text-headline-sm text-[#157375] font-semibold">Update Commission Rate</h2>
+                      <h2 className="font-headline-sm text-headline-sm text-[#46B1B1] font-semibold">Update Commission Rate</h2>
                     </div>
-                    <p className="font-body-md text-body-md text-[#157375] mb-space-md">Adjust the baseline marketplace percentage. Changes activate immediately for all checkout attempts.</p>
+                    <p className="font-body-md text-body-md text-[#46B1B1] mb-space-md">Adjust the baseline marketplace percentage. Changes activate immediately for all checkout attempts.</p>
                     <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-space-md">
                       <div className="flex flex-col">
-                        <label className="font-label-md text-label-md font-medium text-[#157375] mb-space-xxs flex justify-between" htmlFor="rateInput">
+                        <label className="font-label-md text-label-md font-medium text-[#46B1B1] mb-space-xxs flex justify-between" htmlFor="rateInput">
                           <span>New Commission Rate Percentage (%)</span>
                           <span className="text-outline font-normal">Min 0 · Max 100</span>
                         </label>
                         <div className="flex items-center bg-surface-container-low rounded-lg p-1">
-                          <button type="button" onClick={() => setRate((v) => String(Math.max(0, parseFloat(v) - 0.5)))} className="w-10 h-10 flex items-center justify-center rounded-lg bg-surface-container-lowest text-[#157375] hover:bg-[#157375] hover:text-white shadow-sm transition-colors">
+                          <button type="button" onClick={() => setRate((v) => String(Math.max(0, parseFloat(v) - 0.5)))} className="w-10 h-10 flex items-center justify-center rounded-lg bg-surface-container-lowest text-[#46B1B1] hover:bg-primary hover:text-white shadow-sm transition-colors">
                             <Icon name="remove" className="material-symbols-outlined text-[18px]" />
                           </button>
                           <input className="w-full text-center bg-transparent font-headline-sm text-headline-sm text-primary font-semibold focus:outline-none" id="rateInput" max="100" min="0" step="0.1" type="number" value={rate} onChange={(e) => setRate(e.target.value)} />
-                          <button type="button" onClick={() => setRate((v) => String(Math.min(100, parseFloat(v) + 0.5)))} className="w-10 h-10 flex items-center justify-center rounded-lg bg-surface-container-lowest text-[#157375] hover:bg-[#157375] hover:text-white shadow-sm transition-colors">
+                          <button type="button" onClick={() => setRate((v) => String(Math.min(100, parseFloat(v) + 0.5)))} className="w-10 h-10 flex items-center justify-center rounded-lg bg-surface-container-lowest text-[#46B1B1] hover:bg-primary hover:text-white shadow-sm transition-colors">
                             <Icon name="add" className="material-symbols-outlined text-[18px]" />
                           </button>
                         </div>
                       </div>
                       {error && <div className="p-3 rounded-lg bg-error-container text-on-error-container text-sm">{error}</div>}
                       {success && <div className="p-3 rounded-lg bg-secondary-container text-on-secondary-container text-sm">{success}</div>}
-                      <button type="submit" disabled={saving} className="w-full min-h-[44px] bg-primary hover:bg-[#0a2e2f] text-white font-label-md font-medium rounded-lg flex items-center justify-center gap-2 shadow-md disabled:opacity-50">
+                      <button type="submit" disabled={saving} className="w-full min-h-[44px] bg-primary hover:bg-primary/90 text-white font-label-md font-medium rounded-lg flex items-center justify-center gap-2 shadow-md disabled:opacity-50">
                         <Icon name="save" className="material-symbols-outlined text-[20px]" />
                         <span>{saving ? "Saving…" : "Update Commission Rate"}</span>
                       </button>

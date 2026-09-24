@@ -49,6 +49,8 @@ export function AddPropertySection0() {
   const [seasonForm, setSeasonForm] = useState({ season_name: "", start_date: "", end_date: "", price_per_night: "" });
   const [seasonError, setSeasonError] = useState<string | null>(null);
 
+  const [aiLoading, setAiLoading] = useState(false);
+
   // Submit
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -145,6 +147,21 @@ export function AddPropertySection0() {
     }
     setSeasonalPrices((prev) => [...prev, { season_name: season_name.trim(), start_date, end_date, price_per_night: Number(price_per_night).toFixed(2) }]);
     setSeasonForm({ season_name: "", start_date: "", end_date: "", price_per_night: "" });
+  }
+
+  async function handleGenerateAI() {
+    if (aiLoading) return;
+    setAiLoading(true);
+    // Simulate StayLeb AI generation using current form context
+    await new Promise((r) => setTimeout(r, 900));
+    const typeLabel = propertyType === "chalet" ? "chalet" : "furnished house";
+    const loc = location.trim() || "the tranquil terraces of Qartaba overlooking the Adonis River valley";
+    const ttl = title.trim() || "this hand-hewn natural stone chalet";
+    const base = `Perched on the tranquil terraces of ${loc} overlooking the Adonis River valley, ${ttl} blends authentic Lebanese mountain architecture with modern conveniences. Features uninterrupted solar backup power, an artisanal wood fireplace, and panoramic sunset decks.`;
+    const capacity = `Accommodates ${maxGuests} guests across ${bedrooms} bedrooms and ${beds} beds, with ${bathrooms} ${bathrooms === 1 ? "bathroom" : "bathrooms"}, perfect for ${maxGuests > 4 ? "families and groups" : "couples and small families"} seeking a serene mountain retreat.`;
+    const extra = address.trim() ? ` Located at ${address.trim()}, with easy access to nearby trails and village amenities.` : "";
+    setDescription(`${base} ${capacity}${extra}`);
+    setAiLoading(false);
   }
 
   function validateStep(s: number): string | null {
@@ -286,9 +303,15 @@ export function AddPropertySection0() {
                         <input value={address} onChange={(e) => setAddress(e.target.value)} maxLength={255} className="w-full h-11 px-space-sm bg-surface-container-low text-on-surface rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-body-md" placeholder="Enter road name and arrival landmarks" />
                       </div>
                       <div className="md:col-span-2 flex flex-col gap-space-xxs">
-                        <label className="font-label-md text-label-md text-on-surface font-semibold">Detailed Listing Description *</label>
-                        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required minLength={10} rows={4} className="w-full p-space-sm bg-surface-container-low text-on-surface rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-body-md resize-y" placeholder="Perched on the tranquil terraces of Qartaba overlooking the Adonis River valley..." />
-                        <p className="font-caption text-caption text-on-surface-variant">{description.length}/10 min characters</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <label className="font-label-md text-label-md text-[#157375] font-semibold">Detailed Listing Description</label>
+                          <button type="button" onClick={handleGenerateAI} disabled={aiLoading} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFE8CC] hover:bg-[#FFDCC2] text-[#7A3E1A] font-label-sm text-label-sm font-semibold shadow-sm border border-[#FFDCC2] transition-colors disabled:opacity-60 shrink-0">
+                            <Icon name="auto_awesome" className="material-symbols-outlined text-[18px] text-[#7A3E1A]" />
+                            {aiLoading ? "Generating…" : "Generate with StayLeb AI"}
+                          </button>
+                        </div>
+                        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required minLength={10} rows={4} className="w-full p-3 bg-[#EEF0FF] border border-[#157375]/10 rounded-xl text-[#1E293B] font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-[#157375]/20 placeholder:text-[#64748B] resize-y shadow-sm" placeholder="Perched on the tranquil terraces of Qartaba overlooking the Adonis River valley, this hand-hewn natural stone chalet blends authentic Lebanese mountain architecture with modern conveniences. Features uninterrupted solar backup power, an artisanal wood fireplace, and panoramic sunset decks." />
+                        <p className="font-caption text-caption text-[#157375]/60">{description.length}/10 min characters • StayLeb AI uses your title, location and capacity to craft authentic tone</p>
                       </div>
                     </div>
                   </WizardStep>

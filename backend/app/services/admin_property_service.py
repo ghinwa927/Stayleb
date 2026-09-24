@@ -1,19 +1,109 @@
 from sqlalchemy.orm import Session
-
+from sqlalchemy import or_
 from app.models.property import Property
 
-
-def get_all_properties(
+def get_admin_properties(
     db: Session,
     status: str | None = None,
+    search: str | None = None,
+    owner_id: int | None = None,
+    location: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
 ):
     query = db.query(Property)
 
-    if status:
-        query = query.filter(Property.status == status)
+    # =====================================================
+    # STATUS FILTER
+    # =====================================================
 
-    return query.order_by(Property.created_at.desc()).all()
+    if status is not None:
+        query = query.filter(
+            Property.status == status
+        )
 
+    # =====================================================
+    # OWNER FILTER
+    # =====================================================
+
+    if owner_id is not None:
+        query = query.filter(
+            Property.owner_id == owner_id
+        )
+
+    # =====================================================
+    # LOCATION FILTER
+    # =====================================================
+
+    if location:
+        location_value = location.strip()
+
+        if location_value:
+            query = query.filter(
+                Property.location.ilike(
+                    f"%{location_value}%"
+                )
+            )
+
+    # =====================================================
+    # SEARCH
+    # =====================================================
+
+    if search:
+        search_value = search.strip()
+
+        if search_value:
+            pattern = f"%{search_value}%"
+
+            query = query.filter(
+                or_(
+                    Property.title.ilike(pattern),
+                    Property.location.ilike(pattern),
+                    Property.address.ilike(pattern),
+                    Property.description.ilike(pattern),
+                )
+            )
+
+    # =====================================================
+    # TOTAL BEFORE PAGINATION
+    # =====================================================
+
+    total = query.count()
+
+    # =====================================================
+    # PAGINATION
+    # =====================================================
+
+    page = max(page, 1)
+
+    page_size = max(
+        1,
+        min(page_size, 100),
+    )
+
+    total_pages = (
+        (total + page_size - 1) // page_size
+        if total > 0
+        else 0
+    )
+
+    properties = (
+        query
+        .order_by(Property.created_at.desc())
+        .offset(
+            (page - 1) * page_size
+        )
+        .limit(page_size)
+        .all()
+    )
+
+    return {
+        "items": properties,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": total_pages,
+    }
 
 def get_property_by_id(
     db: Session,

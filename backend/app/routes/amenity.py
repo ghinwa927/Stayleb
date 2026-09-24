@@ -15,6 +15,16 @@ router = APIRouter(
 
 
 @router.get(
+    "/public",
+    response_model=list[AmenityResponse]
+)
+def get_public_amenities_route(
+    db: Session = Depends(get_db),
+):
+    return get_active_amenities(db)
+
+
+@router.get(
     "",
     response_model=list[AmenityResponse]
 )

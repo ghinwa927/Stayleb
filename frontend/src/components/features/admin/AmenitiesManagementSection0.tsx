@@ -103,8 +103,8 @@ export function AmenitiesManagementSection0() {
                   <Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
                   <span className="text-primary font-semibold">Amenities Management</span>
                 </div>
-                <h1 className="font-headline-lg text-headline-lg text-[#157375] tracking-tight">Master Amenities Directory</h1>
-                <p className="font-body-md text-body-md text-[#157375]">Configure reusable platform amenities available to property owners across Lebanon.</p>
+                <h1 className="font-headline-lg text-headline-lg text-[#46B1B1] tracking-tight">Master Amenities Directory</h1>
+                <p className="font-body-md text-body-md text-[#46B1B1]">Configure reusable platform amenities available to property owners across Lebanon.</p>
               </div>
               <div className="flex items-center gap-space-sm self-start md:self-auto">
                 <button onClick={() => { setEditing(null); setForm({ name: "", description: "", category: "Heating & Comfort", is_active: true }); setShowModal(true); }} className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-primary text-white rounded-lg font-label-md text-label-md shadow-sm hover:opacity-95">
@@ -118,20 +118,20 @@ export function AmenitiesManagementSection0() {
               <div className="p-space-md flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
                 <div className="flex items-center gap-space-xs flex-1 max-w-md bg-surface-container-low px-space-sm py-space-xs rounded-lg">
                   <Icon name="search" className="material-symbols-outlined text-outline text-[20px]" />
-                  <input className="bg-transparent text-[#157375] placeholder:text-outline w-full focus:outline-none" placeholder="Search amenities..." type="text" value={search} onChange={(e) => setSearch(e.target.value)} />
+                  <input className="bg-transparent text-[#46B1B1] placeholder:text-outline w-full focus:outline-none" placeholder="Search amenities..." type="text" value={search} onChange={(e) => setSearch(e.target.value)} />
                 </div>
               </div>
               <div className="overflow-x-auto">
                 {loading ? (
-                  <div className="p-8 text-center text-[#157375]">Loading…</div>
+                  <div className="p-8 text-center text-[#46B1B1]">Loading…</div>
                 ) : error ? (
                   <div className="p-8 text-center text-error">{error}</div>
                 ) : filtered.length === 0 ? (
-                  <div className="p-8 text-center text-[#157375]">No amenities found.</div>
+                  <div className="p-8 text-center text-[#46B1B1]">No amenities found.</div>
                 ) : (
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-surface-container-low text-[#157375] font-caption text-caption uppercase tracking-wider">
+                      <tr className="bg-surface-container-low text-[#46B1B1] font-caption text-caption uppercase tracking-wider">
                         <th className="py-space-sm px-space-md">Amenity Name</th>
                         <th className="py-space-sm px-space-md">Description</th>
                         <th className="py-space-sm px-space-md">Status</th>
@@ -141,15 +141,15 @@ export function AmenitiesManagementSection0() {
                     <tbody className="divide-y-0">
                       {filtered.map((a) => (
                         <tr key={a.id} className="hover:bg-surface-container-low">
-                          <td className="py-space-sm px-space-md font-semibold text-[#157375]">
+                          <td className="py-space-sm px-space-md font-semibold text-[#46B1B1]">
                             <div className="flex items-center gap-space-xs">
                               <Icon name="pool" className="material-symbols-outlined text-primary text-[20px]" />
-                              <span className="text-[#157375]">{a.name}</span>
+                              <span className="text-[#46B1B1]">{a.name}</span>
                             </div>
                           </td>
-                          <td className="py-space-sm px-space-md max-w-xs text-[#157375] line-clamp-2">{a.description || "—"}</td>
+                          <td className="py-space-sm px-space-md max-w-xs text-[#46B1B1] line-clamp-2">{a.description || "—"}</td>
                           <td className="py-space-sm px-space-md">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-caption text-caption font-semibold ${a.is_active === false ? "bg-surface-container text-[#157375]" : "bg-secondary-container text-on-secondary-container"}`}>
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-caption text-caption font-semibold ${a.is_active === false ? "bg-surface-container text-[#46B1B1]" : "bg-secondary-container text-on-secondary-container"}`}>
                               {a.is_active === false ? "Inactive" : "Active"}
                             </span>
                           </td>
@@ -164,11 +164,11 @@ export function AmenitiesManagementSection0() {
                                   setForm({ name: a.name, description: a.description || "", category: cat, is_active: a.is_active !== false });
                                   setShowModal(true);
                                 }}
-                                className="p-1 text-[#157375] hover:text-primary"
+                                className="p-1 text-[#46B1B1] hover:text-primary"
                               >
                                 <Icon name="edit" className="material-symbols-outlined text-[18px]" />
                               </button>
-                              <button onClick={() => setConfirmAmenity(a)} className="p-1 text-[#157375] hover:text-error">
+                              <button onClick={() => setConfirmAmenity(a)} className="p-1 text-[#46B1B1] hover:text-error">
                                 <Icon name={a.is_active === false ? "toggle_off" : "toggle_on"} className="material-symbols-outlined text-[18px]" />
                               </button>
                             </div>
@@ -187,10 +187,10 @@ export function AmenitiesManagementSection0() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1E293B]/50 backdrop-blur-sm p-4" onClick={() => setShowModal(false)}>
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-5 bg-gradient-to-r from-[#0f3d3e] to-[#157375] flex items-start justify-between gap-4">
+            <div className="px-6 py-5 bg-gradient-to-r from-[#46B1B1] to-[#3A9E9E] flex items-start justify-between gap-4">
               <div>
                 <h2 className="font-display font-bold text-[18px] tracking-tight text-white flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-full bg-white text-[#0f3d3e] grid place-items-center text-sm font-bold shadow-sm">+</span>
+                  <span className="w-7 h-7 rounded-full bg-white text-[#46B1B1] grid place-items-center text-sm font-bold shadow-sm">+</span>
                   {editing ? "Edit Amenity" : "Add Amenity"}
                 </h2>
                 <p className="text-[13px] text-white/80 mt-1">Create a reusable amenity for property listings</p>
@@ -201,9 +201,9 @@ export function AmenitiesManagementSection0() {
             </div>
             <form noValidate onSubmit={handleSubmit} className="px-6 py-6 flex flex-col gap-5">
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-[#0f3d3e]">Amenity Name *</label>
+                <label className="text-sm font-semibold text-[#46B1B1]">Amenity Name *</label>
                 <input
-                  className={`h-11 px-3.5 rounded-xl border bg-white text-[#1E293B] placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all ${fieldErrors.name ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
+                  className={`h-11 px-3.5 rounded-xl border bg-white text-[#46B1B1] placeholder:text-[#46B1B1]/60 focus:outline-none focus:ring-2 transition-all ${fieldErrors.name ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
                   placeholder="Swimming Pool"
                   type="text"
                   value={form.name}
@@ -212,10 +212,10 @@ export function AmenitiesManagementSection0() {
                 {fieldErrors.name && <p className="text-xs text-red-600 mt-1">{fieldErrors.name}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-[#0f3d3e]">Category *</label>
+                <label className="text-sm font-semibold text-[#46B1B1]">Category *</label>
                 <div className="relative">
                   <select
-                    className={`h-11 w-full px-3.5 pr-10 rounded-xl border bg-white text-[#1E293B] focus:outline-none focus:ring-2 transition-all appearance-none cursor-pointer ${fieldErrors.category ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
+                    className={`h-11 w-full px-3.5 pr-10 rounded-xl border bg-white text-[#46B1B1] focus:outline-none focus:ring-2 transition-all appearance-none cursor-pointer ${fieldErrors.category ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
                   >
@@ -226,14 +226,14 @@ export function AmenitiesManagementSection0() {
                     <option value="Coastal Stays">Coastal Stays</option>
                     <option value="Other">Other</option>
                   </select>
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">▼</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#46B1B1]/60">▼</span>
                 </div>
                 {fieldErrors.category && <p className="text-xs text-red-600 mt-1">{fieldErrors.category}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-[#0f3d3e]">Description</label>
+                <label className="text-sm font-semibold text-[#46B1B1]">Description</label>
                 <textarea
-                  className={`p-3.5 rounded-xl border bg-white text-[#1E293B] placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all resize-none ${fieldErrors.description ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
+                  className={`p-3.5 rounded-xl border bg-white text-[#46B1B1] placeholder:text-[#46B1B1]/60 focus:outline-none focus:ring-2 transition-all resize-none ${fieldErrors.description ? "border-red-300 focus:border-red-400 focus:ring-red-200 bg-red-50/30" : "border-slate-200 focus:ring-[#0f3d3e]/20 focus:border-[#0f3d3e]"}`}
                   placeholder="Private swimming pool available for guests. Suitable for family and group stays."
                   rows={3}
                   value={form.description}
@@ -242,31 +242,31 @@ export function AmenitiesManagementSection0() {
                 {fieldErrors.description && <p className="text-xs text-red-600 mt-1">{fieldErrors.description}</p>}
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-[#0f3d3e]">Status</label>
+                <label className="text-sm font-semibold text-[#46B1B1]">Status</label>
                 <div className="flex items-center gap-6">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="amenity_active" checked={form.is_active} onChange={() => setForm({ ...form, is_active: true })} className="w-4 h-4 accent-[#0f3d3e]" />
-                    <span className="flex items-center gap-1.5 text-sm font-medium text-[#0f3d3e]">
-                      <span className="w-2 h-2 rounded-full bg-[#0f3d3e]"></span> Active
+                    <span className="flex items-center gap-1.5 text-sm font-medium text-[#46B1B1]">
+                      <span className="w-2 h-2 rounded-full bg-primary"></span> Active
                     </span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="amenity_active" checked={!form.is_active} onChange={() => setForm({ ...form, is_active: false })} className="w-4 h-4 accent-slate-400" />
-                    <span className="flex items-center gap-1.5 text-sm text-slate-500">
+                    <span className="flex items-center gap-1.5 text-sm text-[#46B1B1]/70">
                       <span className="w-2 h-2 rounded-full border border-slate-400"></span> Inactive
                     </span>
                   </label>
                 </div>
-                <p className="flex items-start gap-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
-                  <span className="text-[#0f3d3e] mt-0.5">ⓘ</span>
+                <p className="flex items-start gap-1.5 text-xs text-[#46B1B1]/70 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
+                  <span className="text-[#46B1B1] mt-0.5">ⓘ</span>
                   <span>Active amenities are available for owners to assign to their properties.</span>
                 </p>
               </div>
               <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-slate-100">
-                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-[#1E293B] hover:bg-slate-50 font-medium transition-colors">
+                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-[#46B1B1] hover:bg-slate-50 font-medium transition-colors">
                   Cancel
                 </button>
-                <button type="submit" disabled={busy} className="px-6 py-2.5 rounded-xl bg-[#0f3d3e] text-white hover:bg-[#0a2e2f] font-semibold shadow-sm disabled:opacity-50 transition-colors">
+                <button type="submit" disabled={busy} className="px-6 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 font-semibold shadow-sm disabled:opacity-50 transition-colors">
                   {busy ? "Saving…" : editing ? "Update Amenity" : "Add Amenity"}
                 </button>
               </div>
@@ -281,15 +281,15 @@ export function AmenitiesManagementSection0() {
               <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${confirmAmenity.is_active === false ? "bg-emerald-100 text-emerald-600" : "bg-amber-100 text-amber-600"}`}>
                 <Icon name={confirmAmenity.is_active === false ? "check_circle" : "warning"} className="material-symbols-outlined text-[36px]" />
               </div>
-              <h3 className="font-display font-bold text-[19px] tracking-tight text-[#0f3d3e]">{confirmAmenity.is_active === false ? "Activate Amenity?" : "Deactivate Amenity?"}</h3>
-              <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                Are you sure you want to <span className="font-semibold text-[#0f3d3e]">{confirmAmenity.is_active === false ? "activate" : "deactivate"}</span> <span className="font-semibold text-[#0f3d3e]">"{confirmAmenity.name}"</span>?
+              <h3 className="font-display font-bold text-[19px] tracking-tight text-[#46B1B1]">{confirmAmenity.is_active === false ? "Activate Amenity?" : "Deactivate Amenity?"}</h3>
+              <p className="text-sm text-[#46B1B1]/70 mt-2 leading-relaxed">
+                Are you sure you want to <span className="font-semibold text-[#46B1B1]">{confirmAmenity.is_active === false ? "activate" : "deactivate"}</span> <span className="font-semibold text-[#46B1B1]">"{confirmAmenity.name}"</span>?
                 <br />
                 {confirmAmenity.is_active === false ? "It will become available for owners to assign to their properties." : "It will be hidden from new listings. Existing assignments remain."}
               </p>
             </div>
             <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-center gap-3">
-              <button onClick={() => setConfirmAmenity(null)} className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-[#1E293B] hover:bg-slate-50 font-medium min-w-[110px] transition-colors">
+              <button onClick={() => setConfirmAmenity(null)} className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-[#46B1B1] hover:bg-slate-50 font-medium min-w-[110px] transition-colors">
                 Cancel
               </button>
               <button
@@ -310,11 +310,11 @@ export function AmenitiesManagementSection0() {
               <div className="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-3">
                 <Icon name="error" className="material-symbols-outlined text-[28px]" />
               </div>
-              <h3 className="font-display font-bold text-[17px] text-[#0f3d3e]">Heads up</h3>
-              <p className="text-sm text-slate-600 mt-2 leading-relaxed">{alertMsg}</p>
+              <h3 className="font-display font-bold text-[17px] text-[#46B1B1]">Heads up</h3>
+              <p className="text-sm text-[#46B1B1] mt-2 leading-relaxed">{alertMsg}</p>
             </div>
             <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-center">
-              <button onClick={() => setAlertMsg(null)} className="px-6 py-2.5 rounded-xl bg-[#0f3d3e] text-white hover:bg-[#0a2e2f] font-semibold min-w-[120px]">OK, got it</button>
+              <button onClick={() => setAlertMsg(null)} className="px-6 py-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 font-semibold min-w-[120px]">OK, got it</button>
             </div>
           </div>
         </div>

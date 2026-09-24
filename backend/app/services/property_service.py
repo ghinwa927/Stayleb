@@ -547,7 +547,10 @@ def get_approved_property_by_id(
     property_obj = (
         db.query(Property)
         .options(
-            selectinload(Property.seasonal_prices)
+            selectinload(Property.seasonal_prices),
+            selectinload(Property.images),
+            selectinload(Property.property_amenities).selectinload(PropertyAmenity.amenity),
+            selectinload(Property.property_rules).selectinload(PropertyRule.rule),
         )
         .filter(
             Property.id == property_id,

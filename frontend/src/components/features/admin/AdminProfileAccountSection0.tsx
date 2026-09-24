@@ -89,31 +89,33 @@ export function AdminProfileAccountSection0() {
     setProfileMsg(null);
   }
 
-  const displayName = user?.full_name || "Karim Boustany";
-  const displayEmail = user?.email || "karim.admin@stayleb.com";
-  const initials = displayName
+  const displayName = user?.full_name || "";
+  const displayEmail = user?.email || "";
+  const hasIdentity = !!displayName;
+  const initials = (displayName || "—")
     .split(" ")
+    .filter(Boolean)
     .map((n) => n[0])
     .join("")
     .slice(0, 2)
-    .toUpperCase();
+    .toUpperCase() || "—";
   return <>
 <div className={""}><main className={"w-full pt-6 px-gutter-lg py-space-lg min-h-screen bg-surface-container-low"}><div className={"flex flex-col w-full gap-space-lg"}>
 
 <div className={"flex flex-col md:flex-row md:items-end justify-between gap-space-md"}>
 <div className={"flex flex-col gap-space-xxs"}>
-<div className={"flex items-center gap-space-xs text-[#157375] font-caption text-caption uppercase tracking-wider"}>
+<div className={"flex items-center gap-space-xs text-[#46B1B1] font-caption text-caption uppercase tracking-wider"}>
 <span>{"Administration"}</span>
 <Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
 <span className={"text-primary font-semibold"}>{"Profile & Account"}</span>
 </div>
-<h1 className={"font-headline-lg text-headline-lg text-[#157375] tracking-tight"}>{"Administrator Profile & Security"}</h1>
-<p className={"font-body-md text-body-md text-[#157375] max-w-3xl"}>{"Manage your administrator account credentials, verification standing, and administrative access settings."}</p>
+<h1 className={"font-headline-lg text-headline-lg text-[#46B1B1] tracking-tight"}>{"Administrator Profile & Security"}</h1>
+<p className={"font-body-md text-body-md text-[#46B1B1] max-w-3xl"}>{"Manage your administrator account credentials, verification standing, and administrative access settings."}</p>
 </div>
 
 <div className={"flex items-center gap-space-xs px-space-sm py-space-xxs rounded-full bg-surface-container shadow-sm self-start md:self-auto"}>
 <span className={"w-2 h-2 rounded-full bg-primary animate-pulse"}></span>
-<span className={"font-label-sm text-label-sm text-[#157375]"}>{"Active Session: "}<strong className={"text-[#157375] font-semibold"}>{"Beirut Node BEY-01"}</strong></span>
+<span className={"font-label-sm text-label-sm text-[#46B1B1]"}>{"Active Session: "}<strong className={"text-[#46B1B1] font-semibold"}>{"Active session"}</strong></span>
 </div>
 </div>
 
@@ -133,20 +135,20 @@ export function AdminProfileAccountSection0() {
 </div>
 <div className={"flex flex-col gap-space-xxs"}>
 <div className={"flex flex-wrap items-center gap-space-xs"}>
-<h2 className={"font-title-md text-title-md font-bold text-[#157375]"}>{loading ? "Loading…" : displayName}</h2>
+<h2 className={"font-title-md text-title-md font-bold text-[#46B1B1]"}>{loading ? "—" : displayName || "—"}</h2>
 <span className={"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold tracking-wide"}>
 <Icon name="shield" className="material-symbols-outlined text-[14px]" /> Super Administrator
 </span>
 </div>
-<span className={"font-label-sm text-label-sm text-[#157375] flex items-center gap-1"}>
-<Icon name="lan" className="material-symbols-outlined text-[16px] text-outline" /> Account Node: Administrator Node BEY-01
+<span className={"font-label-sm text-label-sm text-[#46B1B1] flex items-center gap-1"}>
+<Icon name="lan" className="material-symbols-outlined text-[16px] text-outline" /> Account type: Administrator
 </span>
 </div>
 </div>
 
 <div className={"px-space-sm py-space-xs rounded-lg bg-surface-container-low flex flex-col items-start sm:items-end"}>
-<span className={"font-caption text-caption text-[#157375] uppercase"}>Portal Authority</span>
-<span className={"font-label-sm text-label-sm font-semibold text-primary"}>Full Platform Access</span>
+<span className={"font-caption text-caption text-[#46B1B1] uppercase"}>Access level</span>
+<span className={"font-label-sm text-label-sm font-semibold text-primary"}>Full platform access</span>
 </div>
 </div>
 
@@ -156,8 +158,8 @@ export function AdminProfileAccountSection0() {
 <Icon name="mark_email_read" className="material-symbols-outlined text-[20px]" />
 </div>
 <div className={"flex flex-col min-w-0"}>
-<span className={"font-caption text-caption text-[#157375] uppercase tracking-wider"}>Registered Admin Email</span>
-<span className={"font-label-md text-label-md font-medium text-[#157375] truncate"}>{loading ? "Loading…" : displayEmail}</span>
+<span className={"font-caption text-caption text-[#46B1B1] uppercase tracking-wider"}>Registered Admin Email</span>
+<span className={"font-label-md text-label-md font-medium text-[#46B1B1] truncate"}>{loading ? "—" : displayEmail || "—"}</span>
 <span className={"font-caption text-caption text-primary font-semibold flex items-center gap-1"}>
 <span className={"w-1.5 h-1.5 rounded-full bg-primary"}></span> Verified Internal
 </span>
@@ -168,9 +170,9 @@ export function AdminProfileAccountSection0() {
 <Icon name="call" className="material-symbols-outlined text-[20px]" />
 </div>
 <div className={"flex flex-col min-w-0"}>
-<span className={"font-caption text-caption text-[#157375] uppercase tracking-wider"}>Lebanese Telephone</span>
-<span className={"font-label-md text-label-md font-medium text-[#157375] truncate"}>{loading ? "Loading…" : user?.phone ? user.phone : "— Not set"}</span>
-<span className={"font-caption text-caption text-[#157375]"}>Primary Operational Line · from database</span>
+<span className={"font-caption text-caption text-[#46B1B1] uppercase tracking-wider"}>Lebanese Telephone</span>
+<span className={"font-label-md text-label-md font-medium text-[#46B1B1] truncate"}>{loading ? "—" : user?.phone ? user.phone : "— Not set"}</span>
+<span className={"font-caption text-caption text-[#46B1B1]"}>Primary contact number</span>
 </div>
 </div>
 </div>
@@ -180,41 +182,41 @@ export function AdminProfileAccountSection0() {
 <div className={"flex items-center justify-between"}>
 <div className={"flex items-center gap-space-xs"}>
 <Icon name="badge" className="material-symbols-outlined text-primary text-[22px]" />
-<h3 className={"font-headline-sm text-headline-sm text-[#157375]"}>{"Personal Information"}</h3>
+<h3 className={"font-headline-sm text-headline-sm text-[#46B1B1]"}>{"Personal Information"}</h3>
 </div>
-<span className={"font-caption text-caption text-outline"}>{"Updated: 14 May 2024"}</span>
+<span className={"font-caption text-caption text-outline"} aria-hidden="true"></span>
 </div>
   <div className="flex flex-col gap-space-md" id="adminProfileForm">
 <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
 
 <div className="flex flex-col gap-space-xxs">
-<label className="font-label-sm text-label-sm font-semibold text-[#157375]">Full Legal Name</label>
+<label className="font-label-sm text-label-sm font-semibold text-[#46B1B1]">Full Legal Name</label>
 <div className="relative">
-<input className="w-full h-11 px-space-sm bg-surface-container-low text-[#157375] rounded-lg font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest shadow-sm placeholder:text-outline border border-transparent focus:border-[#157375]/20" type="text" value={loading ? "Loading…" : editName} onChange={(e) => setEditName(e.target.value)} placeholder="Enter full name" disabled={loading || profileBusy} />
+<input className="w-full h-11 px-space-sm bg-surface-container-low text-[#46B1B1] rounded-lg font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest shadow-sm placeholder:text-outline border border-transparent focus:border-[#157375]/20" type="text" value={loading ? "" : editName} onChange={(e) => setEditName(e.target.value)} placeholder={loading ? "—" : "Enter full name"} disabled={loading || profileBusy} />
 </div>
 </div>
 
 <div className="flex flex-col gap-space-xxs">
 <div className="flex items-center justify-between">
-<label className="font-label-sm text-label-sm font-semibold text-[#157375]">Email Address</label>
+<label className="font-label-sm text-label-sm font-semibold text-[#46B1B1]">Email Address</label>
 <span className="font-caption text-caption text-outline flex items-center gap-0.5">
 <Icon name="lock" className="material-symbols-outlined text-[13px]" />
 Super Admin Locked
 </span>
 </div>
 <div className="relative flex items-center">
-<input className="w-full h-11 px-space-sm bg-surface-container-low text-[#157375] rounded-lg font-body-md text-body-md opacity-90 select-none shadow-sm border border-transparent" disabled type="email" value={loading ? "Loading…" : displayEmail} />
+<input className="w-full h-11 px-space-sm bg-surface-container-low text-[#46B1B1] rounded-lg font-body-md text-body-md opacity-90 select-none shadow-sm border border-transparent" disabled type="email" value={loading ? "" : displayEmail} placeholder={loading ? "—" : ""} />
 <Icon name="verified_user" className="absolute right-3 material-symbols-outlined text-outline text-[18px]" />
 </div>
 </div>
 
 <div className="flex flex-col gap-space-xxs md:col-span-2">
-<label className="font-label-sm text-label-sm font-semibold text-[#157375]">Mobile Telephone (SMS 2FA)</label>
+<label className="font-label-sm text-label-sm font-semibold text-[#46B1B1]">Mobile Telephone (SMS 2FA)</label>
 <div className="relative flex items-center">
-<span className="absolute left-3 font-label-md text-label-md text-[#157375] font-medium">🇱🇧</span>
-<input className="w-full h-11 pl-10 pr-space-sm bg-surface-container-low text-[#157375] rounded-lg font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-[#157375]/20 placeholder:text-outline" type="tel" value={loading ? "Loading…" : editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="+961 70 000 000" disabled={loading || profileBusy} />
+<span className="absolute left-3 font-label-md text-label-md text-[#46B1B1] font-medium">🇱🇧</span>
+<input className="w-full h-11 pl-10 pr-space-sm bg-surface-container-low text-[#46B1B1] rounded-lg font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest shadow-sm border border-transparent focus:border-[#157375]/20 placeholder:text-outline" type="tel" value={loading ? "" : editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder={loading ? "—" : "+961 70 000 000"} disabled={loading || profileBusy} />
 </div>
-<span className="font-caption text-caption text-outline mt-1">Retrieved from users table · editable</span>
+<span className="font-caption text-caption text-outline mt-1">Editable — saved to your profile</span>
 </div>
 
 </div>
@@ -227,10 +229,10 @@ Super Admin Locked
 )}
 
 <div className={"flex items-center justify-end gap-space-xs pt-space-xs"}>
-<button onClick={handleCancel} disabled={profileBusy} className={"px-space-md h-11 rounded-lg bg-surface-container-high text-[#157375] font-label-md text-label-md hover:bg-surface-container transition-colors disabled:opacity-50"} type={"button"}>
+<button onClick={handleCancel} disabled={profileBusy} className={"px-space-md h-11 rounded-lg bg-surface-container-high text-[#46B1B1] font-label-md text-label-md hover:bg-surface-container transition-colors disabled:opacity-50"} type={"button"}>
 Cancel
 </button>
-<button onClick={handleProfileUpdate} disabled={profileBusy || loading} className={"px-space-lg h-11 rounded-lg bg-primary text-white font-label-md text-label-md font-semibold shadow-sm hover:bg-[#0a2e2f] active:scale-[0.98] transition-all flex items-center gap-space-xs disabled:opacity-50"} type={"button"}>
+<button onClick={handleProfileUpdate} disabled={profileBusy || loading} className={"px-space-lg h-11 rounded-lg bg-primary text-white font-label-md text-label-md font-semibold shadow-sm hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center gap-space-xs disabled:opacity-50"} type={"button"}>
 <Icon name="save" className="material-symbols-outlined text-[18px]" />
 {profileBusy ? "Saving…" : "Save Profile Changes"}
 </button>
@@ -242,28 +244,28 @@ Cancel
 <div className={"flex items-center justify-between"}>
 <div className={"flex items-center gap-space-xs"}>
 <Icon name="lock_reset" className="material-symbols-outlined text-primary text-[22px]" />
-<h3 className={"font-headline-sm text-headline-sm text-[#157375]"}>{"Security & Authentication"}</h3>
+<h3 className={"font-headline-sm text-headline-sm text-[#46B1B1]"}>{"Security & Authentication"}</h3>
 </div>
-<span className={"w-2.5 h-2.5 rounded-full bg-secondary"} title={"2FA Guarded"}></span>
+<span className={"hidden"} aria-hidden="true"></span>
 </div>
-<p className={"font-caption text-caption text-[#157375]"}>{"\n          Super administrator credentials require 14+ characters, cryptographic salts, and mandatory biometric or TOTP secondary auth.\n        "}</p>
+<p className={"font-caption text-caption text-[#46B1B1]"}>{"Manage your administrator password securely."}</p>
 <div className="flex flex-col gap-space-sm" id="passwordForm">
 
 <div className={"flex flex-col gap-space-xxs"}>
-<label className={"font-label-sm text-label-sm font-semibold text-[#157375]"}>{"Current Password"}</label>
+<label className={"font-label-sm text-label-sm font-semibold text-[#46B1B1]"}>{"Current Password"}</label>
 <div className={"relative flex items-center"}>
-<input className={"w-full h-11 pl-space-sm pr-11 bg-surface-container-lowest text-[#157375] rounded-lg font-body-md text-body-md focus:outline-none shadow-sm"} id={"currPassInput"} placeholder={"Enter current password"} type={"password"} value={currPass} onChange={(e) => setCurrPass(e.target.value)} aria-label={"Enter current password"} />
+<input className={"w-full h-11 pl-space-sm pr-11 bg-surface-container-lowest text-[#46B1B1] rounded-lg font-body-md text-body-md focus:outline-none shadow-sm"} id={"currPassInput"} placeholder={"Enter current password"} type={"password"} value={currPass} onChange={(e) => setCurrPass(e.target.value)} aria-label={"Enter current password"} />
 </div>
 </div>
 
 <div className={"flex flex-col gap-space-xxs"}>
-<label className={"font-label-sm text-label-sm font-semibold text-[#157375]"}>{"New Password"}</label>
+<label className={"font-label-sm text-label-sm font-semibold text-[#46B1B1]"}>{"New Password"}</label>
 <div className={"relative flex items-center"}>
-<input className={"w-full h-11 pl-space-sm pr-11 bg-surface-container-lowest text-[#157375] rounded-lg font-body-md text-body-md focus:outline-none shadow-sm"} id={"newPassInput"} placeholder={"8+ chars, uppercase, number, symbol"} type={"password"} value={newPass} onChange={(e) => setNewPass(e.target.value)} aria-label={"New password"} />
+<input className={"w-full h-11 pl-space-sm pr-11 bg-surface-container-lowest text-[#46B1B1] rounded-lg font-body-md text-body-md focus:outline-none shadow-sm"} id={"newPassInput"} placeholder={"8+ chars, uppercase, number, symbol"} type={"password"} value={newPass} onChange={(e) => setNewPass(e.target.value)} aria-label={"New password"} />
 </div>
 <div className={"flex flex-col gap-1 mt-1"}>
 <div className={"flex items-center justify-between text-caption font-caption"}>
-<span className={"text-[#157375]"}>{"Password Strength"}</span>
+<span className={"text-[#46B1B1]"}>{"Password Strength"}</span>
 <span className={"font-semibold text-secondary"}>{newPass.length >= 8 && /[A-Z]/.test(newPass) && /\d/.test(newPass) ? "Strong" : newPass ? "Weak" : ""}</span>
 </div>
 <div className={"h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden flex gap-1"}>
@@ -276,9 +278,9 @@ Cancel
 </div>
 
 <div className={"flex flex-col gap-space-xxs"}>
-<label className={"font-label-sm text-label-sm font-semibold text-[#157375]"}>{"Confirm New Password"}</label>
+<label className={"font-label-sm text-label-sm font-semibold text-[#46B1B1]"}>{"Confirm New Password"}</label>
 <div className={"relative flex items-center"}>
-<input className={"w-full h-11 pl-space-sm pr-11 bg-surface-container-lowest text-[#157375] rounded-lg font-body-md text-body-md focus:outline-none shadow-sm"} id={"confirmPassInput"} placeholder={"Re-enter new password"} type={"password"} value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} aria-label={"Confirm new password"} />
+<input className={"w-full h-11 pl-space-sm pr-11 bg-surface-container-lowest text-[#46B1B1] rounded-lg font-body-md text-body-md focus:outline-none shadow-sm"} id={"confirmPassInput"} placeholder={"Re-enter new password"} type={"password"} value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} aria-label={"Confirm new password"} />
 </div>
 </div>
 {passMsg && (
@@ -288,7 +290,7 @@ Cancel
   </div>
 )}
 
-<button onClick={handlePasswordUpdate} disabled={passBusy} className={"w-full mt-space-xs h-11 rounded-lg bg-[#0f3d3e] text-white hover:bg-[#157375] transition-all font-label-md text-label-md font-semibold flex items-center justify-center gap-space-xs shadow-sm active:scale-[0.99] disabled:opacity-50"} type={"button"}>
+<button onClick={handlePasswordUpdate} disabled={passBusy} className={"w-full mt-space-xs h-11 rounded-lg bg-primary text-white hover:bg-primary transition-all font-label-md text-label-md font-semibold flex items-center justify-center gap-space-xs shadow-sm active:scale-[0.99] disabled:opacity-50"} type={"button"}>
 <Icon name="key" className="material-symbols-outlined text-[18px]" /> {passBusy ? "Updating…" : "Update Password"}
 </button>
 </div>
@@ -299,65 +301,55 @@ Cancel
 <div className={"flex items-center justify-between"}>
 <div className={"flex items-center gap-space-xs"}>
 <Icon name="policy" className="material-symbols-outlined text-primary text-[22px]" />
-<h3 className={"font-headline-sm text-headline-sm text-[#157375]"}>{"Administrative System Standing"}</h3>
+<h3 className={"font-headline-sm text-headline-sm text-[#46B1B1]"}>{"Administrative System Standing"}</h3>
 </div>
-<span className={"px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-caption text-caption font-semibold"}>{"Tier-1 Root"}</span>
+<span className={"px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-caption text-caption font-semibold"}>{"Admin"}</span>
 </div>
 <div className={"flex flex-col gap-space-sm"}>
 
 <div className={"flex flex-col gap-1 p-space-sm rounded-lg bg-surface-container-low"}>
 <div className={"flex items-center justify-between"}>
-<span className={"font-caption text-caption text-[#157375] uppercase tracking-wider"}>{"Access Level"}</span>
+<span className={"font-caption text-caption text-[#46B1B1] uppercase tracking-wider"}>{"Access Level"}</span>
 <span className={"font-label-sm text-label-sm font-semibold text-primary"}>{"Root Super Admin"}</span>
 </div>
-<p className={"font-body-md text-body-md font-medium text-[#157375]"}>{"Full Platform Super Admin"}</p>
+<p className={"font-body-md text-body-md font-medium text-[#46B1B1]"}>{"Full Platform Super Admin"}</p>
 </div>
 
 <div className={"flex flex-col gap-space-xxs"}>
-<span className={"font-caption text-caption text-[#157375] uppercase tracking-wider font-semibold"}>{"Active Portal Privileges"}</span>
+<span className={"font-caption text-caption text-[#46B1B1] uppercase tracking-wider font-semibold"}>{"Active Portal Privileges"}</span>
 <div className={"grid grid-cols-1 sm:grid-cols-2 gap-space-xxs"}>
 <div className={"flex items-center gap-space-xs p-2 rounded-lg bg-surface-container-low/70"}>
 <Icon name="group" className="material-symbols-outlined text-primary text-[18px]" />
-<span className={"font-label-sm text-label-sm text-[#157375]"}>{"User Management"}</span>
+<span className={"font-label-sm text-label-sm text-[#46B1B1]"}>{"User Management"}</span>
 </div>
 <div className={"flex items-center gap-space-xs p-2 rounded-lg bg-surface-container-low/70"}>
 <Icon name="domain_verification" className="material-symbols-outlined text-primary text-[18px]" />
-<span className={"font-label-sm text-label-sm text-[#157375]"}>{"Listing Approval"}</span>
+<span className={"font-label-sm text-label-sm text-[#46B1B1]"}>{"Listing Approval"}</span>
 </div>
 <div className={"flex items-center gap-space-xs p-2 rounded-lg bg-surface-container-low/70"}>
 <Icon name="payments" className="material-symbols-outlined text-primary text-[18px]" />
-<span className={"font-label-sm text-label-sm text-[#157375]"}>{"Commission & Settlements"}</span>
+<span className={"font-label-sm text-label-sm text-[#46B1B1]"}>{"Commission & Settlements"}</span>
 </div>
 <div className={"flex items-center gap-space-xs p-2 rounded-lg bg-surface-container-low/70"}>
 <Icon name="database" className="material-symbols-outlined text-primary text-[18px]" />
-<span className={"font-label-sm text-label-sm text-[#157375]"}>{"Amenities & Rules"}</span>
+<span className={"font-label-sm text-label-sm text-[#46B1B1]"}>{"Amenities & Rules"}</span>
 </div>
 <div className={"flex items-center gap-space-xs p-2 rounded-lg bg-surface-container-low/70 sm:col-span-2"}>
 <Icon name="rate_review" className="material-symbols-outlined text-primary text-[18px]" />
-<span className={"font-label-sm text-label-sm text-[#157375]"}>{"Review Moderation & Disputes"}</span>
+<span className={"font-label-sm text-label-sm text-[#46B1B1]"}>{"Review Moderation & Disputes"}</span>
 </div>
 </div>
 </div>
 
-<div className={"p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-space-xxs"}>
-<div className={"flex items-center justify-between"}>
-<span className={"font-caption text-caption text-[#157375] uppercase tracking-wider"}>{"Session Integrity"}</span>
-<span className={"inline-flex items-center gap-1 font-caption text-caption text-secondary font-semibold"}>
-<span className={"w-1.5 h-1.5 rounded-full bg-secondary"}></span>{" TLS 1.3 Active\n              "}</span>
-</div>
-<div className={"flex items-center gap-space-xs text-[#157375] font-label-sm text-label-sm"}>
-<Icon name="dns" className="material-symbols-outlined text-[16px] text-outline" />
-<span className={"font-mono text-[12px]"}>{"IP: 185.192.44.18 \u00b7 Beirut Central Node"}</span>
-</div>
-</div>
+
 </div>
 </div>
 
 <div className={"pt-2"}>
-<Link className={"w-full h-12 rounded-xl bg-[#0f3d3e] text-white hover:bg-[#157375] font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.98]"} href={"/auth/login"}>
+<Link className={"w-full h-12 rounded-xl bg-primary text-white hover:bg-primary font-label-md text-label-md font-semibold transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.98]"} href={"/auth/login"}>
 <Icon name="logout" className="material-symbols-outlined text-[20px] text-white" /> Sign Out of Admin Portal
 </Link>
-<p className="text-xs text-center text-slate-400 mt-2">Securely ends your admin session and returns to login</p>
+<p className="text-xs text-center text-[#46B1B1]/60 mt-2">Securely ends your admin session and returns to login</p>
 </div>
 </div>
 

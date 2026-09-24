@@ -1,0 +1,735 @@
+"use client";
+import { LocalImage } from "@/components/ui/LocalImage";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import { Icon } from "@/components/ui/Icon";
+import { ActionButton } from "@/components/ui/Interactions";
+import { requireAuth } from "@/lib/authGuard";
+
+export function PropertyDetailsSection0() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const handleFavorite = () => {
+    if (!requireAuth({ nextPath: pathname, action: "favorites", router })) return;
+    // For authenticated users, toggle favorite via existing localStorage logic
+    const key = "cedar-peak";
+    const saved: string[] = JSON.parse(localStorage.getItem("stayleb-saved-property-ids") || '["batroun-sunset","cedar-peak","azure-horizon"]');
+    const active = saved.includes(key);
+    localStorage.setItem("stayleb-saved-property-ids", JSON.stringify(active ? saved.filter((v) => v !== key) : [...saved, key]));
+    window.dispatchEvent(new Event("stayleb-favorites"));
+  };
+  const handleBooking = () => {
+    const nextPath = "/book/cedar-peak";
+    if (!requireAuth({ nextPath, action: "booking", router })) return;
+    router.push(nextPath);
+  };
+  return <>
+<main className={"w-full min-h-screen bg-background flex flex-col justify-center"}><div className={"flex flex-col w-full"}>
+
+
+
+<div className={"max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6"}>
+
+<nav className={"flex items-center gap-2 mb-4 font-caption text-caption text-on-surface-variant"}>
+<ActionButton className={"hover:text-primary transition-colors"} actionLabel={"Mount Lebanon"} aria-label={"Mount Lebanon"}>{"Mount Lebanon"}</ActionButton>
+<Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
+<ActionButton className={"hover:text-primary transition-colors"} actionLabel={"Keserwan District"} aria-label={"Keserwan District"}>{"Keserwan District"}</ActionButton>
+<Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
+<ActionButton className={"hover:text-primary transition-colors"} actionLabel={"Faraya Mzaar"} aria-label={"Faraya Mzaar"}>{"Faraya Mzaar"}</ActionButton>
+<Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
+<span className={"text-[#157375] font-medium truncate"}>{"Cedar Peak Stone Chalet"}</span>
+</nav>
+
+<div className={"flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6"}>
+<div className={"space-y-2"}>
+<h1 className={"font-headline-lg text-headline-lg text-[#157375] tracking-tight"}>{"\n          Cedar Peak Stone Chalet & Heated Outdoor Spa\n        "}</h1>
+<div className={"flex flex-wrap items-center gap-y-2 gap-x-4 font-body-md text-body-md"}>
+<div className={"flex items-center gap-1 text-[#157375] font-semibold"}>
+<Icon name="star" className="material-symbols-outlined text-[18px] text-amber-500" />
+<span>{"4.96"}</span>
+<span className={"font-normal text-on-surface-variant"}>{"(42 verified reviews)"}</span>
+</div>
+<span className={"text-outline-variant font-caption hidden sm:inline"}>{"\u2022"}</span>
+<div className={"flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm font-medium text-secondary"}>
+<Icon name="verified" className="material-symbols-outlined text-[16px]" />{"\n            Superhost Verified\n          "}</div>
+<span className={"text-outline-variant font-caption hidden sm:inline"}>{"\u2022"}</span>
+<a className={"flex items-center gap-1 text-primary hover:underline font-medium"} href={"#locationSection"}>
+<Icon name="pin_drop" className="material-symbols-outlined text-[18px]" />{"\n            Faraya Mzaar, Mount Lebanon (1,850m Altitude)\n          "}</a>
+</div>
+</div>
+
+<div className={"flex items-center gap-3"}>
+<ActionButton className={"flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-container-lowest hover:bg-surface-container shadow-sm font-label-md text-label-md text-[#157375] transition-all"} actionLabel={"share Share"} aria-label={"share Share"}>
+<Icon name="share" className="material-symbols-outlined text-[18px]" />{"\n          Share\n        "}</ActionButton>
+<button type="button" onClick={handleFavorite} className={"relative group flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-container-lowest hover:bg-surface-container shadow-sm font-label-md text-label-md text-[#157375] transition-all"}>
+<Icon name="favorite" className="material-symbols-outlined text-[20px] text-error transition-transform group-hover:scale-110" />
+<span className={"font-medium"}>{"Saved to Favorites"}</span>
+<span className={"absolute -top-9 left-1/2 -translate-x-1/2 hidden group-hover:block bg-inverse-surface text-inverse-on-surface font-caption text-caption py-1 px-2.5 rounded-lg whitespace-nowrap shadow-md"}>{"Click to manage favorite lists"}</span>
+</button>
+</div>
+</div>
+
+<section className={"relative rounded-2xl overflow-hidden shadow-md mb-10 bg-surface-container-low"}>
+<div className={"grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 h-[340px] sm:h-[440px] lg:h-[500px]"}>
+
+<div className={"md:col-span-2 md:row-span-2 relative group overflow-hidden cursor-pointer"}>
+<LocalImage className={"w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"} data-alt={"A grand traditional Lebanese mountain chalet exterior crafted from authentic ochre and limestone masonry, featuring high-pitched cedar roof beams, illuminated by warm golden evening lights, set against snow-covered Faraya peaks and a glowing dusk sky with warm teal shadows."} src={"/images/9c28520e8f40ad66.jpg"} alt={"Lebanese holiday home"} />
+<div className={"absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 pointer-events-none"}></div>
+<span className={"absolute bottom-4 left-4 px-3 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-[#157375] font-label-sm text-label-sm font-medium shadow-sm"}>{"\n            Stone Chalet Exterior \u00b7 Winter Glow\n          "}</span>
+</div>
+
+<div className={"hidden md:block relative group overflow-hidden cursor-pointer"}>
+<LocalImage className={"w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"} data-alt={"Cozy mountain chalet living room interior in Lebanon featuring an authentic stone chimney fireplace with crackling cedar logs, deep plush seating, woven traditional rugs, and warm ambient candlelight."} src={"/images/26daf8b2d5860fed.jpg"} alt={"Lebanese holiday home"} />
+<div className={"absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"}></div>
+</div>
+
+<div className={"hidden md:block relative group overflow-hidden cursor-pointer"}>
+<LocalImage className={"w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"} data-alt={"Steaming outdoor heated jacuzzi hot tub built into a wooden deck overlooking snow-covered Faraya mountain ridges under a crisp twilight sky, emitting soft steam into the winter air."} src={"/images/f3262bba7059ae32.jpg"} alt={"Lebanese holiday home"} />
+<div className={"absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"}></div>
+</div>
+
+<div className={"hidden md:block relative group overflow-hidden cursor-pointer"}>
+<LocalImage className={"w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"} data-alt={"Warm master bedroom with natural cedar timber wall cladding, king size bed dressed in crisp white linen and thick wool blankets, framed by expansive glass windows revealing panoramic Lebanese mountain peaks."} src={"/images/b74ce5f5723696b0.jpg"} alt={"Lebanese holiday home"} />
+<div className={"absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"}></div>
+</div>
+
+<div className={"hidden md:block relative group overflow-hidden cursor-pointer"}>
+<LocalImage className={"w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"} data-alt={"Artisanal Lebanese dining room inside mountain chalet with handcrafted solid cedar wood table set with handmade pottery, brass coffee dallah, and arched stone windows."} src={"/images/fed8cb591c3dd078.jpg"} alt={"Lebanese holiday home"} />
+<div className={"absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"}></div>
+</div>
+</div>
+
+<ActionButton className={"absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest/95 hover:bg-surface-container-lowest text-[#157375] shadow-md font-label-md text-label-md font-semibold backdrop-blur-md transition-all"} actionLabel={"grid_view View all 24 photos"} aria-label={"grid_view View all 24 photos"} hint={"openGallery()"}>
+<Icon name="grid_view" className="material-symbols-outlined text-[20px]" />{"\n        View all 24 photos\n      "}</ActionButton>
+</section>
+
+<div className={"grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"}>
+
+<main className={"lg:col-span-8 flex flex-col gap-10"}>
+
+<div className={"bg-surface-container-lowest p-6 rounded-2xl shadow-sm flex flex-wrap items-center justify-between gap-4"}>
+<div className={"flex items-center gap-6 sm:gap-8 flex-wrap"}>
+<div className={"flex items-center gap-2.5"}>
+<div className={"w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-primary"}>
+<Icon name="group" className="material-symbols-outlined text-[22px]" />
+</div>
+<div>
+<p className={"font-label-md text-label-md font-bold text-[#157375]"}>{"6 Guests"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Maximum capacity"}</p>
+</div>
+</div>
+<div className={"flex items-center gap-2.5"}>
+<div className={"w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-primary"}>
+<Icon name="bed" className="material-symbols-outlined text-[22px]" />
+</div>
+<div>
+<p className={"font-label-md text-label-md font-bold text-[#157375]"}>{"3 Bedrooms"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"4 Beds total"}</p>
+</div>
+</div>
+<div className={"flex items-center gap-2.5"}>
+<div className={"w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-primary"}>
+<Icon name="bathtub" className="material-symbols-outlined text-[22px]" />
+</div>
+<div>
+<p className={"font-label-md text-label-md font-bold text-[#157375]"}>{"2 Bathrooms"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Heated floorings"}</p>
+</div>
+</div>
+</div>
+
+<div className={"flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary-container/60 text-on-secondary-container font-label-sm text-label-sm font-semibold"}>
+<Icon name="hourglass_top" className="material-symbols-outlined text-[18px]" />{"\n            Min. 2 nights stay\n          "}</div>
+</div>
+
+
+
+<section className={"p-6 sm:p-8 rounded-2xl bg-surface-container-lowest shadow-sm space-y-4"}>
+<div className={"flex items-center justify-between"}>
+<h2 className={"font-headline-sm text-headline-sm text-[#157375]"}>{"About This Sanctuary"}</h2>
+<div className={"flex items-center gap-3"}>
+<div className={"w-10 h-10 rounded-full bg-surface-container overflow-hidden flex items-center justify-center"}>
+<Icon name="face" className="material-symbols-outlined text-primary text-[24px]" />
+</div>
+<div>
+<p className={"font-label-sm text-label-sm font-semibold text-[#157375]"}>{"Hosted by Tony & Carole"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Superhosts \u00b7 5 years hosting"}</p>
+</div>
+</div>
+</div>
+<div className={"prose font-body-lg text-body-lg text-on-surface-variant space-y-4 leading-relaxed"}>
+<p>{"\n              Perched at an exhilarating 1,850 meters above sea level in the serene heights of Faraya Mzaar, Cedar Peak Stone Chalet is an architectural tribute to the timeless alpine traditions of Mount Lebanon. Hand-chiseled local limestone walls up to 40 centimeters thick provide whisper-quiet insulation and authentic rustic mountain elegance.\n            "}</p>
+<p>{"\n              Step inside to soaring ceilings framed by fragrant Lebanese cedar timber beams, centering on a monumental handcrafted stone chimney fireplace. The open-plan living hall is tailored for memorable winter gatherings, furnished with deep lounge seating, handwoven local textiles, and floor-to-ceiling glass framing unobstructed sunsets that turn the mountain ridges crimson and violet.\n            "}</p>
+<p>{"\n              After a long day carving the slopes of Mzaar, soak in the private heated outdoor hydrotherapy spa under crisp starry skies, or gather around the artisanal copper fondue table for an intimate alpine dinner. Every detail has been curated to merge deep Mediterranean warmth with five-star mountain comfort.\n            "}</p>
+</div>
+</section>
+
+<section className={"p-6 sm:p-8 rounded-2xl bg-surface-container-lowest shadow-sm space-y-6"}>
+<div className={"flex items-center justify-between"}>
+<div>
+<h2 className={"font-headline-sm text-headline-sm text-[#157375]"}>{"Amenities & Facilities"}</h2>
+<p className={"font-caption text-caption text-on-surface-variant mt-0.5"}>{"Engineered for winter comfort and mountain living"}</p>
+</div>
+<span className={"font-label-sm text-label-sm text-primary font-semibold"}>{"9 Featured"}</span>
+</div>
+<div className={"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
+
+<div className={"flex items-center gap-3.5 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"}>
+<Icon name="wifi" className="material-symbols-outlined text-primary text-[22px]" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"High-Speed Wi-Fi"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Fiber optic 80 Mbps"}</p>
+</div>
+</div>
+
+<div className={"flex items-center gap-3.5 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"}>
+<Icon name="hot_tub" className="material-symbols-outlined text-secondary text-[22px]" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Heated Outdoor Jacuzzi"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"38\u00b0C hydrotherapy year-round"}</p>
+</div>
+</div>
+
+<div className={"flex items-center gap-3.5 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"}>
+<Icon name="fireplace" className="material-symbols-outlined text-tertiary text-[22px]" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Indoor Stone Fireplace"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Complementary seasoned cedar logs"}</p>
+</div>
+</div>
+
+<div className={"flex items-center gap-3.5 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"}>
+<Icon name="solar_power" className="material-symbols-outlined text-primary text-[22px]" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"24/7 Solar & Generator"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Automatic microgrid backup"}</p>
+</div>
+</div>
+
+<div className={"flex items-center gap-3.5 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"}>
+<Icon name="local_parking" className="material-symbols-outlined text-primary text-[22px]" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Free Private Parking"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"3 SUV spaces cleared of snow"}</p>
+</div>
+</div>
+
+<div className={"flex items-center gap-3.5 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"}>
+<Icon name="outdoor_grill" className="material-symbols-outlined text-tertiary text-[22px]" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"BBQ Grill & Charcoal"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Sheltered outdoor terrace grill"}</p>
+</div>
+</div>
+
+<div className={"flex items-center gap-3.5 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"}>
+<Icon name="deck" className="material-symbols-outlined text-secondary text-[22px]" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Mountain View Terrace"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Panoramic 180\u00b0 views"}</p>
+</div>
+</div>
+
+<div className={"flex items-center gap-3.5 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"}>
+<Icon name="kitchen" className="material-symbols-outlined text-primary text-[22px]" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Fully Equipped Kitchen"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Espresso machine, dishwasher, raclette"}</p>
+</div>
+</div>
+
+<div className={"flex items-center gap-3.5 p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors"}>
+<Icon name="downhill_skiing" className="material-symbols-outlined text-primary text-[22px]" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Ski Equipment Storage"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Heated ski boot dryer racks"}</p>
+</div>
+</div>
+</div>
+</section>
+
+<section className={"p-6 sm:p-8 rounded-2xl bg-surface-container-lowest shadow-sm space-y-4"}>
+<h2 className={"font-headline-sm text-headline-sm text-[#157375]"}>{"Chalet Policies & House Rules"}</h2>
+<div className={"grid grid-cols-1 sm:grid-cols-2 gap-4"}>
+<div className={"flex items-start gap-3 p-4 rounded-xl bg-surface-container-low"}>
+<Icon name="pets" className="material-symbols-outlined text-primary text-[20px] mt-0.5" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Pets Allowed Upon Request"}</p>
+<p className={"font-body-md text-body-md text-on-surface-variant"}>{"Well-behaved dogs welcome with prior notice to host."}</p>
+</div>
+</div>
+<div className={"flex items-start gap-3 p-4 rounded-xl bg-surface-container-low"}>
+<Icon name="smoke_free" className="material-symbols-outlined text-error text-[20px] mt-0.5" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Non-Smoking Indoors"}</p>
+<p className={"font-body-md text-body-md text-on-surface-variant"}>{"Strictly prohibited inside stone chalet. Allowed on outdoor balcony & terrace."}</p>
+</div>
+</div>
+<div className={"flex items-start gap-3 p-4 rounded-xl bg-surface-container-low"}>
+<Icon name="celebration" className="material-symbols-outlined text-error text-[20px] mt-0.5" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"No Large Parties or Commercial Events"}</p>
+<p className={"font-body-md text-body-md text-on-surface-variant"}>{"Quiet sanctuary intended for family and restful mountain stays."}</p>
+</div>
+</div>
+<div className={"flex items-start gap-3 p-4 rounded-xl bg-surface-container-low"}>
+<Icon name="bedtime" className="material-symbols-outlined text-secondary text-[20px] mt-0.5" />
+<div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Quiet Hours After 11:00 PM"}</p>
+<p className={"font-body-md text-body-md text-on-surface-variant"}>{"Please respect neighboring mountain chalets and village tranquility."}</p>
+</div>
+</div>
+</div>
+</section>
+
+<div className={"p-5 rounded-2xl bg-gradient-to-r from-surface-container-low via-surface-container to-surface-container-low shadow-sm flex items-start sm:items-center gap-4"}>
+<div className={"w-12 h-12 rounded-xl bg-primary flex-shrink-0 flex items-center justify-center text-on-primary shadow-sm"}>
+<Icon name="ac_unit" className="material-symbols-outlined text-[26px]" />
+</div>
+<div className={"space-y-1"}>
+<p className={"font-label-md text-label-md font-bold text-[#157375]"}>{"Transparent Seasonal Pricing Structure"}</p>
+<p className={"font-body-md text-body-md text-on-surface-variant"}>
+<span className={"font-semibold text-primary"}>{"Base Rate: $220 / night"}</span>{" \u00b7 \n              "}<span className={"font-semibold text-secondary"}>{"Winter Peak Ski Season (Dec 15 \u2013 Mar 15): $290 / night"}</span>{". \n              Dynamically calculated night-by-night in your booking summary.\n            "}</p>
+</div>
+</div>
+
+<section className={"p-6 sm:p-8 rounded-2xl bg-surface-container-lowest shadow-sm space-y-6"}>
+<div className={"flex flex-col sm:flex-row sm:items-center justify-between gap-4"}>
+<div>
+<h2 className={"font-headline-sm text-headline-sm text-[#157375]"}>{"Availability Calendar"}</h2>
+<p className={"font-caption text-caption text-on-surface-variant mt-0.5"}>{"Select your check-in & check-out dates (Minimum 2 nights)"}</p>
+</div>
+
+<div className={"flex items-center gap-4 font-caption text-caption"}>
+<div className={"flex items-center gap-1.5"}>
+<span className={"w-3.5 h-3.5 rounded-full bg-primary"}></span>
+<span className={"text-[#157375] font-medium"}>{"Selected Endpoint"}</span>
+</div>
+<div className={"flex items-center gap-1.5"}>
+<span className={"w-3.5 h-3.5 rounded-full bg-secondary-container"}></span>
+<span className={"text-[#157375] font-medium"}>{"In Range"}</span>
+</div>
+<div className={"flex items-center gap-1.5"}>
+<span className={"w-3.5 h-3.5 rounded-full bg-surface-container-high line-through text-outline"}></span>
+<span className={"text-on-surface-variant"}>{"Unavailable"}</span>
+</div>
+</div>
+</div>
+
+<div className={"grid grid-cols-1 md:grid-cols-2 gap-8"}>
+
+<div className={"space-y-4"}>
+<div className={"flex items-center justify-between"}>
+<span className={"font-title-md text-title-md font-bold text-[#157375]"}>{"September 2024"}</span>
+<ActionButton className={"p-1 rounded-lg hover:bg-surface-container text-on-surface-variant"} actionLabel={"chevron_left"} aria-label={"chevron_left"}>
+<Icon name="chevron_left" className="material-symbols-outlined text-[20px]" />
+</ActionButton>
+</div>
+
+<div className={"grid grid-cols-7 text-center font-caption text-caption font-semibold text-on-surface-variant"}>
+<span>{"Su"}</span><span>{"Mo"}</span><span>{"Tu"}</span><span>{"We"}</span><span>{"Th"}</span><span>{"Fr"}</span><span>{"Sa"}</span>
+</div>
+
+<div className={"grid grid-cols-7 gap-1 text-center font-label-sm text-label-sm"}>
+
+<span className={"py-2 text-outline-variant opacity-40"}>{"28"}</span>
+<span className={"py-2 text-outline-variant opacity-40"}>{"29"}</span>
+<span className={"py-2 text-outline-variant opacity-40"}>{"30"}</span>
+<span className={"py-2 text-outline-variant opacity-40"}>{"31"}</span>
+
+<span className={"py-2 rounded-lg text-outline line-through bg-surface-container-low/40"}>{"1"}</span>
+<span className={"py-2 rounded-lg text-outline line-through bg-surface-container-low/40"}>{"2"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"3"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"4"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"5"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"6"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"7"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"8"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"9"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"10"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"11"}</span>
+<span className={"py-2 rounded-lg text-outline line-through bg-surface-container-low/40"}>{"12"}</span>
+<span className={"py-2 rounded-lg text-outline line-through bg-surface-container-low/40"}>{"13"}</span>
+<span className={"py-2 rounded-lg text-outline line-through bg-surface-container-low/40"}>{"14"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"15"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"16"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"17"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"18"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"19"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"20"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"21"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"22"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"23"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"24"}</span>
+
+<span className={"py-2 rounded-l-lg bg-primary text-on-primary font-bold shadow-sm cursor-pointer"}>{"25"}</span>
+
+<span className={"py-2 bg-secondary-container text-on-secondary-container font-semibold cursor-pointer"}>{"26"}</span>
+<span className={"py-2 bg-secondary-container text-on-secondary-container font-semibold cursor-pointer"}>{"27"}</span>
+
+<span className={"py-2 rounded-r-lg bg-primary text-on-primary font-bold shadow-sm cursor-pointer"}>{"28"}</span>
+
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"29"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"30"}</span>
+<span className={"py-2 text-outline-variant opacity-40"}>{"1"}</span>
+</div>
+</div>
+
+<div className={"space-y-4"}>
+<div className={"flex items-center justify-between"}>
+<span className={"font-title-md text-title-md font-bold text-[#157375]"}>{"October 2024"}</span>
+<ActionButton className={"p-1 rounded-lg hover:bg-surface-container text-on-surface-variant"} actionLabel={"chevron_right"} aria-label={"chevron_right"}>
+<Icon name="chevron_right" className="material-symbols-outlined text-[20px]" />
+</ActionButton>
+</div>
+
+<div className={"grid grid-cols-7 text-center font-caption text-caption font-semibold text-on-surface-variant"}>
+<span>{"Su"}</span><span>{"Mo"}</span><span>{"Tu"}</span><span>{"We"}</span><span>{"Th"}</span><span>{"Fr"}</span><span>{"Sa"}</span>
+</div>
+
+<div className={"grid grid-cols-7 gap-1 text-center font-label-sm text-label-sm"}>
+
+<span className={"py-2 text-outline-variant opacity-40"}>{"29"}</span>
+<span className={"py-2 text-outline-variant opacity-40"}>{"30"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"1"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"2"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"3"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"4"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"5"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"6"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"7"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"8"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"9"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"10"}</span>
+<span className={"py-2 rounded-lg text-outline line-through bg-surface-container-low/40"}>{"11"}</span>
+<span className={"py-2 rounded-lg text-outline line-through bg-surface-container-low/40"}>{"12"}</span>
+<span className={"py-2 rounded-lg text-outline line-through bg-surface-container-low/40"}>{"13"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"14"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"15"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"16"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"17"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"18"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"19"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"20"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"21"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"22"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"23"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"24"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"25"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"26"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"27"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"28"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"29"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"30"}</span>
+<span className={"py-2 rounded-lg hover:bg-surface-container cursor-pointer"}>{"31"}</span>
+<span className={"py-2 text-outline-variant opacity-40"}>{"1"}</span>
+<span className={"py-2 text-outline-variant opacity-40"}>{"2"}</span>
+</div>
+</div>
+</div>
+</section>
+
+<section className={"p-6 sm:p-8 rounded-2xl bg-surface-container-lowest shadow-sm space-y-8"}>
+<div className={"flex flex-col sm:flex-row sm:items-center justify-between gap-4"}>
+<div className={"flex items-center gap-3"}>
+<div className={"w-14 h-14 rounded-2xl bg-surface-container flex items-center justify-center text-primary font-headline-md text-headline-md font-bold shadow-sm"}>{"\n                4.96\n              "}</div>
+<div>
+<div className={"flex items-center gap-1 text-amber-500"}>
+<Icon name="star" className="material-symbols-outlined text-[20px]" />
+<Icon name="star" className="material-symbols-outlined text-[20px]" />
+<Icon name="star" className="material-symbols-outlined text-[20px]" />
+<Icon name="star" className="material-symbols-outlined text-[20px]" />
+<Icon name="star" className="material-symbols-outlined text-[20px]" />
+</div>
+<p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Guest Favorite Chalet \u00b7 42 Reviews"}</p>
+</div>
+</div>
+<div className={"flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold"}>
+<Icon name="verified_user" className="material-symbols-outlined text-[16px]" />{"\n              100% Verified Stays\n            "}</div>
+</div>
+
+<div className={"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 pt-2"}>
+
+<div className={"space-y-1.5"}>
+<div className={"flex items-center justify-between font-label-sm text-label-sm"}>
+<span className={"text-[#157375] font-medium flex items-center gap-1.5"}>
+<Icon name="cleaning_services" className="material-symbols-outlined text-[16px] text-primary" />{"\n                  Cleanliness\n                "}</span>
+<span className={"font-bold text-[#157375]"}>{"5.0"}</span>
+</div>
+<div className={"w-full h-2 rounded-full bg-surface-container overflow-hidden"}>
+<div className={"h-full bg-primary rounded-full"} style={{"width": "100%"}}></div>
+</div>
+</div>
+
+<div className={"space-y-1.5"}>
+<div className={"flex items-center justify-between font-label-sm text-label-sm"}>
+<span className={"text-[#157375] font-medium flex items-center gap-1.5"}>
+<Icon name="water_heater" className="material-symbols-outlined text-[16px] text-secondary" />{"\n                  Hot Water & Power\n                "}</span>
+<span className={"font-bold text-[#157375]"}>{"5.0"}</span>
+</div>
+<div className={"w-full h-2 rounded-full bg-surface-container overflow-hidden"}>
+<div className={"h-full bg-secondary rounded-full"} style={{"width": "100%"}}></div>
+</div>
+</div>
+
+<div className={"space-y-1.5"}>
+<div className={"flex items-center justify-between font-label-sm text-label-sm"}>
+<span className={"text-[#157375] font-medium flex items-center gap-1.5"}>
+<Icon name="landscape" className="material-symbols-outlined text-[16px] text-primary" />{"\n                  Location & Views\n                "}</span>
+<span className={"font-bold text-[#157375]"}>{"4.9"}</span>
+</div>
+<div className={"w-full h-2 rounded-full bg-surface-container overflow-hidden"}>
+<div className={"h-full bg-primary rounded-full"} style={{"width": "98%"}}></div>
+</div>
+</div>
+
+<div className={"space-y-1.5"}>
+<div className={"flex items-center justify-between font-label-sm text-label-sm"}>
+<span className={"text-[#157375] font-medium flex items-center gap-1.5"}>
+<Icon name="lock" className="material-symbols-outlined text-[16px] text-tertiary" />{"\n                  Privacy & Calm\n                "}</span>
+<span className={"font-bold text-[#157375]"}>{"4.9"}</span>
+</div>
+<div className={"w-full h-2 rounded-full bg-surface-container overflow-hidden"}>
+<div className={"h-full bg-tertiary rounded-full"} style={{"width": "98%"}}></div>
+</div>
+</div>
+
+<div className={"space-y-1.5"}>
+<div className={"flex items-center justify-between font-label-sm text-label-sm"}>
+<span className={"text-[#157375] font-medium flex items-center gap-1.5"}>
+<Icon name="wifi" className="material-symbols-outlined text-[16px] text-primary" />{"\n                  Wi-Fi Reliability\n                "}</span>
+<span className={"font-bold text-[#157375]"}>{"4.8"}</span>
+</div>
+<div className={"w-full h-2 rounded-full bg-surface-container overflow-hidden"}>
+<div className={"h-full bg-primary rounded-full"} style={{"width": "96%"}}></div>
+</div>
+</div>
+
+<div className={"space-y-1.5"}>
+<div className={"flex items-center justify-between font-label-sm text-label-sm"}>
+<span className={"text-[#157375] font-medium flex items-center gap-1.5"}>
+<Icon name="payments" className="material-symbols-outlined text-[16px] text-secondary" />{"\n                  Value for Money\n                "}</span>
+<span className={"font-bold text-[#157375]"}>{"4.8"}</span>
+</div>
+<div className={"w-full h-2 rounded-full bg-surface-container overflow-hidden"}>
+<div className={"h-full bg-secondary rounded-full"} style={{"width": "96%"}}></div>
+</div>
+</div>
+
+<div className={"space-y-1.5 sm:col-span-2 lg:col-span-1"}>
+<div className={"flex items-center justify-between font-label-sm text-label-sm"}>
+<span className={"text-[#157375] font-medium flex items-center gap-1.5"}>
+<Icon name="chat" className="material-symbols-outlined text-[16px] text-primary" />{"\n                  Host Hospitality\n                "}</span>
+<span className={"font-bold text-[#157375]"}>{"5.0"}</span>
+</div>
+<div className={"w-full h-2 rounded-full bg-surface-container overflow-hidden"}>
+<div className={"h-full bg-primary rounded-full"} style={{"width": "100%"}}></div>
+</div>
+</div>
+</div>
+
+<div className={"grid grid-cols-1 md:grid-cols-2 gap-6 pt-4"}>
+
+<div className={"p-5 rounded-2xl bg-surface-container-low flex flex-col justify-between space-y-4"}>
+<div className={"space-y-2"}>
+<div className={"flex items-center justify-between"}>
+<div className={"flex items-center gap-3"}>
+<div className={"w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md font-bold"}>{"\n                      MH\n                    "}</div>
+<div>
+<p className={"font-label-md text-label-md font-bold text-[#157375]"}>{"Maya H."}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Beirut, Lebanon \u00b7 Stayed February 2024"}</p>
+</div>
+</div>
+<div className={"flex text-amber-500"}>
+<Icon name="star" className="material-symbols-outlined text-[16px]" />
+<Icon name="star" className="material-symbols-outlined text-[16px]" />
+<Icon name="star" className="material-symbols-outlined text-[16px]" />
+<Icon name="star" className="material-symbols-outlined text-[16px]" />
+<Icon name="star" className="material-symbols-outlined text-[16px]" />
+</div>
+</div>
+<p className={"font-body-md text-body-md text-[#157375] leading-relaxed"}>{"\n                  \"Hands down the best stay we\u2019ve ever experienced in Faraya. The heated outdoor jacuzzi surrounded by pure fresh snow was magical. Power and heating were flawless 24/7 without a second of drop, which is rare in the mountains. Tony\u2019s hot saj in the morning sealed the experience!\"\n                "}</p>
+</div>
+<span className={"font-caption text-caption text-primary font-semibold flex items-center gap-1"}>
+<Icon name="verified" className="material-symbols-outlined text-[14px]" />{" Verified StayLeb Booking\n              "}</span>
+</div>
+
+<div className={"p-5 rounded-2xl bg-surface-container-low flex flex-col justify-between space-y-4"}>
+<div className={"space-y-2"}>
+<div className={"flex items-center justify-between"}>
+<div className={"flex items-center gap-3"}>
+<div className={"w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-md font-bold"}>{"\n                      JK\n                    "}</div>
+<div>
+<p className={"font-label-md text-label-md font-bold text-[#157375]"}>{"Jad K."}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Dubai, UAE \u00b7 Stayed January 2024"}</p>
+</div>
+</div>
+<div className={"flex text-amber-500"}>
+<Icon name="star" className="material-symbols-outlined text-[16px]" />
+<Icon name="star" className="material-symbols-outlined text-[16px]" />
+<Icon name="star" className="material-symbols-outlined text-[16px]" />
+<Icon name="star" className="material-symbols-outlined text-[16px]" />
+<Icon name="star" className="material-symbols-outlined text-[16px]" />
+</div>
+</div>
+<p className={"font-body-md text-body-md text-[#157375] leading-relaxed"}>{"\n                  \"Traveled in with my family for ski week. We were literally 3 minutes from Mzaar Junction. The handcrafted cedar woodwork smells incredible and the fireplace kept the living room so cozy. The kitchen had everything for fondue nights. We will return next season for sure.\"\n                "}</p>
+</div>
+<span className={"font-caption text-caption text-secondary font-semibold flex items-center gap-1"}>
+<Icon name="verified" className="material-symbols-outlined text-[14px]" />{" Verified StayLeb Booking\n              "}</span>
+</div>
+</div>
+</section>
+
+
+</main>
+
+<aside className={"lg:col-span-4 sticky top-24 space-y-4"}>
+
+<div className={"bg-surface-container-lowest rounded-2xl shadow-xl p-6 space-y-6"}>
+
+<div className={"flex items-baseline justify-between"}>
+<div className={"flex items-baseline gap-1.5"}>
+<span className={"font-headline-lg text-headline-lg font-bold text-primary tracking-tight"}>{"$220"}</span>
+<span className={"font-body-md text-body-md text-on-surface-variant font-medium"}>{"/ night"}</span>
+</div>
+<div className={"flex items-center gap-1 font-label-sm text-label-sm text-[#157375] font-semibold"}>
+<Icon name="star" className="material-symbols-outlined text-[16px] text-amber-500" />
+<span>{"4.96"}</span>
+<span className={"text-on-surface-variant font-normal"}>{"(42)"}</span>
+</div>
+</div>
+
+<div className={"rounded-xl bg-surface-container-low p-1 space-y-1"}>
+<div className={"grid grid-cols-2 gap-1"}>
+
+<div className={"p-3 bg-surface-container-lowest rounded-lg"}>
+<label className={"block font-caption text-caption text-on-surface-variant uppercase font-semibold"}>{"Check-In"}</label>
+<div className={"flex items-center gap-1.5 mt-0.5"}>
+<Icon name="calendar_today" className="material-symbols-outlined text-primary text-[18px]" />
+<span className={"font-label-md text-label-md font-bold text-[#157375]"}>{"Sep 25, 2024"}</span>
+</div>
+</div>
+
+<div className={"p-3 bg-surface-container-lowest rounded-lg"}>
+<label className={"block font-caption text-caption text-on-surface-variant uppercase font-semibold"}>{"Check-Out"}</label>
+<div className={"flex items-center gap-1.5 mt-0.5"}>
+<Icon name="event" className="material-symbols-outlined text-primary text-[18px]" />
+<span className={"font-label-md text-label-md font-bold text-[#157375]"}>{"Sep 28, 2024"}</span>
+</div>
+</div>
+</div>
+
+<div className={"p-3 bg-surface-container-lowest rounded-lg flex items-center justify-between"}>
+<div>
+<label className={"block font-caption text-caption text-on-surface-variant uppercase font-semibold"}>{"Guests"}</label>
+<span className={"font-label-md text-label-md font-bold text-[#157375]"}>{"4 Guests (2 adults, 2 kids)"}</span>
+</div>
+<Icon name="expand_more" className="material-symbols-outlined text-on-surface-variant text-[20px]" />
+</div>
+</div>
+
+<div className={"flex items-center gap-2 p-3 rounded-xl bg-secondary-container/50 text-on-secondary-container"}>
+<Icon name="check_circle" className="material-symbols-outlined text-[20px] text-secondary" />
+<p className={"font-label-sm text-label-sm"}>
+<span className={"font-bold"}>{"Minimum 2 nights stay:"}</span>{" Satisfied (3 nights selected).\n            "}</p>
+</div>
+
+<div className={"space-y-3 pt-2 font-body-md text-body-md"}>
+<div className={"flex items-center justify-between text-on-surface-variant"}>
+<span>{"$220 \u00d7 3 nights"}</span>
+<span className={"font-medium text-[#157375]"}>{"$660"}</span>
+</div>
+<div className={"flex items-center justify-between text-on-surface-variant"}>
+<span className={"flex items-center gap-1"}>{"\n                Cleaning & Firewood fee\n                "}<Icon name="info" className="material-symbols-outlined text-[16px] text-outline cursor-pointer" />
+</span>
+<span className={"font-medium text-[#157375]"}>{"$40"}</span>
+</div>
+<div className={"flex items-center justify-between text-on-surface-variant"}>
+<span>{"StayLeb Service Fee"}</span>
+<span className={"font-medium text-secondary font-semibold"}>{"Free ($0 promo)"}</span>
+</div>
+<div className={"pt-3 flex items-center justify-between font-title-md text-title-md font-bold text-[#157375]"}>
+<span>{"Total before taxes"}</span>
+<span className={"text-primary text-headline-sm"}>{"$700"}</span>
+</div>
+</div>
+
+<button type="button" onClick={handleBooking} className={"w-full py-3.5 px-6 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-title-md text-title-md font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"}>
+<span>{"Continue to Booking"}</span>
+<Icon name="arrow_forward" className="material-symbols-outlined text-[20px] transition-transform group-hover:translate-x-1" />
+</button>
+<p className={"text-center font-caption text-caption text-on-surface-variant"}>{"\n            You won\u2019t be charged yet. Dates are held for 15 minutes upon confirmation.\n          "}</p>
+
+<div className={"pt-4 space-y-3 font-caption text-caption text-on-surface-variant"}>
+<div className={"flex items-center gap-2.5"}>
+<Icon name="verified" className="material-symbols-outlined text-primary text-[18px]" />
+<span>{"100% Guaranteed Generator switchover & solar warmth"}</span>
+</div>
+<div className={"flex items-center gap-2.5"}>
+<Icon name="cancel" className="material-symbols-outlined text-secondary text-[18px]" />
+<span>{"Free cancellation up to 7 days before check-in"}</span>
+</div>
+<div className={"flex items-center gap-2.5"}>
+<Icon name="health_and_safety" className="material-symbols-outlined text-tertiary text-[18px]" />
+<span>{"StayLeb Host Protection Shield included"}</span>
+</div>
+</div>
+</div>
+
+<div className={"p-4 rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between"}>
+<div className={"flex items-center gap-3"}>
+<Icon name="question_answer" className="material-symbols-outlined text-primary text-[24px]" />
+<div>
+<p className={"font-label-md text-label-md font-bold text-[#157375]"}>{"Have questions about snow access?"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Host Tony typically replies in under 15 mins"}</p>
+</div>
+</div>
+<ActionButton className={"px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold transition-colors"} actionLabel={"Ask Host"} aria-label={"Ask Host"}>{"\n            Ask Host\n          "}</ActionButton>
+</div>
+</aside>
+</div>
+</div>
+
+<div className={"fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-0 pointer-events-none"} id={"authGateModal"}>
+<div className={"relative w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 transform scale-95 transition-transform duration-200"} id={"modalCard"}>
+
+<ActionButton className={"absolute top-4 right-4 p-2 rounded-full hover:bg-surface-container text-on-surface-variant"} actionLabel={"close"} aria-label={"close"} hint={"closeBookingGate()"}>
+<Icon name="close" className="material-symbols-outlined text-[20px]" />
+</ActionButton>
+
+<div className={"space-y-2 text-center"}>
+<div className={"w-12 h-12 rounded-2xl bg-primary-fixed text-primary mx-auto flex items-center justify-center shadow-sm"}>
+<Icon name="lock_open" className="material-symbols-outlined text-[28px]" />
+</div>
+<h3 className={"font-headline-sm text-headline-sm text-[#157375]"}>{"Sign in to continue booking"}</h3>
+<p className={"font-body-md text-body-md text-on-surface-variant"}>{"\n          Create an account or sign in to reserve "}<span className={"font-semibold text-[#157375]"}>{"Cedar Peak Stone Chalet"}</span>{" for Sep 25 \u2013 28.\n        "}</p>
+</div>
+
+<div className={"p-3.5 rounded-xl bg-surface-container flex items-center justify-between text-left"}>
+<div>
+<p className={"font-label-sm text-label-sm font-bold text-[#157375]"}>{"3 Nights \u00b7 4 Guests"}</p>
+<p className={"font-caption text-caption text-on-surface-variant"}>{"Sep 25 - Sep 28, 2024"}</p>
+</div>
+<span className={"font-title-md text-title-md font-bold text-primary"}>{"$700 Total"}</span>
+</div>
+
+<div className={"space-y-3"}>
+
+<Link className={"w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold shadow-md transition-all flex items-center justify-center gap-2"} href={"/auth/login"}>
+<Icon name="login" className="material-symbols-outlined text-[18px]" />{"\n          Log In to Existing Account\n        "}</Link>
+
+<Link className={"w-full py-3 px-4 rounded-xl bg-surface-container-low hover:bg-surface-container text-[#157375] font-label-md text-label-md font-bold transition-all flex items-center justify-center gap-2"} href={"/auth/register"}>
+<Icon name="person_add" className="material-symbols-outlined text-[18px] text-secondary" />{"\n          Create Client Account\n        "}</Link>
+
+<ActionButton className={"w-full py-2 font-label-sm text-label-sm font-medium text-on-surface-variant hover:text-primary transition-colors text-center block"} actionLabel={"Continue Browsing Chalets"} aria-label={"Continue Browsing Chalets"} hint={"closeBookingGate()"}>{"\n          Continue Browsing Chalets\n        "}</ActionButton>
+</div>
+
+<div className={"pt-2 text-center"}>
+<p className={"font-caption text-caption text-outline"}>{"\n          Your booking context and selected dates will be seamlessly saved upon registration.\n        "}</p>
+</div>
+</div>
+</div>
+
+
+</div></main>
+</>; }

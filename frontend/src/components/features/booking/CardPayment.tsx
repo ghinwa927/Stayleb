@@ -1,7 +1,167 @@
 "use client";
-import {useState} from 'react';
-import Link from 'next/link';
-import {useRouter} from 'next/navigation';
-import {useBooking,money} from './BookingContext';
-import {BookingSummary,BookingProgress} from './BookingSummary';
-export function CardPayment(){const {stay,total,update}=useBooking();const router=useRouter();const [processing,setProcessing]=useState(false);return <main className="booking-main"><BookingProgress step={3}/><div className="booking-grid"><div className="space-y-5"><div className="bg-surface-container-low p-4 rounded-lg text-xs text-white">Secure payment preview · This is a frontend demonstration. No card details are transmitted or charged.</div><form className="panel space-y-5" onSubmit={e=>{e.preventDefault();setProcessing(true);sessionStorage.setItem('stayleb-latest-booking',JSON.stringify({...stay,total,status:'Confirmed'}));setTimeout(()=>router.push('/book/cedar-peak/confirmed'),700);}}><div><h1 className="text-xl font-semibold">Credit & Debit Card</h1><p className="text-xs text-slate-500 mt-1">Complete your booking with instant verification.</p></div><label className="field">Cardholder Name<input required value={stay.name} onChange={e=>update({name:e.target.value})}/></label><label className="field">Card Information<input required inputMode="numeric" pattern="[0-9 ]{15,23}" autoComplete="off" placeholder="4242 4242 4242 4242" aria-describedby="demo-card"/></label><p id="demo-card" className="text-xs text-slate-500">Use demo card 4242 4242 4242 4242, any future expiry, and three demo digits.</p><div className="grid grid-cols-2 gap-4"><label className="field">Expiration Date<input required pattern="(0[1-9]|1[0-2])/[0-9]{2}" placeholder="MM/YY" inputMode="numeric"/></label><label className="field">CVC<input required pattern="[0-9]{3,4}" placeholder="•••" type="password" autoComplete="off" maxLength={4}/></label></div><div className="grid grid-cols-2 gap-4"><label className="field">Country or Region<select defaultValue="Lebanon"><option>Lebanon</option><option>France</option><option>United Arab Emirates</option><option>United States</option></select></label><label className="field">Postal Code<input required placeholder="1001"/></label></div><div className="p-4 rounded-lg bg-surface-container-low text-xs">On successful confirmation, your reservation at Cedar Peak Stone Chalet is instantly locked.</div><button disabled={processing} className="primary-button w-full">{processing?'Confirming your demo booking…':`Pay ${money(total)} USD`}</button><p className="text-[11px] text-slate-500 text-center">Demo payment · No real charges</p></form><div className="flex justify-between text-xs"><Link href="/book/cedar-peak/payment-method">‹ Return to Payment Method Selection</Link><Link className="text-white" href="/book/cedar-peak/failed">Preview declined payment</Link></div></div><BookingSummary/></div></main>;}
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { Elements } from "@stripe/react-stripe-js";
+
+import { useBooking } from "./BookingContext";
+import { BookingSummary, BookingProgress, BackToPropertyButton } from "./BookingSummary";
+import { stripePromise } from "@/lib/stripe";
+import StripePaymentForm from "@/components/payments/StripePaymentForm";
+
+export function CardPayment() {
+  const { booking, bookingLoading } = useBooking();
+
+  const params = useParams() as {
+    id?: string;
+  };
+
+  const propertyId = params.id;
+
+  const [clientSecret, setClientSecret] =
+    useState<string | null>(null);
+
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const secret = sessionStorage.getItem(
+      "stayleb-stripe-client-secret"
+    );
+
+    const stripeBookingId = sessionStorage.getItem(
+      "stayleb-stripe-booking-id"
+    );
+
+    if (!secret) {
+      setError(
+        "Stripe payment information is missing. Please return to payment method selection and try again."
+      );
+
+      return;
+    }
+
+    if (
+      booking &&
+      stripeBookingId &&
+      String(booking.id) !== stripeBookingId
+    ) {
+      setError(
+        "The Stripe payment does not match this booking."
+      );
+
+      return;
+    }
+
+    setClientSecret(secret);
+  }, [booking]);
+
+  return (
+    <main className="booking-main">
+      <div className="mb-4"><BackToPropertyButton propertyId={propertyId} /></div>
+      <BookingProgress step={3} />
+
+      <div className="booking-grid">
+        <div className="space-y-5">
+
+          <div className="bg-surface-container-low p-4 rounded-lg text-xs text-primary">
+            Secure payment powered by Stripe. Your card
+            information is securely collected and processed by
+            Stripe.
+          </div>
+
+          <div className="panel space-y-5">
+            <div>
+              <h1 className="text-xl font-semibold">
+                Credit & Debit Card
+              </h1>
+
+              <p className="text-xs text-slate-500 mt-1">
+                Complete your booking with secure card payment.
+              </p>
+            </div>
+
+            {bookingLoading && (
+              <div className="p-4 rounded-lg bg-surface-container-low text-sm text-slate-600">
+                Loading booking...
+              </div>
+            )}
+
+            {!bookingLoading && error && (
+              <div className="p-4 rounded-lg bg-red-50 text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
+            {!bookingLoading &&
+              !error &&
+              clientSecret &&
+              booking && (
+                <Elements
+                  stripe={stripePromise}
+                  options={{
+                    clientSecret,
+
+                    appearance: {
+                      theme: "stripe",
+
+                      variables: {
+                        colorPrimary: "#157375",
+                        colorText: "#1E293B",
+                        colorDanger: "#E11D48",
+                        borderRadius: "8px",
+                      },
+                    },
+                  }}
+                >
+                  <StripePaymentForm
+                    bookingId={booking.id}
+                    propertyId={propertyId}
+                  />
+                </Elements>
+              )}
+
+            {booking && (
+              <div className="p-4 rounded-lg bg-surface-container-low text-xs space-y-1">
+                <p>
+                  Booking #{booking.id}
+                </p>
+
+                <p>
+                  {booking.number_of_nights} night
+                  {booking.number_of_nights !== 1
+                    ? "s"
+                    : ""}
+                </p>
+
+                <p className="font-semibold">
+                  Total: $
+                  {Number(
+                    booking.total_price
+                  ).toFixed(2)}{" "}
+                  USD
+                </p>
+              </div>
+            )}
+
+            <p className="text-[11px] text-slate-500 text-center">
+              Card details are securely handled by Stripe and
+              are not stored by StayLeb.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap justify-between gap-3 text-xs items-center">
+            <Link
+  href={`/market/book/${propertyId}/payment-method`}
+>
+              ‹ Return to Payment Method Selection
+            </Link>
+            <BackToPropertyButton propertyId={propertyId} variant="compact" />
+          </div>
+        </div>
+
+        <BookingSummary />
+      </div>
+    </main>
+  );
+}

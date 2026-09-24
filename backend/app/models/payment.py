@@ -1,8 +1,10 @@
+from enum import Enum
+from decimal import Decimal
+
 from sqlalchemy import (
     Column,
     Integer,
     DECIMAL,
-    Enum,
     String,
     DateTime,
     ForeignKey,
@@ -11,6 +13,20 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.database.database import Base
+
+
+class PaymentStatus(str, Enum):
+    PENDING = "pending"
+    PAID = "paid"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+    PARTIALLY_REFUNDED = "partially_refunded"
+    CANCELLED = "cancelled"
+
+
+class PaymentMethod(str, Enum):
+    CASH = "cash"
+    STRIPE = "stripe"
 
 
 class Payment(Base):
@@ -36,27 +52,30 @@ class Payment(Base):
     )
 
     payment_method = Column(
-        Enum(
-            "stripe",
-            "cash",
-        ),
+        String(20),
         nullable=False,
     )
 
     payment_status = Column(
-        Enum(
-            "pending",
-            "paid",
-            "failed",
-            "refunded",
-        ),
+        String(20),
         nullable=False,
-        default="pending",
+        default=PaymentStatus.PENDING.value,
     )
 
     stripe_payment_id = Column(
         String(255),
         nullable=True,
+    )
+
+    stripe_refund_id = Column(
+        String(255),
+        nullable=True,
+    )
+
+    refunded_amount = Column(
+        DECIMAL(10, 2),
+        nullable=False,
+        default=Decimal("0.00"),
     )
 
     paid_at = Column(

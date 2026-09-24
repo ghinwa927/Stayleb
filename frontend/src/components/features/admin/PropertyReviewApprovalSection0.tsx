@@ -39,6 +39,7 @@ export function PropertyReviewApprovalSection0() {
   const [busy, setBusy] = useState<"approve" | "reject" | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showReject, setShowReject] = useState(false);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [masterRules, setMasterRules] = useState<{ id: number; name: string; category: string }[]>([]);
 
@@ -99,7 +100,7 @@ export function PropertyReviewApprovalSection0() {
   if (loading) {
     return (
       <div className="w-full pt-6 px-gutter-lg py-space-lg min-h-screen bg-surface-container-low flex items-center justify-center">
-        <div className="text-[#157375]">Loading property #{id}…</div>
+        <div className="text-[#46B1B1]">Loading property #{id}…</div>
       </div>
     );
   }
@@ -123,18 +124,18 @@ export function PropertyReviewApprovalSection0() {
           <div className="flex flex-col w-full">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-sm mb-space-lg">
               <div className="flex flex-col">
-                <nav className="flex items-center gap-space-xxs text-[#157375] font-caption text-caption uppercase tracking-wider mb-space-xxs">
+                <nav className="flex items-center gap-space-xxs text-[#46B1B1] font-caption text-caption uppercase tracking-wider mb-space-xxs">
                   <Link href="/admin/properties" className="hover:text-primary">Administration</Link>
                   <Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
                   <Link href="/admin/properties" className="hover:text-primary">Property Approvals</Link>
                   <Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
                   <span className="font-semibold text-primary">PROP-{p.id}</span>
                 </nav>
-                <h1 className="font-headline-md text-headline-md text-[#157375] tracking-tight">Property Review — {p.title}</h1>
-                <p className="font-body-md text-body-md text-[#157375] mt-0.5">Inspect submitted property specifications, photos, and policies. Make an official marketplace listing decision.</p>
+                <h1 className="font-headline-md text-headline-md text-[#46B1B1] tracking-tight">Property Review — {p.title}</h1>
+                <p className="font-body-md text-body-md text-[#46B1B1] mt-0.5">Inspect submitted property specifications, photos, and policies. Make an official marketplace listing decision.</p>
               </div>
               <div className="flex items-center gap-space-xs self-start md:self-auto">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-[#157375] font-label-sm text-label-sm font-semibold">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-[#46B1B1] font-label-sm text-label-sm font-semibold">
                   <Icon name="calendar_today" className="material-symbols-outlined text-[16px] text-primary" />
                   Submitted: {new Date(p.created_at).toLocaleDateString()}
                 </span>
@@ -154,16 +155,16 @@ export function PropertyReviewApprovalSection0() {
                     </div>
                     <div className="flex flex-col">
                       <div className="flex items-center gap-space-xs flex-wrap">
-                        <span className="font-headline-sm text-headline-sm text-[#157375] font-semibold">{p.title}</span>
+                        <span className="font-headline-sm text-headline-sm text-[#46B1B1] font-semibold">{p.title}</span>
                         <span className="px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-caption text-caption font-semibold capitalize">{p.property_type.replace("_", " ")}</span>
                       </div>
-                      <p className="font-body-md text-body-md text-[#157375] flex items-center gap-1 mt-1">
+                      <p className="font-body-md text-body-md text-[#46B1B1] flex items-center gap-1 mt-1">
                         <Icon name="pin_drop" className="material-symbols-outlined text-[18px] text-primary" />
                         <span>{p.location}</span>
                         {p.address && (
                           <>
                             <span className="mx-1.5 text-outline-variant">•</span>
-                            <span className="text-[#157375] font-medium">{p.address}</span>
+                            <span className="text-[#46B1B1] font-medium">{p.address}</span>
                           </>
                         )}
                       </p>
@@ -171,8 +172,8 @@ export function PropertyReviewApprovalSection0() {
                   </div>
                   <div className="flex items-center gap-space-xs bg-surface-container-low px-space-md py-space-xs rounded-lg self-stretch md:self-auto justify-between md:justify-start">
                     <div className="flex flex-col text-left">
-                      <span className="font-caption text-caption text-[#157375] uppercase">Listed Host</span>
-                      <span className="font-label-md text-label-md font-semibold text-[#157375]">Owner #{p.owner_id}</span>
+                      <span className="font-caption text-caption text-[#46B1B1] uppercase">Listed Host</span>
+                      <span className="font-label-md text-label-md font-semibold text-[#46B1B1]">Owner #{p.owner_id}</span>
                     </div>
                     <span className="font-caption text-caption px-2 py-0.5 rounded bg-surface-container-highest text-primary font-mono font-medium">#{p.owner_id}</span>
                   </div>
@@ -182,9 +183,9 @@ export function PropertyReviewApprovalSection0() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-space-xs">
                       <Icon name="photo_library" className="material-symbols-outlined text-primary text-[22px]" />
-                      <span className="font-title-md text-title-md text-[#157375]">Submitted Visual Media</span>
+                      <span className="font-title-md text-title-md text-[#46B1B1]">Submitted Visual Media</span>
                     </div>
-                    <span className="font-caption text-caption font-semibold uppercase tracking-wider text-[#157375]">{p.images?.length || 0} Photographs</span>
+                    <span className="font-caption text-caption font-semibold uppercase tracking-wider text-[#46B1B1]">{p.images?.length || 0} Photographs</span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-space-sm mt-space-xs">
                     {p.images && p.images.length > 0 ? (
@@ -193,7 +194,7 @@ export function PropertyReviewApprovalSection0() {
                           <LocalImage className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={p.images[0].image_url} alt={p.title} />
                           <div className="absolute inset-0 bg-gradient-to-t from-on-surface/80 via-transparent to-transparent opacity-90"></div>
                           <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
-                            <span className="px-2.5 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-md text-[#157375] font-caption text-caption font-semibold flex items-center gap-1">
+                            <span className="px-2.5 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-md text-[#46B1B1] font-caption text-caption font-semibold flex items-center gap-1">
                               <Icon name="star" className="material-symbols-outlined text-[14px] text-primary" /> Cover Perspective
                             </span>
                             <span className="font-caption text-caption text-surface-container-lowest">Exterior Façade</span>
@@ -208,57 +209,57 @@ export function PropertyReviewApprovalSection0() {
                             </div>
                           ))}
                           {p.images.length === 1 && (
-                            <div className="col-span-1 row-span-3 flex items-center justify-center bg-surface-container-low rounded-xl text-[#157375] text-sm">Only 1 image submitted</div>
+                            <div className="col-span-1 row-span-3 flex items-center justify-center bg-surface-container-low rounded-xl text-[#46B1B1] text-sm">Only 1 image submitted</div>
                           )}
                         </div>
                       </>
                     ) : (
-                      <div className="col-span-12 h-[200px] flex items-center justify-center bg-surface-container-low rounded-xl text-[#157375]">No images submitted</div>
+                      <div className="col-span-12 h-[200px] flex items-center justify-center bg-surface-container-low rounded-xl text-[#46B1B1]">No images submitted</div>
                     )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-space-md">
                   <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col">
-                    <span className="font-caption text-caption text-[#157375] uppercase font-medium">Base Nightly Rate</span>
+                    <span className="font-caption text-caption text-[#46B1B1] uppercase font-medium">Base Nightly Rate</span>
                     <div className="flex items-baseline gap-1 mt-1">
                       <span className="font-headline-md text-headline-md font-bold text-primary">${Number(p.price_per_night).toFixed(2)}</span>
-                      <span className="font-caption text-caption text-[#157375] font-medium">USD</span>
+                      <span className="font-caption text-caption text-[#46B1B1] font-medium">USD</span>
                     </div>
                     <span className="font-caption text-caption text-secondary font-medium mt-1">Standard Season Base</span>
                   </div>
                   <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col">
-                    <span className="font-caption text-caption text-[#157375] uppercase font-medium">Capacity</span>
+                    <span className="font-caption text-caption text-[#46B1B1] uppercase font-medium">Capacity</span>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="font-headline-md text-headline-md font-bold text-[#157375]">{p.max_guests}</span>
-                      <span className="font-body-md text-body-md text-[#157375]">Guests</span>
+                      <span className="font-headline-md text-headline-md font-bold text-[#46B1B1]">{p.max_guests}</span>
+                      <span className="font-body-md text-body-md text-[#46B1B1]">Guests</span>
                     </div>
-                    <span className="font-caption text-caption text-[#157375] mt-1">Max Occupancy Limit</span>
+                    <span className="font-caption text-caption text-[#46B1B1] mt-1">Max Occupancy Limit</span>
                   </div>
                   <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col">
-                    <span className="font-caption text-caption text-[#157375] uppercase font-medium">Rooms & Beds</span>
+                    <span className="font-caption text-caption text-[#46B1B1] uppercase font-medium">Rooms & Beds</span>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="font-headline-md text-headline-md font-bold text-[#157375]">{p.bedrooms} BR</span>
-                      <span className="font-caption text-caption text-[#157375] font-medium">/ {p.beds} Beds</span>
+                      <span className="font-headline-md text-headline-md font-bold text-[#46B1B1]">{p.bedrooms} BR</span>
+                      <span className="font-caption text-caption text-[#46B1B1] font-medium">/ {p.beds} Beds</span>
                     </div>
-                    <span className="font-caption text-caption text-[#157375] mt-1">{p.bathrooms} Full Bathrooms</span>
+                    <span className="font-caption text-caption text-[#46B1B1] mt-1">{p.bathrooms} Full Bathrooms</span>
                   </div>
                   <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col">
-                    <span className="font-caption text-caption text-[#157375] uppercase font-medium">Minimum Stay</span>
+                    <span className="font-caption text-caption text-[#46B1B1] uppercase font-medium">Minimum Stay</span>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <span className="font-headline-md text-headline-md font-bold text-[#157375]">{p.min_nights}</span>
-                      <span className="font-body-md text-body-md text-[#157375]">Nights</span>
+                      <span className="font-headline-md text-headline-md font-bold text-[#46B1B1]">{p.min_nights}</span>
+                      <span className="font-body-md text-body-md text-[#46B1B1]">Nights</span>
                     </div>
-                    <span className="font-caption text-caption text-[#157375] mt-1">Strict Reservation Policy</span>
+                    <span className="font-caption text-caption text-[#46B1B1] mt-1">Strict Reservation Policy</span>
                   </div>
                 </div>
 
                 <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-xs">
                   <div className="flex items-center gap-space-xs text-primary mb-1">
                     <Icon name="notes" className="material-symbols-outlined text-[20px]" />
-                    <span className="font-title-md text-title-md text-[#157375]">Owner Listing Narrative</span>
+                    <span className="font-title-md text-title-md text-[#46B1B1]">Owner Listing Narrative</span>
                   </div>
-                  <p className="font-body-lg text-body-lg text-[#157375] leading-relaxed bg-surface-container-low p-space-md rounded-lg">{p.description}</p>
+                  <p className="font-body-lg text-body-lg text-[#46B1B1] leading-relaxed bg-surface-container-low p-space-md rounded-lg">{p.description}</p>
                   {p.rejection_reason && (
                     <div className="mt-2 p-3 rounded-lg bg-error-container text-on-error-container">
                       <strong className="font-semibold">Rejection reason:</strong> {p.rejection_reason}
@@ -269,18 +270,18 @@ export function PropertyReviewApprovalSection0() {
                 <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
                   <div className="flex items-center gap-space-xs">
                     <Icon name="checklist" className="material-symbols-outlined text-primary text-[22px]" />
-                    <h3 className="font-title-md text-title-md text-[#157375]">Amenities Configured</h3>
+                    <h3 className="font-title-md text-title-md text-[#46B1B1]">Amenities Configured</h3>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-space-sm">
                     {p.amenities && p.amenities.length > 0 ? (
                       p.amenities.map((am: any) => (
-                        <div key={am.id || am.name} className="flex items-center gap-space-xs p-space-sm rounded-lg bg-surface-container-low text-[#157375]">
+                        <div key={am.id || am.name} className="flex items-center gap-space-xs p-space-sm rounded-lg bg-surface-container-low text-[#46B1B1]">
                           <Icon name="check_circle" className="material-symbols-outlined text-[18px] text-primary" />
                           <span className="font-label-md text-label-md font-medium">{am.name}</span>
                         </div>
                       ))
                     ) : (
-                      <p className="col-span-3 text-sm text-[#157375]/70">No amenities configured</p>
+                      <p className="col-span-3 text-sm text-[#46B1B1]/70">No amenities configured</p>
                     )}
                   </div>
                 </div>
@@ -289,9 +290,9 @@ export function PropertyReviewApprovalSection0() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-space-xs text-primary">
                       <Icon name="gavel" className="material-symbols-outlined text-[20px]" />
-                      <h3 className="font-title-md text-title-md text-[#157375]">House Rules Configured</h3>
+                      <h3 className="font-title-md text-title-md text-[#46B1B1]">House Rules Configured</h3>
                     </div>
-                    <span className="font-caption text-caption px-2 py-0.5 rounded bg-surface-container text-[#157375]">{p.property_rules?.length || 0} rules</span>
+                    <span className="font-caption text-caption px-2 py-0.5 rounded bg-surface-container text-[#46B1B1]">{p.property_rules?.length || 0} rules</span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-space-sm">
                     {p.property_rules && p.property_rules.length > 0 ? (
@@ -299,7 +300,7 @@ export function PropertyReviewApprovalSection0() {
                         const rule = masterRules.find((m) => m.id === pr.rule_id);
                         const name = rule ? rule.name : `Rule #${pr.rule_id}`;
                         return (
-                          <div key={idx} className="flex items-center gap-space-xs p-space-sm rounded-lg bg-surface-container-low text-[#157375]">
+                          <div key={idx} className="flex items-center gap-space-xs p-space-sm rounded-lg bg-surface-container-low text-[#46B1B1]">
                             <Icon name={pr.allowed ? "check_circle" : "block"} className={`material-symbols-outlined text-[18px] ${pr.allowed ? "text-secondary" : "text-error"} shrink-0`} />
                             <div className="flex flex-col min-w-0">
                               <span className="font-label-md text-label-md font-medium leading-tight truncate">{name}</span>
@@ -309,7 +310,7 @@ export function PropertyReviewApprovalSection0() {
                         );
                       })
                     ) : (
-                      <p className="col-span-3 text-sm text-[#157375]/60 py-4 text-center bg-surface-container-low rounded-lg">No specific house rules configured for this property.</p>
+                      <p className="col-span-3 text-sm text-[#46B1B1]/60 py-4 text-center bg-surface-container-low rounded-lg">No specific house rules configured for this property.</p>
                     )}
                   </div>
                 </div>
@@ -317,25 +318,25 @@ export function PropertyReviewApprovalSection0() {
                 <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
                   <div className="flex items-center gap-space-xs text-primary">
                     <Icon name="calendar_month" className="material-symbols-outlined text-[20px]" />
-                    <h3 className="font-title-md text-title-md text-[#157375]">Seasonal Pricing Windows</h3>
+                    <h3 className="font-title-md text-title-md text-[#46B1B1]">Seasonal Pricing Windows</h3>
                   </div>
                   {p.seasonal_prices && p.seasonal_prices.length > 0 ? (
                     <div className="flex flex-col gap-space-xs">
                       {p.seasonal_prices.map((sp: any, idx: number) => (
                         <div key={idx} className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-1">
                           <div className="flex items-center justify-between">
-                            <span className="font-label-md text-label-md font-bold text-[#157375] flex items-center gap-1.5">
+                            <span className="font-label-md text-label-md font-bold text-[#46B1B1] flex items-center gap-1.5">
                               <Icon name="ac_unit" className="material-symbols-outlined text-[18px] text-primary" />
                               {sp.season_name ? sp.season_name.charAt(0).toUpperCase() + sp.season_name.slice(1) : `Seasonal Rate ${idx + 1}`}
                             </span>
                             <span className="font-label-md text-label-md font-bold text-primary bg-surface-container-lowest px-2.5 py-1 rounded-md shadow-sm">${Number(sp.price_per_night).toFixed(2)} / night</span>
                           </div>
                           <div className="flex flex-col gap-1 mt-1">
-                            <div className="flex items-center gap-1.5 text-[#157375] font-caption text-caption">
+                            <div className="flex items-center gap-1.5 text-[#46B1B1] font-caption text-caption">
                               <Icon name="date_range" className="material-symbols-outlined text-[14px]" />
                               <span className="font-medium">From:</span> <span>{new Date(sp.start_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-[#157375] font-caption text-caption">
+                            <div className="flex items-center gap-1.5 text-[#46B1B1] font-caption text-caption">
                               <Icon name="event" className="material-symbols-outlined text-[14px]" />
                               <span className="font-medium">To:</span> <span>{new Date(sp.end_date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
                             </div>
@@ -344,7 +345,7 @@ export function PropertyReviewApprovalSection0() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-[#157375]/60 py-6 text-center bg-surface-container-low rounded-xl">No seasonal pricing configured. Standard base rate applies.</p>
+                    <p className="text-sm text-[#46B1B1]/60 py-6 text-center bg-surface-container-low rounded-xl">No seasonal pricing configured. Standard base rate applies.</p>
                   )}
                 </div>
               </div>
@@ -354,11 +355,11 @@ export function PropertyReviewApprovalSection0() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></div>
-                      <h2 className="font-title-md text-title-md text-[#157375] font-semibold">Review Assessment</h2>
+                      <h2 className="font-title-md text-title-md text-[#46B1B1] font-semibold">Review Assessment</h2>
                     </div>
-                    <span className="font-caption text-caption font-mono uppercase text-[#157375] font-medium">Vetting Phase</span>
+                    <span className="font-caption text-caption font-mono uppercase text-[#46B1B1] font-medium">Vetting Phase</span>
                   </div>
-                  <p className="font-body-md text-body-md text-[#157375]">Approving will immediately publish this property to the public StayLeb search index.</p>
+                  <p className="font-body-md text-body-md text-[#46B1B1]">Approving will immediately publish this property to the public StayLeb search index.</p>
                   {alertMsg && (
                     <div className={`p-3 rounded-lg text-sm ${alertMsg.includes("approved") ? "bg-secondary-container text-on-secondary-container" : "bg-error-container text-on-error-container"}`}>
                       {alertMsg}
@@ -366,9 +367,9 @@ export function PropertyReviewApprovalSection0() {
                   )}
                   <div className="flex flex-col gap-space-xs pt-space-xs">
                     <button
-                      onClick={handleApprove}
+                      onClick={() => setShowApproveConfirm(true)}
                       disabled={busy === "approve" || p.status === "approved"}
-                      className="w-full flex items-center justify-center gap-2 h-12 px-space-md rounded-xl bg-primary text-white font-label-md text-label-md font-semibold hover:bg-[#0a2e2f] transition-all shadow-sm disabled:opacity-50"
+                      className="w-full flex items-center justify-center gap-2 h-12 px-space-md rounded-xl bg-primary text-white font-label-md text-label-md font-semibold hover:bg-primary/90 transition-all shadow-sm disabled:opacity-50"
                     >
                       <Icon name="check_circle" className="material-symbols-outlined text-[20px] text-white" />
                       <span>{busy === "approve" ? "Approving…" : p.status === "approved" ? "Already Approved" : "Approve & Publish Listing"}</span>
@@ -389,20 +390,20 @@ export function PropertyReviewApprovalSection0() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-error">
                         <Icon name="assignment_late" className="material-symbols-outlined text-[20px]" />
-                        <h3 className="font-title-md text-title-md text-[#157375]">Listing Feedback & Rejection</h3>
+                        <h3 className="font-title-md text-title-md text-[#46B1B1]">Listing Feedback & Rejection</h3>
                       </div>
                       <span className="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-caption text-caption font-semibold">Action Required</span>
                     </div>
-                    <p className="font-caption text-caption text-[#157375] leading-relaxed">Provide clear, itemized guidance to the host so they can edit and resubmit.</p>
+                    <p className="font-caption text-caption text-[#46B1B1] leading-relaxed">Provide clear, itemized guidance to the host so they can edit and resubmit.</p>
                     <textarea
-                      className="w-full p-3 rounded-lg bg-surface-container-low text-[#157375] focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-outline-variant resize-none"
+                      className="w-full p-3 rounded-lg bg-surface-container-low text-[#46B1B1] focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-outline-variant resize-none"
                       placeholder="e.g., The primary cover photo is blurry. Please upload a high-resolution daylight photo. (min 10 characters)"
                       rows={4}
                       value={rejectionReason}
                       onChange={(e) => setRejectionReason(e.target.value)}
                     />
                     <div className="flex items-center justify-end gap-2 pt-2">
-                      <button onClick={() => setShowReject(false)} className="px-3 py-2 rounded-lg text-[#157375] hover:bg-surface-container">
+                      <button onClick={() => setShowReject(false)} className="px-3 py-2 rounded-lg text-[#46B1B1] hover:bg-surface-container">
                         Clear
                       </button>
                       <button onClick={handleReject} disabled={busy === "reject"} className="px-4 py-2 rounded-lg bg-error text-white font-semibold hover:opacity-90 disabled:opacity-50">
@@ -416,8 +417,39 @@ export function PropertyReviewApprovalSection0() {
           </div>
         </main>
       </div>
+      {showApproveConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 backdrop-blur-sm p-4">
+          <div className="bg-surface-container-lowest rounded-xl max-w-lg w-full p-space-lg shadow-xl flex flex-col gap-4">
+            <div className="flex items-start gap-space-md">
+              <div className="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center flex-shrink-0 text-on-secondary-container">
+                <Icon name="verified" className="material-symbols-outlined text-[26px]" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <h3 className="font-headline-sm text-headline-sm text-[#46B1B1] tracking-tight">Approve Property?</h3>
+                <p className="font-body-md text-body-md text-[#46B1B1] mt-1">
+                  Are you sure you want to approve <span className="font-semibold text-[#46B1B1]">“{p.title}”</span> in {p.location}? This will publish the listing to the marketplace and notify the owner.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowApproveConfirm(false)} className="px-4 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-[#46B1B1]">Cancel</button>
+              <button
+                onClick={() => {
+                  setShowApproveConfirm(false);
+                  handleApprove();
+                }}
+                disabled={busy === "approve"}
+                className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50 font-semibold flex items-center gap-1.5"
+              >
+                <Icon name="check_circle" className="material-symbols-outlined text-[18px]" />
+                Confirm Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {alertMsg && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0f3d3e] text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50">
           {alertMsg}
         </div>
       )}
