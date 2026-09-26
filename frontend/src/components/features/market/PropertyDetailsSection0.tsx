@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams, useRouter, usePathname } from "next/navigation";
+import { useParams, useRouter, usePathname, useSearchParams } from "next/navigation";
 import { LocalImage } from "@/components/ui/LocalImage";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
@@ -13,7 +13,9 @@ import { useBooking } from "@/components/features/booking/BookingContext";
 import { previewBooking } from "@/services/bookings";
 import type { BookingPreviewResponse } from "@/services/bookings";
 import { getPropertyReviews, getPropertyReviewStats, type Review, type PropertyReviewStats } from "@/services/reviews";
+import { addFavorite, removeFavorite } from "@/services/favorites";
 import Swal from "sweetalert2";
+import { readPropertySearch, searchValidation } from "@/lib/property-search";
 
 function formatPrice(v: string | number) { const n = Number(v); return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n); }
 
@@ -22,14 +24,19 @@ export function PropertyDetailsSection0() {
   const propertyId = params.id;
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [searchStay] = useState(() => {
+    const values = readPropertySearch(new URLSearchParams(searchParams.toString()));
+    return searchValidation(values) ? { guests: values.guests } : values;
+  });
   const { draft, setDraft, preview, setPreview, setBooking } = useBooking();
   const [property, setProperty] = useState<PropertyResponse | null>(null);
   const [availability, setAvailability] = useState<AvailabilityResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState(2);
+  const [checkIn, setCheckIn] = useState(searchStay.check_in ?? "");
+  const [checkOut, setCheckOut] = useState(searchStay.check_out ?? "");
+  const [guests, setGuests] = useState(searchStay.guests ?? 2);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [previewLocal, setPreviewLocal] = useState<BookingPreviewResponse | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -66,10 +73,10 @@ export function PropertyDetailsSection0() {
           setProperty(prop);
           setAvailability(avail);
           // Preserve draft guest count on back navigation - don't overwrite if draft exists
-          if(draft && draft.propertyId === propertyId){
+          if(!searchStay.guests && draft && draft.propertyId === propertyId){
             setGuests(draft.guests);
           } else {
-            setGuests(Math.min(2, prop.max_guests));
+            setGuests(searchStay.guests ?? Math.min(2, prop.max_guests));
           }
         }
       } catch (e) {
@@ -82,7 +89,7 @@ export function PropertyDetailsSection0() {
 
   // Hydrate from draft when returning from Price & Review (back navigation preserves selections)
   useEffect(()=>{
-    if(draft && draft.propertyId === propertyId){
+    if(!searchStay.check_in && !searchStay.guests && draft && draft.propertyId === propertyId){
       setCheckIn(draft.checkIn);
       setCheckOut(draft.checkOut);
       setGuests(draft.guests);
@@ -133,14 +140,28 @@ export function PropertyDetailsSection0() {
     return ()=>{ cancelled = true; };
   },[property, checkIn, checkOut, guests, propertyId]);
 
-  const handleFavorite = () => {
+  const handleFavorite = async () => {
     if (!requireAuth({ nextPath: pathname, action: "favorites", router })) return;
-    const key = String(propertyId);
-    const saved: string[] = JSON.parse(localStorage.getItem("stayleb-saved-property-ids") || '[]');
-    const active = saved.includes(key);
-    localStorage.setItem("stayleb-saved-property-ids", JSON.stringify(active ? saved.filter((v) => v !== key) : [...saved, key]));
-    window.dispatchEvent(new Event("stayleb-favorites"));
-    Swal.fire({ title: active ? 'Removed from favorites' : 'Saved to favorites', icon: 'success', timer: 1200, showConfirmButton: false });
+    const propertyIdNum = Number(propertyId);
+    try {
+      // We need to check current favorite status by calling the API or we can just toggle and handle the response
+      // For simplicity, we'll try to add and if it fails with 409/conflict, we'll remove
+      try {
+        await addFavorite(propertyIdNum);
+        Swal.fire({ title: 'Saved to favorites', icon: 'success', timer: 1200, showConfirmButton: false });
+      } catch (addError) {
+        // If add fails, try to remove (assuming it was already favorited)
+        const msg = addError instanceof Error ? addError.message : '';
+        if (msg.includes('already') || msg.includes('duplicate') || msg.includes('409') || msg.includes('conflict')) {
+          await removeFavorite(propertyIdNum);
+          Swal.fire({ title: 'Removed from favorites', icon: 'success', timer: 1200, showConfirmButton: false });
+        } else {
+          throw addError;
+        }
+      }
+    } catch (e) {
+      Swal.fire({ title: 'Error', text: e instanceof Error ? e.message : 'Failed to update favorites', icon: 'error', confirmButtonColor: '#157375' });
+    }
   };
 
   const isUnavailable = (dateStr: string) => {
@@ -269,13 +290,7 @@ export function PropertyDetailsSection0() {
 
   <div className={"max-w-[1280px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6"}>
 
-  <nav className={"flex items-center gap-2 mb-4 font-caption text-caption text-on-surface-variant"}>
-  <Link href="/" className={"hover:text-primary transition-colors"}>Home</Link>
-  <Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
-  <Link href="/search" className={"hover:text-primary transition-colors"}>{property.location}</Link>
-  <Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
-  <span className={"text-[#157375] font-medium truncate"}>{property.title}</span>
-  </nav>
+  
 
   <div className={"flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6"}>
   <div className={"space-y-2"}>

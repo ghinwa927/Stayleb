@@ -29,6 +29,11 @@ from app.routes.admin_settlements import router as admin_settlements
 from app.routes.reviews import router as reviews_router
 from app.routes.admin_reviews import router as admin_reviews
 from app.routes.admin_dashboard import router as admin_dashboard_router
+from app.routes.owner_dashboard import router as owner_dashboard_router
+from app.routes.ai import router as ai_router
+from app.routes.owner_earnings import router as owner_earnings_router
+from app.routes.owner_settlements import router as owner_settlement_router
+from app.routes.favorites import router as favorite_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -88,6 +93,11 @@ app.include_router(admin_settlements)
 app.include_router(reviews_router)
 app.include_router(admin_reviews)
 app.include_router(admin_dashboard_router)
+app.include_router(owner_dashboard_router)
+app.include_router(ai_router)
+app.include_router(owner_earnings_router)
+app.include_router(owner_settlement_router)
+app.include_router(favorite_router)
 
 @app.get("/")
 def root():

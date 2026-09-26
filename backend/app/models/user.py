@@ -74,3 +74,8 @@ class User(Base):
     "Booking",
     back_populates="client",
 )
+    favorites = relationship(
+    "Favorite",
+    back_populates="client",
+    cascade="all, delete-orphan",
+)

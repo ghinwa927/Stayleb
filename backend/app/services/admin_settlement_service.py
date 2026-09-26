@@ -206,13 +206,32 @@ def get_admin_settlements(
 
 def get_admin_settlement_stats(
     db: Session,
+    owner_id: int | None = None,
 ):
     zero = Decimal("0.00")
 
-    settlements = (
-        db.query(CommissionSettlement)
-        .all()
+    # -------------------------------------------------
+    # Base query
+    # -------------------------------------------------
+
+    query = db.query(
+        CommissionSettlement
     )
+
+    # -------------------------------------------------
+    # Optional Owner filter
+    # -------------------------------------------------
+
+    if owner_id is not None:
+        query = query.filter(
+            CommissionSettlement.owner_id == owner_id
+        )
+
+    settlements = query.all()
+
+    # -------------------------------------------------
+    # Counters / totals
+    # -------------------------------------------------
 
     total_settlements = len(settlements)
 
@@ -221,6 +240,10 @@ def get_admin_settlement_stats(
 
     outstanding_commission = zero
     settled_commission = zero
+
+    # -------------------------------------------------
+    # Calculate stats
+    # -------------------------------------------------
 
     for settlement in settlements:
         amount = Decimal(
@@ -234,6 +257,10 @@ def get_admin_settlement_stats(
         elif settlement.status == "paid":
             paid_count += 1
             settled_commission += amount
+
+    # -------------------------------------------------
+    # Response
+    # -------------------------------------------------
 
     return {
         "total_settlements":

@@ -1,8 +1,9 @@
 from decimal import Decimal, ROUND_HALF_UP
-
+from datetime import date, datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 import stripe
+from sqlalchemy import or_
 
 from app.models.booking import Booking
 from app.models.property import Property
@@ -127,22 +128,30 @@ def create_booking(
     # 8. Check existing bookings
     # ---------------------------------
 
+    now = datetime.now()
+
     conflicting_booking = (
-        db.query(Booking)
-        .filter(
-            Booking.property_id == property.id,
+    db.query(Booking)
+    .filter(
+        Booking.property_id == property.id,
 
-            # Only active reservations block dates.
-            # Rejected/cancelled bookings do not.
-            Booking.status.in_(
-                ["pending", "confirmed"]
+        or_(
+            Booking.status == "confirmed",
+
+            (
+                (Booking.status == "pending")
+                & (
+                    (Booking.expires_at.is_(None))
+                    | (Booking.expires_at > now)
+                )
             ),
+        ),
 
-            Booking.check_in < booking_data.check_out,
-            Booking.check_out > booking_data.check_in,
-        )
-        .first()
+        Booking.check_in < booking_data.check_out,
+        Booking.check_out > booking_data.check_in,
     )
+    .first()
+)
 
     if conflicting_booking:
         raise HTTPException(
@@ -222,6 +231,11 @@ def create_booking(
         rounding=ROUND_HALF_UP,
     )
 
+    checkout_expires_at = (
+    datetime.now()
+    + timedelta(minutes=15)
+)
+
     # ---------------------------------
     # 12. Create booking
     # ---------------------------------
@@ -239,6 +253,7 @@ def create_booking(
         total_price=total_price,
 
         status="pending",
+        expires_at=checkout_expires_at,
 
         commission_percentage=commission_percentage,
         commission_amount=commission_amount,
@@ -258,106 +273,285 @@ def preview_booking(
 ):
     """
     Price preview without persisting.
-    Reuses same validation + pricing logic as create_booking
-    but does NOT create a DB row. Returns pricing breakdown.
+
+    Reuses the same validation and pricing logic as create_booking,
+    but does NOT create a database row.
     """
+
+    # ---------------------------------
+    # 1. Find property
+    # ---------------------------------
+
     property = (
         db.query(Property)
-        .filter(Property.id == booking_data.property_id)
+        .filter(
+            Property.id == booking_data.property_id
+        )
         .first()
     )
+
     if property is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Property not found",
         )
+
+    # ---------------------------------
+    # 2. Property must be approved
+    # ---------------------------------
+
     if property.status != "approved":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This property is not available for booking",
         )
+
+    # ---------------------------------
+    # 3. Owner cannot book own property
+    # ---------------------------------
+
     if property.owner_id == client_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="You cannot book your own property",
         )
+
+    # ---------------------------------
+    # 4. Validate dates
+    # ---------------------------------
+
     if booking_data.check_out <= booking_data.check_in:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Check-out date must be after check-in date",
         )
+
     if booking_data.check_in < date.today():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Check-in date cannot be in the past",
         )
-    requested_nights = (booking_data.check_out - booking_data.check_in).days
+
+    requested_nights = (
+        booking_data.check_out
+        - booking_data.check_in
+    ).days
+
+    # ---------------------------------
+    # 5. Minimum nights
+    # ---------------------------------
+
     if requested_nights < property.min_nights:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"This property requires at least {property.min_nights} night(s)",
+            detail=(
+                f"This property requires at least "
+                f"{property.min_nights} night(s)"
+            ),
         )
+
+    # ---------------------------------
+    # 6. Guest capacity
+    # ---------------------------------
+
     if booking_data.guests > property.max_guests:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"This property allows a maximum of {property.max_guests} guests",
+            detail=(
+                f"This property allows a maximum of "
+                f"{property.max_guests} guests"
+            ),
         )
+
+    # ---------------------------------
+    # 7. Owner-blocked dates
+    # ---------------------------------
+
     blocked_date = (
         db.query(PropertyBlockedDate)
         .filter(
-            PropertyBlockedDate.property_id == property.id,
-            PropertyBlockedDate.start_date < booking_data.check_out,
-            PropertyBlockedDate.end_date > booking_data.check_in,
+            PropertyBlockedDate.property_id
+            == property.id,
+
+            PropertyBlockedDate.start_date
+            < booking_data.check_out,
+
+            PropertyBlockedDate.end_date
+            > booking_data.check_in,
         )
         .first()
     )
+
     if blocked_date:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Property is unavailable for the selected dates",
         )
+
+    # ---------------------------------
+    # 8. Existing booking conflicts
+    #
+    # confirmed
+    #   -> always blocks
+    #
+    # pending + expires_at IS NULL
+    #   -> blocks
+    #
+    # pending + expires_at > now
+    #   -> blocks
+    #
+    # pending + expires_at <= now
+    #   -> does NOT block
+    # ---------------------------------
+
+    now = datetime.now()
+
     conflicting_booking = (
         db.query(Booking)
         .filter(
             Booking.property_id == property.id,
-            Booking.status.in_(["pending", "confirmed"]),
-            Booking.check_in < booking_data.check_out,
-            Booking.check_out > booking_data.check_in,
+
+            or_(
+                Booking.status == "confirmed",
+
+                (
+                    (Booking.status == "pending")
+                    & (
+                        Booking.expires_at.is_(None)
+                        | (Booking.expires_at > now)
+                    )
+                ),
+            ),
+
+            Booking.check_in
+            < booking_data.check_out,
+
+            Booking.check_out
+            > booking_data.check_in,
         )
         .first()
     )
+
     if conflicting_booking:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Property is already booked for the selected dates",
+            detail=(
+                "Property is already booked "
+                "for the selected dates"
+            ),
         )
+
+    # ---------------------------------
+    # 9. Calculate stay pricing
+    # ---------------------------------
+
     pricing = calculate_stay_price(
         db=db,
         property=property,
         check_in=booking_data.check_in,
         check_out=booking_data.check_out,
     )
-    number_of_nights = pricing["number_of_nights"]
-    total_price = Decimal(pricing["total_price"]).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    average_price_per_night = Decimal(pricing["average_price_per_night"]).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    settings = db.query(PlatformSetting).order_by(PlatformSetting.id.asc()).first()
+
+    number_of_nights = pricing[
+        "number_of_nights"
+    ]
+
+    total_price = Decimal(
+        pricing["total_price"]
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    average_price_per_night = Decimal(
+        pricing["average_price_per_night"]
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    # ---------------------------------
+    # 10. Platform commission settings
+    # ---------------------------------
+
+    settings = (
+        db.query(PlatformSetting)
+        .order_by(
+            PlatformSetting.id.asc()
+        )
+        .first()
+    )
+
     if settings is None:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Platform settings are not configured")
-    commission_percentage = Decimal(settings.commission_percentage).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    commission_amount = (total_price * commission_percentage / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    owner_earnings = (total_price - commission_amount).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        raise HTTPException(
+            status_code=(
+                status.HTTP_500_INTERNAL_SERVER_ERROR
+            ),
+            detail=(
+                "Platform settings are not configured"
+            ),
+        )
+
+    commission_percentage = Decimal(
+        settings.commission_percentage
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    # ---------------------------------
+    # 11. Calculate commission
+    # ---------------------------------
+
+    commission_amount = (
+        total_price
+        * commission_percentage
+        / Decimal("100")
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    owner_earnings = (
+        total_price - commission_amount
+    ).quantize(
+        Decimal("0.01"),
+        rounding=ROUND_HALF_UP,
+    )
+
+    # ---------------------------------
+    # 12. Return preview
+    # ---------------------------------
+
     return {
         "property_id": property.id,
         "check_in": booking_data.check_in,
         "check_out": booking_data.check_out,
         "guests": booking_data.guests,
-        "price_per_night": average_price_per_night,
-        "number_of_nights": number_of_nights,
-        "total_price": total_price,
-        "commission_percentage": commission_percentage,
-        "commission_amount": commission_amount,
-        "owner_earnings": owner_earnings,
-        "nightly_breakdown": pricing.get("nightly_breakdown", []),
+
+        "price_per_night":
+            average_price_per_night,
+
+        "number_of_nights":
+            number_of_nights,
+
+        "total_price":
+            total_price,
+
+        "commission_percentage":
+            commission_percentage,
+
+        "commission_amount":
+            commission_amount,
+
+        "owner_earnings":
+            owner_earnings,
+
+        "nightly_breakdown":
+            pricing.get(
+                "nightly_breakdown",
+                [],
+            ),
     }
 
 def get_owner_cash_requests(

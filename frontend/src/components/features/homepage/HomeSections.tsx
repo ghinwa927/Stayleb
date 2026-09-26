@@ -1,114 +1,14 @@
-import {
-  Zap,
-  ShieldCheck,
-  Banknote,
-  Headset,
-  BadgeCheck,
-  Star,
-} from "lucide-react";
+import Link from 'next/link';
+import { Mountain, Search, Banknote, MapPin } from 'lucide-react';
 const assurances = [
-  {
-    icon: Zap,
-    title: "24/7 Power Assurance",
-    description:
-      "Dual UPS backup + on-site Perkins heavy generators ensure seamless electricity and AC day and night.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Decree 4123 Inspected",
-    description:
-      "Rigorous safety audits, clean independent cistern water reserves, and sanitized pool compliance.",
-  },
-  {
-    icon: Banknote,
-    title: "Flexible Fresh USD",
-    description:
-      "International credit cards securely escrowed online or verified Cash-on-Arrival key handovers.",
-  },
-  {
-    icon: Headset,
-    title: "Local Village Caretakers",
-    description:
-      "Trusted on-ground natours within 15 mins for warm arrival check-ins, fireplace wood, and immediate support.",
-  },
+  { icon: Mountain, title: 'Across Lebanon', description: 'Explore coastal stays and mountain getaways.' },
+  { icon: Search, title: 'Find Your Fit', description: 'Compare amenities, house rules and stay options.' },
+  { icon: Banknote, title: 'Choose How to Pay', description: 'Pay online or request a cash booking for owner approval.' },
+  { icon: MapPin, title: 'Discover Somewhere New', description: 'Find a base for your next Lebanese adventure.' },
 ];
 export function Assurances() {
-  return (
-    <section
-      className="page-container assurances"
-      aria-label="StayLeb assurances"
-    >
-      {assurances.map(({ icon: Icon, title, description }) => (
-        <article key={title}>
-          <span>
-            <Icon size={25} />
-          </span>
-          <div>
-            <h2>{title}</h2>
-            <p>{description}</p>
-          </div>
-        </article>
-      ))}
-    </section>
-  );
+  return <section className="page-container assurances" aria-label="Discover StayLeb">{assurances.map(({ icon: Icon, title, description }) => <article key={title}><span><Icon size={25}/></span><div><h2>{title}</h2><p>{description}</p></div></article>)}</section>;
 }
 export function Guarantee() {
-  return (
-    <section id="guarantee" className="page-container guarantee-section">
-      <div className="guarantee">
-        <div className="guarantee-copy">
-          <h2>
-            <BadgeCheck size={24} />
-            The StayLeb Hospitality Guarantee
-          </h2>
-          <h3>
-            “Zero blackouts, crystal water, and genuine Lebanese welcoming.”
-          </h3>
-          <p>
-            Every listing undergoes our on-site 28-point Lebanese infrastructure
-            checklist before appearing on StayLeb. Our network of verified
-            village caretakers (natours) handles keys personally, fills the
-            firewood, and remains on standby 24/7.
-          </p>
-          <div className="guarantee-stats">
-            {[
-              ["99.8%", "Power Uptime Recorded"],
-              ["15 Mins", "Average Caretaker Response"],
-              ["4,800+", "Stays Hosted Safely"],
-            ].map(([value, label]) => (
-              <div key={value}>
-                <strong>{value}</strong>
-                <small>{label}</small>
-              </div>
-            ))}
-          </div>
-        </div>
-        <blockquote>
-          <div className="review-stars">
-            {Array.from({ length: 5 }, (_, i) => (
-              <Star size={17} key={i} />
-            ))}
-            <span>Verified Stay • Batroun Coast</span>
-          </div>
-          <p>
-            “Visiting from Dubai with my family, we were worried about power
-            cuts and water. StayLeb&apos;s chalet in Batroun had flawless AC all
-            weekend, blazing WiFi for my remote work, and Abou Tony greeted us
-            with freshly picked figs and chilled lemonade.”
-          </p>
-          <footer>
-            <span>TG</span>
-            <div>
-              <strong>Tarek &amp; Gabriella G.</strong>
-              <small>Booked Azure Batroun Cliff Villa</small>
-            </div>
-          </footer>
-        </blockquote>
-      </div>
-      <p className="sample-note">
-        * Sample listing data, caretaker contacts, and imagery compiled for
-        prototype demonstration. All pricing displayed in Fresh USD.
-      </p>
-    </section>
-  );
+  return <section id="guarantee" className="page-container guarantee-section"><div className="guarantee"><div className="guarantee-copy"><h2>Plan Your Stay with StayLeb</h2><h3>Coastal weekends. Mountain mornings.</h3><p>Choose a destination, compare properties and find the stay that suits your plans. Review the amenities, house rules and seasonal prices before booking.</p></div><div className="bg-white rounded-xl p-6 space-y-4"><h3 className="text-lg font-semibold">Your next getaway starts here</h3><p className="text-sm text-on-surface-variant">Search with your dates and guest count to explore stays for your trip.</p><Link className="primary-button" href="/search">Explore stays</Link></div></div></section>;
 }

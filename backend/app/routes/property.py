@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status,Query
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 
-from datetime import date
+from datetime import date,datetime
 from decimal import Decimal
 from typing import Literal
 
@@ -25,6 +26,8 @@ from app.services.property_service import (
 
 # Change this import path if your auth file has a different name
 from app.dependencies import require_owner
+from app.models.booking import Booking
+from app.models.property_blocked_date import PropertyBlockedDate
 
 
 router = APIRouter(
@@ -182,48 +185,106 @@ def get_public_availability_route(
     property_id: int,
     db: Session = Depends(get_db),
 ):
-    # Public availability: owner blocked dates + confirmed/pending bookings
+    # -------------------------------------------------
+    # 1. Property must exist and be publicly approved
+    # -------------------------------------------------
+
     try:
-        prop = get_approved_property_by_id(
+        get_approved_property_by_id(
             db=db,
             property_id=property_id,
         )
+
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e),
         )
-    from app.models.property_blocked_date import PropertyBlockedDate
-    from app.models.booking import Booking
-    blocked = db.query(PropertyBlockedDate).filter(
-        PropertyBlockedDate.property_id == property_id
-    ).all()
-    bookings = db.query(Booking).filter(
-        Booking.property_id == property_id,
-        Booking.status.in_(["pending", "confirmed", "paid"]),
-    ).all()
+
+    # -------------------------------------------------
+    # 2. Owner-blocked dates
+    # -------------------------------------------------
+
+    blocked_dates = (
+        db.query(PropertyBlockedDate)
+        .filter(
+            PropertyBlockedDate.property_id
+            == property_id
+        )
+        .order_by(
+            PropertyBlockedDate.start_date.asc()
+        )
+        .all()
+    )
+
+    # -------------------------------------------------
+    # 3. Active bookings
+    #
+    # confirmed
+    #   -> always blocks
+    #
+    # pending + expires_at IS NULL
+    #   -> blocks
+    #
+    # pending + expires_at > now
+    #   -> blocks
+    #
+    # pending + expires_at <= now
+    #   -> does NOT block
+    # -------------------------------------------------
+
+    now = datetime.now()
+
+    bookings = (
+        db.query(Booking)
+        .filter(
+            Booking.property_id == property_id,
+
+            or_(
+                Booking.status == "confirmed",
+
+                (
+                    (Booking.status == "pending")
+                    & (
+                        Booking.expires_at.is_(None)
+                        | (Booking.expires_at > now)
+                    )
+                ),
+            ),
+        )
+        .order_by(
+            Booking.check_in.asc()
+        )
+        .all()
+    )
+
+    # -------------------------------------------------
+    # 4. Response
+    # -------------------------------------------------
+
     return {
         "property_id": property_id,
+
         "blocked_dates": [
             {
-                "id": b.id,
-                "start_date": b.start_date,
-                "end_date": b.end_date,
-                "reason": b.reason,
+                "id": blocked.id,
+                "start_date": blocked.start_date,
+                "end_date": blocked.end_date,
+                "reason": blocked.reason,
             }
-            for b in blocked
+            for blocked in blocked_dates
         ],
+
         "booked_dates": [
             {
-                "id": bk.id,
-                "check_in": bk.check_in,
-                "check_out": bk.check_out,
-                "status": bk.status,
+                "id": booking.id,
+                "check_in": booking.check_in,
+                "check_out": booking.check_out,
+                "status": booking.status,
             }
-            for bk in bookings
+            for booking in bookings
         ],
     }
-
 
 @router.get(
     "/my-properties",

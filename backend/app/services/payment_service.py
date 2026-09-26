@@ -45,6 +45,20 @@ def create_payment(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Payment cannot be created for this booking",
         )
+    
+
+    # Temporary checkout hold must still be active
+    if (
+       booking.expires_at is not None
+       and booking.expires_at <= datetime.now()
+    ):
+       raise HTTPException(
+          status_code=status.HTTP_409_CONFLICT,
+          detail=(
+            "This booking checkout has expired. "
+            "Please create a new booking."
+        ),
+    )
 
     # Prevent duplicate payment
     existing_payment = (
@@ -65,31 +79,38 @@ def create_payment(
 
     if payment_method == "cash":
 
-        payment = Payment(
-            booking_id=booking.id,
+       payment = Payment(
+           booking_id=booking.id,
 
-            # Never trust amount from frontend.
-            amount=booking.total_price,
+           # Never trust amount from frontend.
+           amount=booking.total_price,
 
-            payment_method="cash",
-            payment_status="pending",
+           payment_method="cash",
+           payment_status="pending",
 
-            stripe_payment_id=None,
-            paid_at=None,
-        )
+           stripe_payment_id=None,
+           paid_at=None,
+    )
 
-        db.add(payment)
-        db.commit()
-        db.refresh(payment)
+    db.add(payment)
 
-        return payment
+    # Cash payment is now waiting for owner approval.
+    # It should no longer use the temporary checkout expiry.
+    booking.expires_at = None
 
-    # ---------------------------------
-    # Stripe will be implemented next
-    # ---------------------------------
+    db.commit()
+
+    db.refresh(payment)
+    db.refresh(booking)
+
+    return payment
+
+ # ---------------------------------
+ # Stripe will be implemented next
+ # ---------------------------------
 
     if payment_method == "stripe":
-        raise HTTPException(
+     raise HTTPException(
             status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="Stripe payment is not implemented yet",
         )
@@ -141,36 +162,95 @@ def create_stripe_payment(
         )
 
     # ---------------------------------
-    # 4. Prevent duplicate payment
+    # Temporary checkout hold
+    # must still be active
+    # ---------------------------------
+
+    if (
+        booking.expires_at is not None
+        and booking.expires_at <= datetime.now()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "This booking checkout has expired. "
+                "Please create a new booking."
+            ),
+        )
+
+    # ---------------------------------
+    # 4. Check existing payment
     # ---------------------------------
 
     existing_payment = (
         db.query(Payment)
-        .filter(Payment.booking_id == booking.id)
+        .filter(
+            Payment.booking_id == booking.id
+        )
         .first()
     )
 
     if existing_payment:
-        # Idempotent retry: if a stripe pending payment already exists, reuse its PaymentIntent
+
+        # Cash payment already exists.
+        # Do not allow switching it to Stripe.
+        if existing_payment.payment_method != "stripe":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Payment already exists for this booking",
+            )
+
+        # ---------------------------------
+        # Existing pending Stripe payment
+        #
+        # Reuse its PaymentIntent.
+        # ---------------------------------
+
         if (
-            existing_payment.payment_method == "stripe"
-            and existing_payment.payment_status == "pending"
+            existing_payment.payment_status == "pending"
             and existing_payment.stripe_payment_id
         ):
             try:
-                intent = stripe.PaymentIntent.retrieve(existing_payment.stripe_payment_id)
-                # If intent still requires action, reuse it; client_secret is available
-                if intent and getattr(intent, "client_secret", None):
+                intent = stripe.PaymentIntent.retrieve(
+                    existing_payment.stripe_payment_id
+                )
+
+                if (
+                    intent
+                    and getattr(
+                        intent,
+                        "client_secret",
+                        None,
+                    )
+                ):
                     return {
                         "payment": existing_payment,
                         "client_secret": intent.client_secret,
                     }
+
             except stripe.StripeError:
                 pass
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Payment already exists for this booking",
-        )
+
+        # ---------------------------------
+        # Previous Stripe attempt failed
+        #
+        # The booking expiration was already
+        # checked above, so retry is allowed.
+        # ---------------------------------
+
+        elif existing_payment.payment_status == "failed":
+            pass
+
+        # ---------------------------------
+        # Any other payment state should
+        # not create another payment.
+        # ---------------------------------
+
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Payment already exists for this booking",
+            )
 
     # ---------------------------------
     # 5. Convert amount to cents
@@ -212,19 +292,38 @@ def create_stripe_payment(
         ) from exc
 
     # ---------------------------------
-    # 7. Create local payment
+    # 7. Create or reuse local payment
     # ---------------------------------
 
-    payment = Payment(
-        booking_id=booking.id,
-        amount=booking.total_price,
-        payment_method="stripe",
-        payment_status="pending",
-        stripe_payment_id=payment_intent.id,
-        paid_at=None,
-    )
+    if existing_payment:
+        # Previous Stripe payment failed.
+        # Reuse the same database Payment row.
 
-    db.add(payment)
+        payment = existing_payment
+
+        payment.amount = booking.total_price
+        payment.payment_method = "stripe"
+        payment.payment_status = "pending"
+        payment.stripe_payment_id = payment_intent.id
+        payment.paid_at = None
+
+    else:
+        # First Stripe attempt.
+
+        payment = Payment(
+            booking_id=booking.id,
+            amount=booking.total_price,
+            payment_method="stripe",
+            payment_status="pending",
+            stripe_payment_id=payment_intent.id,
+            paid_at=None,
+        )
+
+        db.add(payment)
+
+    # ---------------------------------
+    # 8. Save local payment
+    # ---------------------------------
 
     try:
         db.commit()
@@ -233,14 +332,20 @@ def create_stripe_payment(
     except Exception:
         db.rollback()
 
-        # We created the PaymentIntent but failed
-        # to create our local payment record.
+        # PaymentIntent was created but
+        # local DB save failed.
         try:
-            stripe.PaymentIntent.cancel(payment_intent.id)
+            stripe.PaymentIntent.cancel(
+                payment_intent.id
+            )
         except stripe.StripeError:
             pass
 
         raise
+
+    # ---------------------------------
+    # 9. Return Stripe client secret
+    # ---------------------------------
 
     return {
         "payment": payment,

@@ -13,9 +13,10 @@ import {
   createStripePayment,
 } from "@/services/payments";
 import { createBooking, previewBooking, type BookingPreviewResponse } from "@/services/bookings";
+import { getPaymentByBooking } from "@/services/payments";
 
 export function PaymentMethod() {
-  const { booking, setBooking, draft, setDraft, preview: ctxPreview, setPreview: setCtxPreview } = useBooking();
+  const { booking, setBooking, draft, setDraft, preview: ctxPreview, setPreview: setCtxPreview, isTemporaryCheckoutHold, getExpiresAtSecondsRemaining } = useBooking();
 
   const params = useParams() as { id?: string };
   const router = useRouter();
@@ -40,6 +41,8 @@ export function PaymentMethod() {
   const effectiveDraft = (draft && draft.propertyId === propertyId ? draft : null) || queryDraft;
 
   const [mounted, setMounted] = useState(false);
+  const [expiresAtSeconds, setExpiresAtSeconds] = useState<number | null>(null);
+  const [expired, setExpired] = useState(false);
   useEffect(()=>{ setMounted(true); },[]);
   useEffect(()=>{
     if(queryDraft && (!draft || draft.propertyId !== propertyId || draft.checkIn !== queryDraft.checkIn || draft.checkOut !== queryDraft.checkOut || draft.guests !== queryDraft.guests)){
@@ -63,6 +66,55 @@ export function PaymentMethod() {
       guests: effectiveDraft.guests
     }).then(p=>{ setPreview(p); setCtxPreview(p); }).catch(()=>{});
   },[effectiveDraft, propertyId, booking]);
+
+  // Checkout expiration countdown for temporary booking holds
+  useEffect(() => {
+    if (!booking || !isTemporaryCheckoutHold(booking)) {
+      setExpiresAtSeconds(null);
+      setExpired(false);
+      return;
+    }
+    const initialSeconds = getExpiresAtSecondsRemaining(booking);
+    if (initialSeconds === null || initialSeconds <= 0) {
+      setExpired(true);
+      setExpiresAtSeconds(0);
+      return;
+    }
+    setExpiresAtSeconds(initialSeconds);
+    setExpired(false);
+    const timer = setInterval(() => {
+      const remaining = getExpiresAtSecondsRemaining(booking);
+      if (remaining === null || remaining <= 0) {
+        clearInterval(timer);
+        setExpired(true);
+        setExpiresAtSeconds(0);
+      } else {
+        setExpiresAtSeconds(remaining);
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [booking, isTemporaryCheckoutHold, getExpiresAtSecondsRemaining]);
+
+  // Handle expired checkout - redirect to property with message
+  useEffect(() => {
+    if (expired && booking) {
+      try {
+        sessionStorage.removeItem('stayleb-latest-booking-id');
+        sessionStorage.removeItem('stayleb-latest-booking');
+        localStorage.removeItem('stayleb-latest-booking-id');
+        sessionStorage.removeItem('stayleb-stripe-client-secret');
+        sessionStorage.removeItem('stayleb-stripe-booking-id');
+      } catch {}
+      Swal.fire({
+        title: 'Checkout hold expired',
+        text: 'Your temporary booking hold has expired. Please select dates again to start a new booking.',
+        icon: 'warning',
+        confirmButtonColor: '#157375',
+      }).then(() => {
+        router.push(`/properties/${propertyId}`);
+      });
+    }
+  }, [expired, booking, propertyId, router]);
 
   const total = booking ? Number(booking.total_price) : preview ? Number(preview.total_price) : 0;
   // bookingId for display/navigation after creation
@@ -157,8 +209,8 @@ export function PaymentMethod() {
       // =========================
       // STRIPE
       // =========================
-      // If a Stripe payment already exists, backend will return 409; we should handle retry by reusing?
-      // For now attempt to create Stripe PaymentIntent; if 409, inform user and allow navigation to payment page if secret already stored?
+      // Backend supports retry: if payment exists and failed, createStripePayment creates new PaymentIntent
+      // and returns new client_secret. We just call it and handle the response.
       let response;
       try {
         response = await createStripePayment(bookingId);
@@ -196,6 +248,14 @@ export function PaymentMethod() {
     }
   };
 
+  const formatCountdown = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const isTempHold = booking && isTemporaryCheckoutHold(booking);
+
   return (
     <main className="booking-main">
       <div className="mb-4"><BackToPropertyButton propertyId={propertyId} /></div>
@@ -215,6 +275,18 @@ export function PaymentMethod() {
             Choose between immediate confirmation via Stripe
             or a cash booking request requiring owner approval.
           </p>
+
+          {isTempHold && expiresAtSeconds !== null && expiresAtSeconds > 0 && (
+            <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
+              <div className="flex items-center gap-2">
+                <Icon name="schedule" className="material-symbols-outlined text-amber-700 text-[22px]" />
+                <div>
+                  <p className="font-semibold text-amber-800">Complete your booking within <span className="font-mono text-lg">{formatCountdown(expiresAtSeconds)}</span></p>
+                  <p className="text-xs text-amber-700">This temporary hold expires automatically. Your dates will be released if not confirmed.</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <fieldset className="space-y-4">
             <legend className="sr-only">

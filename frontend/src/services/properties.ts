@@ -1,5 +1,6 @@
 "use client";
 import { apiFetch } from "@/services/api";
+import { propertySearchQuery } from "@/lib/property-search";
 import type { PropertyResponse } from "@/services/owner";
 
 export type PropertySearchParams = {
@@ -34,22 +35,8 @@ export type AvailabilityResponse = {
 };
 
 export async function searchProperties(params: PropertySearchParams): Promise<PropertySearchResponse> {
-  const qs = new URLSearchParams();
-  if (params.location) qs.set("location", params.location);
-  if (params.check_in) qs.set("check_in", params.check_in);
-  if (params.check_out) qs.set("check_out", params.check_out);
-  if (params.guests) qs.set("guests", String(params.guests));
-  if (params.min_price !== undefined) qs.set("min_price", String(params.min_price));
-  if (params.max_price !== undefined) qs.set("max_price", String(params.max_price));
-  if (params.property_type) qs.set("property_type", params.property_type);
-  if (params.bedrooms !== undefined) qs.set("bedrooms", String(params.bedrooms));
-  if (params.beds !== undefined) qs.set("beds", String(params.beds));
-  if (params.bathrooms !== undefined) qs.set("bathrooms", String(params.bathrooms));
-  if (params.amenity_ids) params.amenity_ids.forEach((id) => qs.append("amenity_ids", String(id)));
-  if (params.sort) qs.set("sort", params.sort);
-  if (params.page) qs.set("page", String(params.page));
-  if (params.page_size) qs.set("page_size", String(params.page_size));
-  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  const query = propertySearchQuery(params);
+  const suffix = query ? `?${query}` : "";
   return apiFetch(`/properties${suffix}`);
 }
 

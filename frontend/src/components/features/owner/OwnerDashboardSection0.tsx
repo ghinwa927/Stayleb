@@ -1,308 +1,672 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { LocalImage } from "@/components/ui/LocalImage";
 import { Icon } from "@/components/ui/Icon";
+import { RecordRow, RecordStatus } from "@/components/ui/RecordRow";
+import { DataTable } from "@/components/ui/Interactions";
 import { getMyProperties, type PropertyResponse } from "@/services/owner";
-import { getOwnerReviewStats, type OwnerReviewStats } from "@/services/reviews";
+import { getOwnerDashboardStats, type OwnerDashboardStats } from "@/services/ownerDashboard";
+
+function formatMoney(v: string | number | null | undefined) {
+  const n = Number(v ?? 0);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+}
+
+function formatRating(v: string | number | null | undefined) {
+  const n = Number(v ?? 0);
+  return n.toFixed(2);
+}
 
 export function OwnerDashboardSection0() {
+  const [stats, setStats] = useState<OwnerDashboardStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
+
   const [properties, setProperties] = useState<PropertyResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [reviewStats, setReviewStats] = useState<OwnerReviewStats | null>(null);
-  const [reviewStatsLoading, setReviewStatsLoading] = useState(true);
+  const [propertiesLoading, setPropertiesLoading] = useState(true);
+
+  async function loadStats() {
+    setStatsLoading(true);
+    setStatsError(null);
+    try {
+      const data = await getOwnerDashboardStats();
+      setStats(data);
+    } catch (e) {
+      setStatsError(e instanceof Error ? e.message : "Failed to load dashboard statistics");
+    } finally {
+      setStatsLoading(false);
+    }
+  }
+
+  async function loadProperties() {
+    setPropertiesLoading(true);
+    try {
+      const data = await getMyProperties();
+      setProperties(data);
+    } catch {
+      setProperties([]);
+    } finally {
+      setPropertiesLoading(false);
+    }
+  }
 
   useEffect(() => {
-    getMyProperties()
-      .then(setProperties)
-      .catch(() => setProperties([]))
-      .finally(() => setLoading(false));
-  }, []);
-  useEffect(() => {
     let cancelled = false;
-    async function loadReviewStats() {
-      setReviewStatsLoading(true);
+    (async () => {
+      setStatsLoading(true);
+      setStatsError(null);
       try {
-        const s = await getOwnerReviewStats();
-        if (!cancelled) setReviewStats(s);
-      } catch {
-        if (!cancelled) setReviewStats(null);
+        const data = await getOwnerDashboardStats();
+        if (!cancelled) setStats(data);
+      } catch (e) {
+        if (!cancelled) setStatsError(e instanceof Error ? e.message : "Failed to load dashboard statistics");
       } finally {
-        if (!cancelled) setReviewStatsLoading(false);
+        if (!cancelled) setStatsLoading(false);
       }
-    }
-    loadReviewStats();
+    })();
     return () => { cancelled = true; };
   }, []);
 
-  const total = properties.length;
-  const approved = properties.filter((p) => p.status === "approved").length;
-  const pending = properties.filter((p) => p.status === "pending").length;
-  const rejected = properties.filter((p) => p.status === "rejected").length;
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setPropertiesLoading(true);
+      try {
+        const data = await getMyProperties();
+        if (!cancelled) setProperties(data);
+      } catch {
+        if (!cancelled) setProperties([]);
+      } finally {
+        if (!cancelled) setPropertiesLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
+  const hasStats = !!stats;
+  const hasReviews = hasStats && stats.total_reviews > 0;
+
+  return <>
+<div className={""}><main className={"w-full pt-6 px-gutter-lg py-space-lg min-h-screen bg-surface-container-low"}><div className={"flex flex-col w-full"}>
+<div className={"flex flex-col md:flex-row md:items-end justify-between gap-space-md mb-space-xl"}>
+<div className={"flex flex-col gap-space-xxs"}>
+<div className={"flex items-center gap-space-xs text-[#46B1B1] font-label-sm text-label-sm"}>
+<span className={"inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold"}>
+<span className={"w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"}></span>{"\n          Live Sync Active\n        "}</span>
+<span>{"\u2022"}</span>
+<span>{"Lebanon Standard Time (UTC+03:00)"}</span>
+</div>
+<h1 className={"font-headline-lg text-headline-lg text-[#46B1B1] tracking-tight mt-1"}>{"Owner Dashboard"}</h1>
+<p className={"font-body-md text-body-md text-[#46B1B1]"}>{"Overview of your listed chalets, approval statuses, and upcoming reservations across Lebanon."}</p>
+</div>
+  <div className={"flex items-center gap-space-xs shrink-0 relative"}>
+<Link className={"inline-flex items-center gap-space-xxs px-space-md py-2.5 rounded-lg bg-primary text-white font-label-md text-label-md shadow-sm hover:bg-primary/90 active:scale-[0.98] transition-all"} data-path={"availability"} href={"/owner/availability"}>
+<Icon name="calendar_month" className="material-symbols-outlined text-[18px] text-white" />
+<span>{"Availability Matrix"}</span>
+</Link>
+<Link className={"inline-flex items-center gap-space-xxs px-space-md py-2.5 rounded-lg bg-primary text-white font-label-md text-label-md shadow-sm hover:bg-primary/90 active:scale-[0.98] transition-all"} data-path={"properties-new"} href={"/owner/properties/new"}>
+<Icon name="add_circle" className="material-symbols-outlined text-[18px] text-white" />
+<span>{"+ Add Property"}</span>
+</Link>
+</div>
+</div>
+
+{statsError ? (
+  <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-rose-200 flex items-center justify-between gap-space-md mb-space-xl">
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600"><Icon name="error" className="material-symbols-outlined text-[20px]" /></div>
+      <div>
+        <p className="font-label-md text-label-md font-semibold text-rose-600">Unable to load dashboard statistics</p>
+        <p className="font-body-md text-body-md text-[#46B1B1]/70">{statsError}</p>
+      </div>
+    </div>
+    <button onClick={() => loadStats()} className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white font-label-sm text-label-sm shadow-sm shrink-0">Retry</button>
+  </div>
+) : null}
+
+<div className={"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-xl"}>
+<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between"}>
+<div className={"flex items-start justify-between"}>
+<span className={"font-caption text-caption uppercase tracking-wider text-outline font-semibold"}>{"Total Properties"}</span>
+<div className={"w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary"}>
+<Icon name="domain" className="material-symbols-outlined text-[20px]" />
+</div>
+</div>
+<div className={"mt-space-sm"}>
+<div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]"}>{statsLoading ? "…" : String(stats?.total_properties ?? 0)}</div>
+<div className={"flex items-center gap-1.5 mt-1 text-[#46B1B1] font-label-sm text-label-sm"}>
+<span>{"All listings in portfolio"}</span>
+</div>
+</div>
+<div className={"mt-space-xs pt-space-xs flex items-center justify-between text-caption font-caption text-[#46B1B1]"}>
+<span className={"text-primary font-medium"}>Live</span>
+<span>{stats ? `${stats.approved_properties} approved · ${stats.pending_properties} pending` : "All properties"}</span>
+</div>
+</div>
+<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between"}>
+<div className={"flex items-start justify-between"}>
+<span className={"font-caption text-caption uppercase tracking-wider text-outline font-semibold"}>{"Pending Properties"}</span>
+<span className={"inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption font-bold"}>
+<span className={"w-1.5 h-1.5 rounded-full bg-tertiary"}></span>{"\n          Action Required\n        "}</span>
+</div>
+<div className={"mt-space-sm"}>
+<div className={"font-headline-md text-headline-md font-bold text-tertiary"}>{statsLoading ? "…" : `${stats?.pending_properties ?? 0} Pending`}</div>
+<div className={"flex items-center gap-1.5 mt-1 text-[#46B1B1] font-label-sm text-label-sm"}>
+<span>{"Awaiting admin review & verification"}</span>
+</div>
+</div>
+<div className={"mt-space-xs pt-space-xs flex items-center justify-between text-caption font-caption text-[#46B1B1]"}>
+<span className={"text-primary font-medium"}>{stats ? `${stats.total_properties} total` : "—"}</span>
+<span>Total properties</span>
+</div>
+</div>
+<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between"}>
+<div className={"flex items-start justify-between"}>
+<span className={"font-caption text-caption uppercase tracking-wider text-outline font-semibold"}>{"Approved Properties"}</span>
+<div className={"w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary"}>
+<Icon name="villa" className="material-symbols-outlined text-[20px]" />
+</div>
+</div>
+<div className={"mt-space-sm"}>
+<div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]"}>{statsLoading ? "…" : `${stats?.approved_properties ?? 0} Live`}</div>
+<div className={"flex items-center gap-1.5 mt-1 text-[#46B1B1] font-label-sm text-label-sm"}>
+<span>{"Active marketplace listings"}</span>
+</div>
+</div>
+<div className={"mt-space-xs pt-space-xs flex items-center justify-between text-caption font-caption text-[#46B1B1]"}>
+<span className={"text-primary font-medium"}>Live</span>
+<span>{stats ? `Rejected: ${stats.rejected_properties}` : ""}</span>
+</div>
+</div>
+<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between"}>
+<div className={"flex items-start justify-between"}>
+<span className={"font-caption text-caption uppercase tracking-wider text-outline font-semibold"}>{"Outstanding Commission"}</span>
+<div className={"w-8 h-8 rounded-lg bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed"}>
+<Icon name="receipt" className="material-symbols-outlined text-[20px]" />
+</div>
+</div>
+<div className={"mt-space-sm"}>
+{statsLoading ? (
+  <div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]"}>…</div>
+) : statsError ? (
+  <div className={"font-label-sm text-label-sm text-rose-600"}>Unavailable</div>
+) : (
+  <div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]"}>{formatMoney(stats?.outstanding_cash_commission ?? "0.00")}<span className={"text-label-sm font-normal text-[#46B1B1]"}>{" USD"}</span></div>
+)}
+<div className={"flex items-center gap-1.5 mt-1 text-[#46B1B1] font-label-sm text-label-sm"}>
+{statsLoading ? (
+  <span>Loading…</span>
+) : statsError ? (
+  <span className="text-rose-600 text-xs">{statsError}</span>
+) : (
+  <>
+    <span className={"font-semibold text-tertiary"}>{stats?.total_bookings ?? 0}</span>{" total bookings"}
+  </>
+)}
+</div>
+</div>
+<div className={"mt-space-xs pt-space-xs flex items-center justify-between text-caption font-caption text-[#46B1B1]"}>
+<span className={"text-tertiary font-medium"}>{"Cash On Arrival"}</span>
+<span>{"Live data"}</span>
+</div>
+</div>
+<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between"}>
+<div className={"flex items-start justify-between"}>
+<span className={"font-caption text-caption uppercase tracking-wider text-outline font-semibold"}>{"Total Bookings"}</span>
+<div className={"w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary"}>
+<Icon name="receipt_long" className="material-symbols-outlined text-[20px]" />
+</div>
+</div>
+<div className={"mt-space-sm"}>
+{statsLoading ? (
+  <div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]"}>…</div>
+) : statsError ? (
+  <div className={"font-label-sm text-label-sm text-rose-600"}>Unavailable</div>
+) : (
+  <div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]"}>{stats?.total_bookings ?? 0}<span className={"text-label-sm font-normal text-[#46B1B1]"}>{" bookings"}</span></div>
+)}
+<div className={"flex items-center gap-1.5 mt-1 text-[#46B1B1] font-label-sm text-label-sm"}>
+<span>{stats ? `${stats.upcoming_bookings} upcoming` : "All-time bookings"}</span>
+</div>
+</div>
+<div className={"mt-space-xs pt-space-xs flex items-center justify-between text-caption font-caption text-[#46B1B1]"}>
+<span className={"text-primary font-medium"}>{stats ? `Upcoming: ${stats.upcoming_bookings}` : "Global"}</span>
+<span>{"Live data"}</span>
+</div>
+</div>
+<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between"}>
+<div className={"flex items-start justify-between"}>
+<span className={"font-caption text-caption uppercase tracking-wider text-outline font-semibold"}>{"Upcoming Bookings"}</span>
+<div className={"w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container"}>
+<Icon name="event_upcoming" className="material-symbols-outlined text-[20px]" />
+</div>
+</div>
+<div className={"mt-space-sm"}>
+{statsLoading ? (
+  <div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]"}>…</div>
+) : statsError ? (
+  <div className={"font-label-sm text-label-sm text-rose-600"}>Unavailable</div>
+) : (
+  <div className={"font-headline-md text-headline-md font-bold text-primary"}>{stats?.upcoming_bookings ?? 0}<span className={"text-label-sm font-normal text-[#46B1B1]"}>{" stays"}</span></div>
+)}
+<div className={"flex items-center gap-1.5 mt-1 text-[#46B1B1] font-label-sm text-label-sm"}>
+{stats && stats.pending_cash_requests > 0 ? (
+  <><span className="font-semibold text-amber-600">{stats.pending_cash_requests}</span>{" pending cash requests"}</>
+) : (
+  <span>{"No pending cash requests"}</span>
+)}
+</div>
+</div>
+<div className={"mt-space-xs pt-space-xs flex items-center justify-between text-caption font-caption text-[#46B1B1]"}>
+<span className={"text-secondary font-medium"}>{statsError ? "Unavailable" : `${stats?.pending_cash_requests ?? 0} cash pending`}</span>
+<span>{"Live data"}</span>
+</div>
+</div>
+<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between"}>
+<div className={"flex items-start justify-between"}>
+<span className={"font-caption text-caption uppercase tracking-wider text-outline font-semibold"}>{"Owner Earnings"}</span>
+<div className={"w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary"}>
+<Icon name="payments" className="material-symbols-outlined text-[20px]" />
+</div>
+</div>
+<div className={"mt-space-sm"}>
+{statsLoading ? (
+  <div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]"}>…</div>
+) : statsError ? (
+  <div className={"font-label-sm text-label-sm text-rose-600"}>Unavailable</div>
+) : (
+  <div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]"}>{formatMoney(stats?.owner_earnings)}<span className={"text-label-sm font-normal text-[#46B1B1]"}>{" USD"}</span></div>
+)}
+<div className={"flex items-center gap-1.5 mt-1 text-[#46B1B1] font-label-sm text-label-sm"}>
+<span>{"Net earnings after commission"}</span>
+</div>
+</div>
+<div className={"mt-space-xs pt-space-xs flex items-center justify-between text-caption font-caption text-[#46B1B1]"}>
+<span className={"text-primary font-medium"}>{statsError ? "Unavailable" : `Revenue: ${formatMoney(stats?.total_revenue ?? "0.00")}`}</span>
+<span>{"Live data"}</span>
+</div>
+</div>
+<div className={"bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between"}>
+<div className={"flex items-start justify-between"}>
+<span className={"font-caption text-caption uppercase tracking-wider text-outline font-semibold"}>{"Portfolio Rating"}</span>
+<div className={"w-8 h-8 rounded-lg bg-surface-container-high flex items-center justify-center text-primary"}>
+<Icon name="star" className="material-symbols-outlined text-[20px]" />
+</div>
+</div>
+<div className={"mt-space-sm"}>
+{statsLoading ? (
+  <div className="flex items-center gap-2 py-2">
+    <span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    <span className="text-sm text-[#46B1B1]/70">Loading…</span>
+  </div>
+) : statsError ? (
+  <div className={"font-label-sm text-label-sm text-rose-600"}>Unavailable</div>
+) : (stats?.total_reviews ?? 0) === 0 ? (
+  <div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]/60"}>0<span className="text-sm font-normal text-[#46B1B1]/70"> reviews</span></div>
+) : (
+  <div className={"font-headline-md text-headline-md font-bold text-[#46B1B1]"}>{formatRating(stats?.portfolio_rating ?? 0)}<span className="text-sm font-normal text-[#46B1B1]/70"> / 5.0</span></div>
+)}
+<div className={"flex items-center gap-1.5 mt-1 text-[#46B1B1] font-label-sm text-label-sm"}>
+{statsLoading ? (
+  <span className="text-[#46B1B1]/60">Loading…</span>
+) : statsError ? (
+  <span className="text-rose-600 text-xs">{statsError}</span>
+) : (stats?.total_reviews ?? 0) === 0 ? (
+  <span className="text-[#46B1B1]/60">No reviews yet</span>
+) : (
+  <>
+    <span className={"inline-flex items-center gap-1 font-semibold text-primary"}>
+      <Icon name="star" className="material-symbols-outlined text-[14px] text-amber-500" /> {stats?.total_reviews ?? 0} reviews
+    </span>
+    <span className="text-xs text-[#46B1B1]/70">verified</span>
+  </>
+)}
+</div>
+</div>
+<div className={"mt-space-xs pt-space-xs flex items-center justify-between text-caption font-caption text-[#46B1B1]"}>
+<span className={"text-secondary font-medium"}>{stats ? `${stats.total_reviews} total` : "Unavailable"}</span>
+<span>{"Live data"}</span>
+</div>
+</div>
+</div>
+
+<div className={"grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-space-xl"}>
+<section className={"lg:col-span-8 flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden"}>
+<div className={"p-space-md flex flex-wrap items-center justify-between gap-space-sm bg-surface-bright"}>
+<div className={"flex items-center gap-space-xs"}>
+<div className={"w-2.5 h-2.5 rounded-full bg-primary animate-pulse"}></div>
+<div>
+<h2 className={"font-title-md text-title-md text-[#46B1B1] tracking-tight"}>{"My Properties Overview"}</h2>
+<p className={"font-caption text-caption text-[#46B1B1]"}>{"Manage rates, seasonal availability calendars, and listing statuses."}</p>
+</div>
+</div>
+<Link className={"inline-flex items-center gap-1 text-[#46B1B1] font-label-sm text-label-sm hover:underline font-semibold"} data-path={"properties"} href={"/owner/properties"}>
+<span>{`View All (${stats?.total_properties ?? properties.length})`}</span>
+<Icon name="arrow_forward" className="material-symbols-outlined text-[16px]" />
+</Link>
+</div>
+<div className={"overflow-x-auto"}>
+{propertiesLoading ? (
+  <div className="p-8 flex flex-col items-center gap-3">
+    <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    <p className="text-sm text-[#46B1B1]">Loading properties…</p>
+  </div>
+) : properties.length === 0 ? (
+  <div className="p-8 text-center">
+    <Icon name="cottage" className="material-symbols-outlined text-[#46B1B1]/50 text-[36px] mb-2" />
+    <p className="text-sm font-semibold text-[#46B1B1]">No properties yet</p>
+    <p className="text-xs text-[#46B1B1]/70 mt-1">List your first property to see it here.</p>
+    <Link href="/owner/properties/new" className="inline-flex mt-3 items-center gap-1 px-space-md py-2 rounded-lg bg-primary text-white font-label-sm text-label-sm hover:bg-primary/90 shadow-sm transition-all">
+      <Icon name="add_circle" className="material-symbols-outlined text-[16px]" /> Add Property
+    </Link>
+  </div>
+) : (
+<DataTable className={"w-full text-left"}>
+<thead className={"bg-surface-container-low text-[#46B1B1] font-caption text-caption uppercase tracking-wider"}>
+<tr>
+<th className={"py-3 px-space-md text-[#46B1B1]"}>{"Property & Location"}</th>
+<th className={"py-3 px-space-md text-[#46B1B1]"}>{"Specs"}</th>
+<th className={"py-3 px-space-md text-[#46B1B1]"}>{"Base Rate"}</th>
+<th className={"py-3 px-space-md text-[#46B1B1]"}>{"Status"}</th>
+<th className={"py-3 px-space-md text-right text-[#46B1B1]"}>{"Actions"}</th>
+</tr>
+</thead>
+<tbody className={"divide-y divide-transparent font-body-md text-body-md text-[#46B1B1]"}>
+{properties.slice(0, 3).map((p: any) => (
+<RecordRow key={p.id} className={"hover:bg-surface-container transition-colors group"} initialStatus={p.status}>
+<td className={"py-3.5 px-space-md"}>
+<div className={"flex items-center gap-space-xs"}>
+<div className={"w-12 h-10 rounded-lg overflow-hidden shrink-0 bg-surface-container-high shadow-xs"}>
+<LocalImage className={"w-full h-full object-cover"} src={p.images?.[0]?.image_url || "/images/52db83fea695d506.jpg"} alt={p.title} />
+</div>
+<div className={"flex flex-col min-w-0"}>
+<span className={"font-label-md text-label-md font-semibold text-[#46B1B1] truncate group-hover:text-primary transition-colors"}>{p.title}</span>
+<span className={"font-caption text-caption text-[#46B1B1] flex items-center gap-1"}>
+<Icon name="location_on" className="material-symbols-outlined text-[13px] text-outline" /> {p.location} • {p.property_type?.replace("_", " ")}
+</span>
+</div>
+</div>
+</td>
+<td className={"py-3.5 px-space-md whitespace-nowrap"}>
+<span className={"font-caption text-caption text-[#46B1B1]"}>{p.bedrooms}BR · {p.beds} beds · {p.max_guests} guests</span>
+</td>
+<td className={"py-3.5 px-space-md whitespace-nowrap"}>
+<div className={"font-semibold text-primary font-label-md text-label-md"}>${Number(p.price_per_night).toFixed(0)} <span className={"font-normal text-caption text-[#46B1B1]"}>{"/ night"}</span></div>
+</td>
+<td className={"py-3.5 px-space-md whitespace-nowrap"}>
+{p.status === "approved" ? (
+  <span className={"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-caption text-caption font-semibold"}>
+    <span className={"w-1.5 h-1.5 rounded-full bg-emerald-500"}></span> Approved / Live
+  </span>
+) : p.status === "pending" ? (
+  <span className={"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption font-semibold"}>
+    <span className={"w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"}></span> Pending Review
+  </span>
+) : (
+  <span className={"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 font-caption text-caption font-semibold"}>
+    <span className={"w-1.5 h-1.5 rounded-full bg-rose-500"}></span> Rejected
+  </span>
+)}
+</td>
+<td className={"py-3.5 px-space-md text-right whitespace-nowrap"}>
+<div className="flex items-center justify-end gap-1">
+<Link className={"inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-high text-[#46B1B1] font-label-sm text-label-sm hover:bg-surface-container-highest transition-colors"} href={`/owner/properties/${p.id}/edit`}>
+  <Icon name="edit" className="material-symbols-outlined text-[14px]" />
+</Link>
+<Link className={"inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-high text-[#46B1B1] font-label-sm text-label-sm hover:bg-surface-container-highest transition-colors"} href={`/owner/availability?property=${p.id}`}>
+  <Icon name="event_upcoming" className="material-symbols-outlined text-[14px]" />
+</Link>
+<Link className={"inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white font-label-sm text-label-sm hover:bg-primary/90 shadow-xs transition-colors"} href={`/owner/properties/${p.id}/preview`}>
+  <span>Preview</span>
+  <Icon name="arrow_forward" className="material-symbols-outlined text-[14px] text-white" />
+</Link>
+</div>
+</td>
+</RecordRow>
+))}
+</tbody>
+</DataTable>
+)}
+</div>
+<div className={"p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm mt-auto"}>
+<div className={"flex items-center gap-2 text-[#46B1B1] font-caption text-caption"}>
+<Icon name="verified" className="material-symbols-outlined text-[18px] text-primary" />
+<span>{"Ministry of Tourism verification applies to all approved Lebanese listings."}</span>
+</div>
+{properties.length > 3 && (
+  <Link href="/owner/properties" className="inline-flex items-center gap-1 px-space-md py-2 rounded-lg bg-primary text-white font-label-sm text-label-sm hover:bg-primary/90 shadow-sm transition-all">
+    <span>{`View All ${stats?.total_properties ?? properties.length} Properties`}</span>
+    <Icon name="arrow_forward" className="material-symbols-outlined text-[14px] text-white" />
+  </Link>
+)}
+</div>
+</section>
+<section className={"lg:col-span-4 flex flex-col bg-surface-container-lowest rounded-xl shadow-sm p-space-md justify-between"}>
+{(() => {
+  const total = stats?.total_properties ?? 0;
+  const approved = stats?.approved_properties ?? 0;
+  const pending = stats?.pending_properties ?? 0;
+  const rejected = stats?.rejected_properties ?? 0;
+  const approvedPct = total > 0 ? (approved / total) * 100 : 0;
+  const pendingPct = total > 0 ? (pending / total) * 100 : 0;
+  const rejectedPct = total > 0 ? (rejected / total) * 100 : 0;
   return (
     <>
-      <div className="">
-        <main className="relative pt-6 w-full px-space-lg pb-space-xl bg-surface min-h-screen">
-          <div className="flex flex-col w-full gap-space-lg">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md pt-space-xs">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-space-xs">
-                  <span className="font-headline-lg text-headline-lg text-[#157375]">Owner Dashboard</span>
-                  <span className="bg-secondary-fixed text-on-secondary-fixed font-caption text-caption px-space-xs py-0.5 rounded-full flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-secondary" /> Host ID #7048
-                  </span>
-                </div>
-                <p className="font-body-md text-body-md text-[#157375]/70">Overview of your listed chalets, approval statuses, and upcoming reservations across Lebanon.</p>
-              </div>
-              <div className="flex items-center gap-space-sm self-start md:self-auto">
-                <Link href="/owner/availability" className="flex items-center gap-space-xxs px-space-md py-2.5 bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] font-label-md text-label-md rounded-xl shadow-sm transition-all">
-                  <Icon name="calendar_month" className="material-symbols-outlined text-[18px] text-white" /> Availability Matrix
-                </Link>
-                <Link href="/owner/properties/new" className="flex items-center gap-space-xxs px-space-md py-2.5 bg-[#157375] hover:bg-[#0f4a4c] text-white font-label-md text-label-md rounded-xl shadow-sm transition-all">
-                  <Icon name="add_circle" className="material-symbols-outlined text-[18px] text-white" /> + Add Property
-                </Link>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
-              <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between transition-transform duration-200 hover:-translate-y-0.5 border border-[#157375]/5">
-                <div className="flex items-center justify-between">
-                  <span className="font-label-sm text-label-sm text-[#157375]/60 uppercase tracking-wider">Total Properties</span>
-                  <div className="w-8 h-8 rounded-lg bg-[#157375]/10 flex items-center justify-center text-[#157375]"><Icon name="domain" className="material-symbols-outlined text-[18px]" /></div>
-                </div>
-                <div className="my-space-xs">
-                  <span className="font-display text-display text-[#157375] leading-none">{loading ? "—" : total}</span>
-                  {!loading && <span className="font-caption text-caption text-[#157375]/60 ml-2">properties</span>}
-                </div>
-                <div className="flex items-center gap-1.5 font-caption text-caption text-[#157375]/70">
-                  {loading ? (
-                    <span className="h-3 w-20 bg-surface-container rounded animate-pulse" />
-                  ) : (
-                    <>
-                      <span className="font-semibold text-[#059669]">{approved} Approved</span>
-                      <span>•</span>
-                      <span className="font-semibold text-[#D97706]">{pending} Pending</span>
-                      {rejected > 0 && (
-                        <>
-                          <span>•</span>
-                          <span className="font-semibold text-[#E11D48]">{rejected} Rejected</span>
-                        </>
-                      )}
-                    </>
-                  )}
-                </div>
-
-              </div>
-
-              <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between transition-transform duration-200 hover:-translate-y-0.5 border border-[#157375]/5">
-                <div className="flex items-center justify-between">
-                  <span className="font-label-sm text-label-sm text-[#157375]/60 uppercase tracking-wider">Active Status</span>
-                  <div className="w-8 h-8 rounded-lg bg-[#46B1B1]/10 flex items-center justify-center text-[#157375]"><Icon name="verified" className="material-symbols-outlined text-[18px]" /></div>
-                </div>
-                <div className="my-space-xs flex items-center gap-space-sm">
-                  <div className="flex items-baseline gap-1">
-                    <span className="font-headline-lg text-headline-lg text-[#157375] leading-none">{loading ? "—" : approved}</span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] font-caption text-caption border border-[#059669]/10">Live</span>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="font-headline-lg text-headline-lg text-[#D1A695] leading-none">{loading ? "—" : pending}</span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#FFFBEB] text-[#D97706] font-caption text-caption border border-[#D97706]/10">Review</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 font-caption text-caption text-[#157375]/60">
-                  <span className="w-2 h-2 rounded-full bg-[#46B1B1]" /> {rejected} Rejected or Delisted
-                </div>
-
-              </div>
-
-              <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden opacity-60 border border-[#157375]/5">
-                <div className="flex items-center justify-between">
-                  <span className="font-label-sm text-label-sm text-[#157375]/60 uppercase tracking-wider">Pending Cash Booking</span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full font-caption text-caption bg-[#F1F5F9] text-[#475569] border border-[#475569]/10">Not connected</span>
-                </div>
-                <div className="my-space-xs flex items-baseline gap-space-xs">
-                  <span className="font-headline-lg text-headline-lg text-[#475569] leading-none">—</span>
-                  <span className="font-label-md text-label-md text-[#157375]/60">Requires booking backend</span>
-                </div>
-                <span className="flex items-center justify-between font-label-sm text-label-sm text-[#157375]/40 pointer-events-none">
-                  <span>Review Request</span>
-                  <Icon name="arrow_forward" className="material-symbols-outlined text-[16px]" />
-                </span>
-
-              </div>
-
-              <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between opacity-60 border border-[#157375]/5">
-                <div className="flex items-center justify-between">
-                  <span className="font-label-sm text-label-sm text-[#157375]/60 uppercase tracking-wider">Upcoming Bookings</span>
-                  <div className="w-8 h-8 rounded-lg bg-[#157375]/10 flex items-center justify-center text-[#157375]"><Icon name="luggage" className="material-symbols-outlined text-[18px]" /></div>
-                </div>
-                <div className="my-space-xs"><span className="font-display text-display text-[#157375] leading-none">—</span></div>
-                <div className="flex items-center gap-1.5 font-caption text-caption text-[#157375]/60 truncate">
-                  <Icon name="event" className="material-symbols-outlined text-[14px] text-[#157375]" />
-                  <span>Booking calendar integration — later</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-[#157375]/5">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
-                <div className="flex items-start gap-space-md">
-                  <div className="w-12 h-12 rounded-xl bg-[#D1A695]/20 flex items-center justify-center shrink-0 text-[#157375]"><Icon name="payments" className="material-symbols-outlined text-[26px]" /></div>
-                  <div className="flex flex-col gap-1">
-                    <div className="flex flex-wrap items-center gap-space-xs">
-                      <span className="font-title-md text-title-md text-[#157375]">Owner financial features — coming soon</span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#F1F5F9] text-[#475569] font-caption text-caption font-semibold border border-[#475569]/10">Not connected</span>
-                    </div>
-                    <p className="font-body-md text-body-md text-[#157375]/70">Pending cash bookings, revenue, commission, and settlement reports will be connected after booking/payment backend work is complete. Current dashboard preserves design for later integration.</p>
-                  </div>
-                </div>
-                <Link href="/owner/properties" className="px-space-md py-2.5 bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] font-label-md text-label-md rounded-xl transition-all shadow-sm flex items-center gap-space-xxs shrink-0">
-                  <span>Manage Properties</span>
-                  <Icon name="arrow_forward" className="material-symbols-outlined text-[16px] text-white" />
-                </Link>
-              </div>
-            </div>
-
-            <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md border border-[#157375]/5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
-                <div>
-                  <h2 className="font-headline-sm text-headline-sm text-[#157375]">My Properties Overview</h2>
-                  <p className="font-body-md text-body-md text-[#157375]/70">Manage rates, seasonal availability calendars, and listing statuses. <span className="font-caption text-caption text-[#059669]">Real data from backend.</span></p>
-                </div>
-                <div className="flex items-center gap-space-xs">
-                  <span className="font-caption text-caption text-[#157375]/60">Filtered by: All ({loading ? "…" : total})</span>
-                  <Link href="/owner/properties" className="px-3 py-1.5 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white font-label-sm text-label-sm font-semibold shadow-sm transition-colors">View all</Link>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-space-md">
-                {loading ? (
-                  <div className="space-y-3">
-                    {[1, 2].map((i) => (
-                      <div key={i} className="p-space-md rounded-xl bg-surface-container-low animate-pulse h-28" />
-                    ))}
-                  </div>
-                ) : properties.length === 0 ? (
-                  <div className="text-center py-10 bg-surface-container-low rounded-xl border border-dashed border-[#157375]/20">
-                    <Icon name="cottage" className="material-symbols-outlined text-[32px] text-[#157375] mb-2" />
-                    <p className="font-title-sm text-title-sm font-semibold text-[#157375]">No properties yet</p>
-                    <p className="font-body-sm text-body-sm text-[#157375]/70 mt-1">List your first property to see it here.</p>
-                    <Link href="/owner/properties/new" className="inline-flex mt-3 px-4 py-2 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white text-sm font-medium shadow-sm">Add Property</Link>
-                  </div>
-                ) : (
-                  properties.slice(0, 3).map((prop) => (
-                    <div key={prop.id} className="p-space-md rounded-xl bg-white border border-[#157375]/10 hover:border-[#157375]/20 hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
-                      <div className="flex items-center gap-space-md">
-                        <div className="w-24 h-20 rounded-lg object-cover shadow-sm shrink-0 overflow-hidden bg-surface-container flex items-center justify-center border border-[#157375]/5">
-                          {prop.images[0] ? <img src={prop.images[0].image_url} alt={prop.title} className="w-full h-full object-cover" /> : <Icon name="image" className="material-symbols-outlined text-[24px] text-[#157375]/40" />}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <div className="flex flex-wrap items-center gap-space-xs">
-                            <span className="font-title-md text-title-md text-[#157375] font-semibold truncate max-w-[220px]">{prop.title}</span>
-                            <span className={`px-2 py-0.5 rounded-full font-caption text-caption font-medium flex items-center gap-1 ${prop.status === "approved" ? "bg-[#ECFDF5] text-[#059669] border border-[#059669]/10" : prop.status === "pending" ? "bg-[#FFFBEB] text-[#D97706] border border-[#D97706]/10" : "bg-[#FFF1F2] text-[#E11D48] border border-[#E11D48]/10"}`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${prop.status === "approved" ? "bg-[#059669]" : prop.status === "pending" ? "bg-[#D97706] animate-pulse" : "bg-[#E11D48]"}`} />
-                              {prop.status === "approved" ? "Approved / Live" : prop.status === "pending" ? "Pending Review" : "Rejected"}
-                            </span>
-                          </div>
-                          <span className="font-body-md text-body-md text-[#157375]/70 truncate">{prop.property_type.replace("_", " ")} · {prop.location}</span>
-                          <div className="flex items-center gap-space-md mt-1 font-caption text-caption text-[#157375]/70">
-                            <span className="font-bold text-[#157375] text-body-md">${Number(prop.price_per_night).toFixed(0)}<span className="font-normal text-caption text-[#157375]/60"> / night</span></span>
-                            <span>•</span>
-                            <span className="text-[#157375]/70">{prop.bedrooms}BR · {prop.beds} beds · {prop.max_guests} guests</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-space-xs self-end lg:self-center">
-                        <Link href={`/owner/properties/${prop.id}/edit`} className="px-space-sm py-2 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] font-label-md text-label-md flex items-center gap-1 shadow-sm transition-colors"><Icon name="edit" className="material-symbols-outlined text-[16px] text-white" /> Edit</Link>
-                        <Link href={`/owner/availability?property=${prop.id}`} className="px-space-sm py-2 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] font-label-md text-label-md flex items-center gap-1 shadow-sm transition-colors"><Icon name="event_upcoming" className="material-symbols-outlined text-[16px] text-white" /> Availability</Link>
-                        <Link href={`/owner/properties/${prop.id}/preview`} className="px-space-sm py-2 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] font-label-md text-label-md flex items-center gap-1 shadow-sm transition-colors"><Icon name="visibility" className="material-symbols-outlined text-[16px] text-white" /> Preview</Link>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-              {properties.length > 3 && (
-                <div className="text-center">
-                  <Link href="/owner/properties" className="inline-flex items-center gap-1 text-sm font-medium text-[#157375] hover:text-[#0f4a4c] hover:underline">View all {total} properties <Icon name="arrow_forward" className="material-symbols-outlined text-[16px]" /></Link>
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
-              <div className="lg:col-span-2 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md border border-[#157375]/5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="font-headline-sm text-headline-sm text-[#157375]">Recent Reviews</h2>
-                    {reviewStatsLoading ? (
-                      <p className="font-body-md text-body-md text-[#157375]/70 flex items-center gap-2"><span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" /> Loading review stats…</p>
-                    ) : reviewStats && reviewStats.total_reviews > 0 ? (
-                      <p className="font-body-md text-body-md text-[#157375]/70">
-                        Portfolio rating <strong className="text-[#157375]">{Number(reviewStats.overall_rating).toFixed(2)} / 5.0</strong> from {reviewStats.total_reviews} {reviewStats.total_reviews === 1 ? "review" : "reviews"} · via GET /reviews/owner/stats
-                      </p>
-                    ) : (
-                      <p className="font-body-md text-body-md text-[#157375]/70">No verified reviews yet — via GET /reviews/owner/stats</p>
-                    )}
-                  </div>
-                  <Link href="/owner/reviews" className="font-label-md text-label-md text-[#157375] flex items-center gap-0.5 hover:text-[#0f4a4c]">All Reviews <Icon name="chevron_right" className="material-symbols-outlined text-[16px]" /></Link>
-                </div>
-                {reviewStats && reviewStats.total_reviews > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-space-md rounded-xl bg-surface-container-low border border-[#157375]/5">
-                    {[
-                      { label: "Overall", value: reviewStats.overall_rating },
-                      { label: "Cleanliness", value: reviewStats.cleanliness_rating },
-                      { label: "Privacy", value: reviewStats.privacy_rating },
-                      { label: "Wi-Fi", value: reviewStats.wifi_rating },
-                      { label: "Hot Water", value: reviewStats.hot_water_rating },
-                      { label: "Location", value: reviewStats.location_rating },
-                      { label: "Value", value: reviewStats.value_rating },
-                    ].slice(0, 4).map((r) => (
-                      <div key={r.label} className="flex items-center justify-between text-sm">
-                        <span className="text-on-surface-variant">{r.label}</span>
-                        <span className="font-semibold text-[#157375]">{Number(r.value).toFixed(2)} / 5.0</span>
-                      </div>
-                    ))}
-                    <div className="col-span-1 sm:col-span-2 text-xs text-slate-500 text-center pt-2">
-                      Showing summary · View all in <Link href="/owner/reviews" className="text-primary underline">Owner Reviews</Link>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-xs border border-[#157375]/5">
-                    {reviewStatsLoading ? (
-                      <p className="font-body-md text-body-md text-[#157375]/70">Loading…</p>
-                    ) : (
-                      <p className="font-body-md text-body-md text-[#157375]/70 italic">No verified reviews yet. Reviews from completed stays will appear here once guests submit their evaluation.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between gap-space-md border border-[#157375]/5">
-                <div className="flex flex-col gap-space-md">
-                  <div className="flex items-center gap-space-xs"><Icon name="info" className="material-symbols-outlined text-[20px] text-[#157375]" /><h3 className="font-title-md text-title-md text-[#157375]">Host Operational Notes</h3></div>
-                  <div className="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1 border border-[#157375]/5">
-                    <span className="font-label-sm text-label-sm font-bold text-[#157375]">Electric Utility & Generator Guarantee</span>
-                    <p className="font-body-md text-body-md text-[#157375]/70">Faraya Chalet winter power plan is active (24/7 solar + automatic generator back-up).</p>
-                  </div>
-                  <div className="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1 border border-[#157375]/5">
-                    <span className="font-label-sm text-label-sm font-bold text-[#157375]">Cash Payout Protocol</span>
-                    <p className="font-body-md text-body-md text-[#157375]/70">For cash bookings, platform fees (10%) are automatically reconciled against your monthly ledger.</p>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-space-xs pt-space-sm">
-                  <span className="font-caption text-caption uppercase text-[#157375]/60 tracking-wider font-semibold">Quick Shortcuts</span>
-                  <Link href="/owner/availability" className="flex items-center justify-between p-space-sm rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] transition-colors group">
-                    <div className="flex items-center gap-space-xs"><Icon name="edit_calendar" className="material-symbols-outlined text-[18px] text-white" /><span className="font-label-md text-label-md font-semibold">Update Calendar Blocks</span></div>
-                    <Icon name="chevron_right" className="material-symbols-outlined text-[16px] text-white" />
-                  </Link>
-                  <Link href="/owner/properties" className="flex items-center justify-between p-space-sm rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] transition-colors group">
-                    <div className="flex items-center gap-space-xs"><Icon name="cottage" className="material-symbols-outlined text-[18px] text-white" /><span className="font-label-md text-label-md font-semibold">My Properties</span></div>
-                    <Icon name="chevron_right" className="material-symbols-outlined text-[16px] text-white" />
-                  </Link>
-                </div>
-              </div>
-            </div>
+      <div>
+        <div className={"flex items-center justify-between mb-space-sm"}>
+          <div className={"flex items-center gap-space-xs"}>
+            <Icon name="donut_large" className="material-symbols-outlined text-primary text-[20px]" />
+            <h3 className={"font-title-md text-title-md text-[#46B1B1]"}>{"Property Status"}</h3>
           </div>
-        </main>
+          <span className={"font-caption text-caption uppercase px-2 py-0.5 bg-surface-container rounded font-semibold text-outline"}>{statsLoading ? "…" : `${total} total`}</span>
+        </div>
+        <p className={"font-body-md text-body-md text-[#46B1B1] mb-space-md"}>{"Distribution of listings by current admin review status."}</p>
+        {statsLoading ? (
+          <div className="p-6 text-center text-sm text-[#46B1B1]">Loading…</div>
+        ) : statsError ? (
+          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm text-rose-700">Unavailable — {statsError}</div>
+        ) : total === 0 ? (
+          <div className="p-6 text-center text-sm text-[#46B1B1]/60">No properties listed yet.</div>
+        ) : (
+          <>
+            <div className={"p-space-md rounded-xl bg-surface-container-low mb-space-md"}>
+              <div className={"flex items-center justify-between mb-space-xs"}>
+                <span className={"font-label-sm text-label-sm text-[#46B1B1] font-semibold flex items-center gap-1.5"}>
+                  <span className={"w-2.5 h-2.5 rounded-full bg-emerald-500"}></span>{" Approved"}
+                </span>
+                <span className={"font-label-sm text-label-sm text-emerald-600 font-bold"}>{approvedPct.toFixed(1)}%</span>
+              </div>
+              <div className={"font-headline-sm text-headline-sm font-bold text-[#46B1B1] mb-1"}>{approved}<span className={"text-label-sm font-normal text-[#46B1B1]"}>{" listings"}</span></div>
+              <p className={"font-caption text-caption text-[#46B1B1]"}>{"Live in marketplace"}</p>
+            </div>
+            <div className={"p-space-md rounded-xl bg-surface-container-low mb-space-md"}>
+              <div className={"flex items-center justify-between mb-space-xs"}>
+                <span className={"font-label-sm text-label-sm text-[#46B1B1] font-semibold flex items-center gap-1.5"}>
+                  <span className={"w-2.5 h-2.5 rounded-full bg-tertiary"}></span>{" Pending"}
+                </span>
+                <span className={"font-label-sm text-label-sm text-tertiary font-bold"}>{pendingPct.toFixed(1)}%</span>
+              </div>
+              <div className={"font-headline-sm text-headline-sm font-bold text-[#46B1B1] mb-1"}>{pending}<span className={"text-label-sm font-normal text-[#46B1B1]"}>{" listings"}</span></div>
+              <p className={"font-caption text-caption text-[#46B1B1]"}>{"Awaiting admin review"}</p>
+            </div>
+            <div className={"p-space-md rounded-xl bg-surface-container-low mb-space-md"}>
+              <div className={"flex items-center justify-between mb-space-xs"}>
+                <span className={"font-label-sm text-label-sm text-[#46B1B1] font-semibold flex items-center gap-1.5"}>
+                  <span className={"w-2.5 h-2.5 rounded-full bg-rose-500"}></span>{" Rejected"}
+                </span>
+                <span className={"font-label-sm text-label-sm text-rose-600 font-bold"}>{rejectedPct.toFixed(1)}%</span>
+              </div>
+              <div className={"font-headline-sm text-headline-sm font-bold text-[#46B1B1] mb-1"}>{rejected}<span className={"text-label-sm font-normal text-[#46B1B1]"}>{" listings"}</span></div>
+              <p className={"font-caption text-caption text-[#46B1B1]"}>{"Edit & resubmit"}</p>
+            </div>
+            <div className={"w-full bg-surface-container h-3 rounded-full overflow-hidden flex shadow-inner mb-space-sm"}>
+              <div className={"bg-emerald-500 h-full transition-all"} style={{"width": `${approvedPct}%`}}></div>
+              <div className={"bg-tertiary h-full transition-all"} style={{"width": `${pendingPct}%`}}></div>
+              <div className={"bg-rose-500 h-full transition-all"} style={{"width": `${rejectedPct}%`}}></div>
+            </div>
+            <div className="flex justify-between text-[11px] text-[#46B1B1]/70 mt-1"><span>Total: {total}</span><span>Portfolio</span></div>
+          </>
+        )}
+      </div>
+      <div className={"pt-space-sm flex items-center justify-between text-caption font-caption text-outline"}>
+        <span>{stats ? `Total: ${stats.total_properties} listings` : "Total: Unavailable"}</span>
+        <span className={"font-semibold text-primary"}>{"Live data"}</span>
       </div>
     </>
   );
-}
+})()}
+</section>
+</div>
+
+<div className={"grid grid-cols-1 lg:grid-cols-2 gap-space-md mb-space-xl"}>
+<section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col justify-between">
+<div className="flex items-center justify-between mb-space-sm">
+<div className="flex items-center gap-space-xs">
+<Icon name="request_quote" className="material-symbols-outlined text-amber-500 text-[20px]" />
+<h3 className="font-title-md text-title-md text-[#46B1B1]">Cash Requests</h3>
+</div>
+<Link href="/owner/bookings" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-high text-[#46B1B1] font-label-sm text-label-sm hover:bg-surface-container-highest transition-colors font-semibold">
+  View All <Icon name="arrow_forward" className="material-symbols-outlined text-[14px]" />
+</Link>
+</div>
+{statsLoading ? (
+  <div className="mt-2 h-6 w-32 bg-surface-container rounded animate-pulse" />
+) : hasStats ? (
+  stats.pending_cash_requests > 0 ? (
+    <div className="mt-space-sm">
+      <div className="p-space-md rounded-xl bg-surface-container-low mb-space-sm">
+        <div className="flex items-center justify-between mb-space-xs">
+          <span className="font-label-sm text-label-sm text-[#46B1B1] font-semibold flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span> Pending Review
+          </span>
+          <span className="font-headline-sm text-headline-sm font-bold text-amber-600">{stats.pending_cash_requests}</span>
+        </div>
+        <p className="font-caption text-caption text-[#46B1B1]">{stats.pending_cash_requests === 1 ? "request" : "requests"} waiting for admin review</p>
+      </div>
+      <Link href="/owner/bookings" className="inline-flex items-center gap-1 px-space-md py-2 rounded-lg bg-primary text-white font-label-sm text-label-sm hover:bg-primary/90 shadow-sm transition-all">
+        <Icon name="receipt_long" className="material-symbols-outlined text-[16px]" /> View Cash Requests
+      </Link>
+    </div>
+  ) : (
+    <div className="mt-space-sm p-space-md rounded-xl bg-surface-container-low text-center">
+      <Icon name="check_circle" className="material-symbols-outlined text-emerald-500 text-[28px] mb-1" />
+      <p className="font-body-md text-body-md text-[#46B1B1] font-semibold">No pending cash requests</p>
+      <p className="font-caption text-caption text-[#46B1B1]/70 mt-1">All cash payments are settled.</p>
+    </div>
+  )
+) : (
+  <p className="font-body-md text-body-md text-[#46B1B1]/60 mt-2">—</p>
+)}
+</section>
+
+<section className="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col justify-between">
+<div className="flex items-center justify-between mb-space-sm">
+<div className="flex items-center gap-space-xs">
+<Icon name="account_balance_wallet" className="material-symbols-outlined text-tertiary text-[20px]" />
+<h3 className="font-title-md text-title-md text-[#46B1B1]">Outstanding StayLeb Commission</h3>
+</div>
+<Link href="/owner/earnings" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-high text-[#46B1B1] font-label-sm text-label-sm hover:bg-surface-container-highest transition-colors font-semibold">
+  Earnings <Icon name="arrow_forward" className="material-symbols-outlined text-[14px]" />
+</Link>
+</div>
+{statsLoading ? (
+  <div className="mt-2 h-6 w-24 bg-surface-container rounded animate-pulse" />
+) : hasStats ? (
+  Number(stats.outstanding_cash_commission) > 0 ? (
+    <div className="mt-space-sm">
+      <div className="p-space-md rounded-xl bg-tertiary-fixed/50 border border-tertiary/20 mb-space-sm">
+        <p className="font-caption text-caption text-on-tertiary-fixed mb-space-xs font-semibold uppercase tracking-wider">Commission Owed</p>
+        <p className="font-headline-md text-headline-md font-bold text-on-tertiary-fixed">{formatMoney(stats.outstanding_cash_commission)}<span className="text-label-sm font-normal text-on-tertiary-fixed/80"> USD</span></p>
+      </div>
+      <Link href="/owner/earnings" className="inline-flex items-center gap-1 px-space-md py-2 rounded-lg bg-primary text-white font-label-sm text-label-sm hover:bg-primary/90 shadow-sm transition-all">
+        <Icon name="payments" className="material-symbols-outlined text-[16px]" /> View Earnings & Commission
+      </Link>
+    </div>
+  ) : (
+    <div className="mt-space-sm p-space-md rounded-xl bg-surface-container-low text-center">
+      <Icon name="check_circle" className="material-symbols-outlined text-emerald-500 text-[28px] mb-1" />
+      <p className="font-body-md text-body-md text-[#46B1B1] font-semibold">No outstanding commission</p>
+      <p className="font-caption text-caption text-[#46B1B1]/70 mt-1">All platform commissions are settled.</p>
+    </div>
+  )
+) : (
+  <p className="font-body-md text-body-md text-[#46B1B1]/60 mt-2">—</p>
+)}
+</section>
+</div>
+
+<section className="flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden mb-space-xl">
+<div className="p-space-md flex flex-wrap items-center justify-between gap-space-sm bg-surface-bright">
+<div>
+<div className="flex items-center gap-space-xs">
+<Icon name="reviews" className="material-symbols-outlined text-amber-500 text-[20px]" />
+<h2 className="font-title-md text-title-md text-[#46B1B1] tracking-tight">Recent Reviews</h2>
+</div>
+{statsLoading ? (
+  <p className="font-caption text-caption text-[#46B1B1] flex items-center gap-2"><span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" /> Loading review stats…</p>
+) : hasStats && hasReviews ? (
+  <p className="font-caption text-caption text-[#46B1B1]">
+    Portfolio rating <strong className="text-[#46B1B1]">{formatRating(stats.portfolio_rating)} / 5.0</strong> from {stats.total_reviews} {stats.total_reviews === 1 ? "review" : "reviews"}
+  </p>
+) : (
+  <p className="font-caption text-caption text-[#46B1B1]">No verified reviews yet</p>
+)}
+</div>
+<Link href="/owner/reviews" className="inline-flex items-center gap-space-xxs px-space-md py-2 rounded-lg bg-surface-container-high text-[#46B1B1] font-label-md text-label-md hover:bg-surface-container-highest transition-colors font-semibold">
+<Icon name="rate_review" className="material-symbols-outlined text-[18px]" />
+<span>All Reviews</span>
+</Link>
+</div>
+<div className="p-space-md">
+{hasStats && hasReviews ? (
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+    <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col items-center text-center">
+      <div className="flex items-center gap-1 mb-space-xs">
+        <Icon name="star" className="material-symbols-outlined text-[18px] text-amber-500 fill-amber-500" />
+        <span className="font-headline-md text-headline-md font-bold text-[#46B1B1]">{formatRating(stats.portfolio_rating)}</span>
+      </div>
+      <span className="font-caption text-caption uppercase tracking-wider text-outline font-semibold">Overall Rating</span>
+      <span className="font-caption text-caption text-[#46B1B1]/70 mt-1">/ 5.0 maximum</span>
+    </div>
+    <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col items-center text-center">
+      <div className="font-headline-md text-headline-md font-bold text-[#46B1B1] mb-space-xs">{stats.total_reviews}</div>
+      <span className="font-caption text-caption uppercase tracking-wider text-outline font-semibold">Total Reviews</span>
+      <span className="font-caption text-caption text-[#46B1B1]/70 mt-1">verified guest stays</span>
+    </div>
+    <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col items-center text-center">
+      <div className="flex mb-space-xs">
+        {[1,2,3,4,5].map((s) => (
+          <Icon key={s} name="star" className={`material-symbols-outlined text-[20px] ${s <= Math.round(Number(stats.portfolio_rating)) ? "text-amber-500 fill-amber-500" : "text-[#46B1B1]/20"}`} />
+        ))}
+      </div>
+      <span className="font-caption text-caption uppercase tracking-wider text-outline font-semibold">Star Breakdown</span>
+      <span className="font-caption text-caption text-[#46B1B1]/70 mt-1">rounded distribution</span>
+    </div>
+  </div>
+) : (
+  <div className="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-xs">
+    {statsLoading ? (
+      <p className="font-body-md text-body-md text-[#46B1B1]/70">Loading…</p>
+    ) : (
+      <div className="text-center py-4">
+        <Icon name="rate_review" className="material-symbols-outlined text-[#46B1B1]/40 text-[36px] mb-2" />
+        <p className="font-body-md text-body-md text-[#46B1B1]/70 italic">No verified reviews yet. Reviews from completed stays will appear here once guests submit their evaluation.</p>
+      </div>
+    )}
+  </div>
+)}
+</div>
+<div className="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<div className="flex items-center gap-space-xs text-caption font-caption text-[#46B1B1]">
+  <Icon name="info" className="material-symbols-outlined text-[16px] text-primary" />
+  <span>Reviews are collected post-checkout and verified against completed booking records.</span>
+</div>
+<Link href="/owner/reviews" className="px-3 py-1.5 rounded-lg bg-primary text-white font-label-sm text-label-sm hover:bg-primary/90 transition-colors font-semibold shadow-sm">
+  Open Reviews Dashboard
+</Link>
+</div>
+</section>
+
+</div></main></div>
+</>; }

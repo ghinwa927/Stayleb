@@ -74,6 +74,11 @@ class Booking(Base):
       default="pending",
     )
 
+    expires_at = Column(
+    DateTime,
+    nullable=True,
+)
+
     cancelled_at = Column(
       DateTime,
       nullable=True,

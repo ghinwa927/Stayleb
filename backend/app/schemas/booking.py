@@ -25,6 +25,7 @@ class BookingResponse(BaseModel):
     total_price: Decimal
 
     status: str
+    expires_at: datetime | None = None
 
     commission_percentage: Decimal
     commission_amount: Decimal

@@ -5,7 +5,19 @@ import Link from "next/link";
 import { LocalImage } from "@/components/ui/LocalImage";
 import { Icon } from "@/components/ui/Icon";
 import { usePropertyWizard, WizardStep } from "@/components/features/owner/PropertyWizard";
-import { getAmenities, getRules, uploadPropertyImage, createProperty, type Amenity, type Rule, type PropertyImageCreate, type SeasonalPriceCreate, type PropertyRuleCreate } from "@/services/owner";
+import { getAmenities, getRules, uploadPropertyImage, createProperty, generatePropertyDescription, type Amenity, type Rule, type PropertyDescriptionRequest, type PropertyImageCreate, type SeasonalPriceCreate, type PropertyRuleCreate } from "@/services/owner";
+
+const WIZARD_STEPS = [
+  { number: 1, label: "Basic Info", readiness: "Basic Information" },
+  { number: 2, label: "Details", readiness: "Capacity Details" },
+  { number: 3, label: "Pricing", readiness: "Base Pricing" },
+  { number: 4, label: "Photos", readiness: "Photography" },
+  { number: 5, label: "Amenities & Rules", readiness: "Amenities & Rules" },
+  { number: 6, label: "Description", readiness: "Description" },
+  { number: 7, label: "Seasonal", readiness: "Seasonal Pricing" },
+  { number: 8, label: "Review", readiness: "Review & Submit" },
+] as const;
+const TOTAL_STEPS = WIZARD_STEPS.length;
 
 export function AddPropertySection0() {
   const router = useRouter();
@@ -14,13 +26,14 @@ export function AddPropertySection0() {
   const go = wizard?.go ?? (() => {});
   const next = wizard?.next ?? (() => {});
   const back = wizard?.back ?? (() => {});
+  const totalSteps = wizard?.totalSteps ?? TOTAL_STEPS;
+  const currentStepLabel = WIZARD_STEPS.find((item) => item.number === step)?.label ?? "";
 
   // Step 1
   const [title, setTitle] = useState("");
   const [propertyType, setPropertyType] = useState<"chalet" | "furnished_house">("chalet");
   const [location, setLocation] = useState("");
   const [address, setAddress] = useState("");
-  const [description, setDescription] = useState("");
 
   // Step 2
   const [bedrooms, setBedrooms] = useState(1);
@@ -44,12 +57,14 @@ export function AddPropertySection0() {
   const [ruleStates, setRuleStates] = useState<Record<number, { allowed: boolean; value: string }>>({});
   const [catLoading, setCatLoading] = useState(true);
 
-  // Step 6 seasonal
+  const [description, setDescription] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  // Step 7 seasonal
   const [seasonalPrices, setSeasonalPrices] = useState<SeasonalPriceCreate[]>([]);
   const [seasonForm, setSeasonForm] = useState({ season_name: "", start_date: "", end_date: "", price_per_night: "" });
   const [seasonError, setSeasonError] = useState<string | null>(null);
-
-  const [aiLoading, setAiLoading] = useState(false);
 
   // Submit
   const [submitting, setSubmitting] = useState(false);
@@ -151,28 +166,67 @@ export function AddPropertySection0() {
 
   async function handleGenerateAI() {
     if (aiLoading) return;
+
+    setAiError(null);
+    const basicInfoError = validateStep(1);
+    if (basicInfoError || title.trim().length > 255 || location.trim().length > 150) {
+      setAiError("Please complete valid title and location information in Basic Info first.");
+      return;
+    }
+    if (
+      !Number.isInteger(bedrooms) || bedrooms < 0 || bedrooms > 50 ||
+      !Number.isInteger(beds) || beds < 0 || beds > 100 ||
+      !Number.isInteger(bathrooms) || bathrooms < 0 || bathrooms > 50 ||
+      !Number.isInteger(maxGuests) || maxGuests < 1 || maxGuests > 100
+    ) {
+      setAiError("Please complete valid capacity details in Details first.");
+      return;
+    }
+
     setAiLoading(true);
-    // Simulate StayLeb AI generation using current form context
-    await new Promise((r) => setTimeout(r, 900));
-    const typeLabel = propertyType === "chalet" ? "chalet" : "furnished house";
-    const loc = location.trim() || "the tranquil terraces of Qartaba overlooking the Adonis River valley";
-    const ttl = title.trim() || "this hand-hewn natural stone chalet";
-    const base = `Perched on the tranquil terraces of ${loc} overlooking the Adonis River valley, ${ttl} blends authentic Lebanese mountain architecture with modern conveniences. Features uninterrupted solar backup power, an artisanal wood fireplace, and panoramic sunset decks.`;
-    const capacity = `Accommodates ${maxGuests} guests across ${bedrooms} bedrooms and ${beds} beds, with ${bathrooms} ${bathrooms === 1 ? "bathroom" : "bathrooms"}, perfect for ${maxGuests > 4 ? "families and groups" : "couples and small families"} seeking a serene mountain retreat.`;
-    const extra = address.trim() ? ` Located at ${address.trim()}, with easy access to nearby trails and village amenities.` : "";
-    setDescription(`${base} ${capacity}${extra}`);
-    setAiLoading(false);
+    try {
+      const request: PropertyDescriptionRequest = {
+        title: title.trim(),
+        property_type: propertyType,
+        location: location.trim(),
+        bedrooms,
+        beds,
+        bathrooms,
+        max_guests: maxGuests,
+        amenities: amenities
+          .filter((amenity) => selectedAmenities.has(amenity.id))
+          .map((amenity) => amenity.name),
+        rules: rules.flatMap((rule) => {
+          const state = ruleStates[rule.id];
+          return state
+            ? [{
+                name: rule.name,
+                allowed: state.allowed,
+                value: state.value.trim() || null,
+              }]
+            : [];
+        }),
+      };
+      const result = await generatePropertyDescription(request);
+      setDescription(result.description);
+    } catch (error) {
+      setAiError(error instanceof Error ? error.message : "StayLeb AI could not generate a description. Please try again shortly.");
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   function validateStep(s: number): string | null {
     if (s === 1) {
       if (title.trim().length < 3) return "Title must be at least 3 characters";
       if (location.trim().length < 2) return "Location must be at least 2 characters";
-      if (description.trim().length < 10) return "Description must be at least 10 characters";
     }
     if (s === 3) {
       const p = Number(price);
       if (!p || p <= 0) return "Base price must be greater than 0";
+    }
+    if (s === 6) {
+      if (description.trim().length < 10) return "Description must be at least 10 characters";
     }
     return null;
   }
@@ -181,7 +235,7 @@ export function AddPropertySection0() {
     const err = validateStep(step);
     if (err) { setSubmitError(err); return; }
     setSubmitError(null);
-    if (step === 7) {
+    if (step === totalSteps) {
       handleSubmit();
       return;
     }
@@ -194,6 +248,8 @@ export function AddPropertySection0() {
     if (err1) { setSubmitError(err1); go(1); return; }
     const err3 = validateStep(3);
     if (err3) { setSubmitError(err3); go(3); return; }
+    const err6 = validateStep(6);
+    if (err6) { setSubmitError(err6); go(6); return; }
     setSubmitting(true);
     try {
       const payload = {
@@ -226,7 +282,7 @@ export function AddPropertySection0() {
     }
   }
 
-  const progress = Math.round((step / 7) * 100);
+  const progress = Math.round((step / totalSteps) * 100);
 
   return (
     <>
@@ -239,7 +295,7 @@ export function AddPropertySection0() {
                 <Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
                 <Link href="/owner/properties" className="hover:text-primary transition-colors">My Properties</Link>
                 <Icon name="chevron_right" className="material-symbols-outlined text-[14px]" />
-                <span className="text-primary font-semibold">Add New Listing (7 Steps)</span>
+                <span className="text-primary font-semibold">Add New Listing ({totalSteps} Steps)</span>
               </nav>
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-space-sm mt-space-xxs">
                 <div>
@@ -248,15 +304,14 @@ export function AddPropertySection0() {
                 </div>
                 <div className="inline-flex items-center gap-space-xs bg-surface-container-high px-space-sm py-1.5 rounded-full self-start sm:self-auto">
                   <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                  <span className="font-label-sm text-label-sm text-on-surface font-medium">Step {step} of 7: {["Basic Info","Details","Pricing","Photos","Amenities & Rules","Seasonal","Review"][step-1]}</span>
+                  <span className="font-label-sm text-label-sm text-on-surface font-medium">Step {step} of {totalSteps}: {currentStepLabel}</span>
                 </div>
               </div>
             </div>
 
             <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm mb-space-lg overflow-x-auto">
               <div className="flex items-center justify-between min-w-[760px] gap-2">
-                {["Basic Info","Details","Pricing","Photos","Amenities & Rules","Seasonal","Review"].map((label, idx) => {
-                  const n = idx + 1;
+                {WIZARD_STEPS.map(({ number: n, label }) => {
                   const active = step === n;
                   const done = step > n;
                   return (
@@ -265,7 +320,7 @@ export function AddPropertySection0() {
                         <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[12px] ${active ? "bg-surface-container-lowest text-primary" : done ? "bg-[#059669] text-white" : "bg-surface-container text-on-surface-variant"}`}>{done ? "✓" : n}</span>
                         <span className="font-label-sm text-label-sm font-semibold whitespace-nowrap">{label}</span>
                       </button>
-                      {n < 7 && <div className={`flex-1 h-[2px] ${done ? "bg-[#059669]" : "bg-surface-container"}`} />}
+                      {n < totalSteps && <div className={`flex-1 h-[2px] ${done ? "bg-[#059669]" : "bg-surface-container"}`} />}
                     </div>
                   );
                 })}
@@ -279,7 +334,7 @@ export function AddPropertySection0() {
                   <WizardStep id="step-panel-1" className="wizard-panel bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md" number={1}>
                     <div className="flex items-center justify-between pb-space-xs border-b border-surface-container">
                       <div className="flex items-center gap-space-xs"><span className="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-label-sm">01</span><h2 className="font-title-md text-title-md text-on-surface font-bold">Basic Information</h2></div>
-                      <span className="font-caption text-caption text-secondary font-semibold bg-secondary-container/40 px-2.5 py-0.5 rounded-full">Step 1 of 7</span>
+                      <span className="font-caption text-caption text-secondary font-semibold bg-secondary-container/40 px-2.5 py-0.5 rounded-full">Step 1 of 8</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
                       <div className="md:col-span-2 flex flex-col gap-space-xxs">
@@ -302,24 +357,13 @@ export function AddPropertySection0() {
                         <label className="font-label-md text-label-md text-on-surface font-semibold">Street Address & Landmarks</label>
                         <input value={address} onChange={(e) => setAddress(e.target.value)} maxLength={255} className="w-full h-11 px-space-sm bg-surface-container-low text-on-surface rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-body-md" placeholder="Enter road name and arrival landmarks" />
                       </div>
-                      <div className="md:col-span-2 flex flex-col gap-space-xxs">
-                        <div className="flex items-center justify-between gap-2">
-                          <label className="font-label-md text-label-md text-[#157375] font-semibold">Detailed Listing Description</label>
-                          <button type="button" onClick={handleGenerateAI} disabled={aiLoading} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFE8CC] hover:bg-[#FFDCC2] text-[#7A3E1A] font-label-sm text-label-sm font-semibold shadow-sm border border-[#FFDCC2] transition-colors disabled:opacity-60 shrink-0">
-                            <Icon name="auto_awesome" className="material-symbols-outlined text-[18px] text-[#7A3E1A]" />
-                            {aiLoading ? "Generating…" : "Generate with StayLeb AI"}
-                          </button>
-                        </div>
-                        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required minLength={10} rows={4} className="w-full p-3 bg-[#EEF0FF] border border-[#157375]/10 rounded-xl text-[#1E293B] font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-[#157375]/20 placeholder:text-[#64748B] resize-y shadow-sm" placeholder="Perched on the tranquil terraces of Qartaba overlooking the Adonis River valley, this hand-hewn natural stone chalet blends authentic Lebanese mountain architecture with modern conveniences. Features uninterrupted solar backup power, an artisanal wood fireplace, and panoramic sunset decks." />
-                        <p className="font-caption text-caption text-[#157375]/60">{description.length}/10 min characters • StayLeb AI uses your title, location and capacity to craft authentic tone</p>
-                      </div>
                     </div>
                   </WizardStep>
 
                   <WizardStep id="step-panel-2" className="wizard-panel bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md" number={2}>
                     <div className="flex items-center justify-between pb-space-xs border-b border-surface-container">
                       <div className="flex items-center gap-space-xs"><span className="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-label-sm">02</span><h2 className="font-title-md text-title-md text-on-surface font-bold">Capacity & Space Details</h2></div>
-                      <span className="font-caption text-caption text-secondary font-semibold bg-secondary-container/40 px-2.5 py-0.5 rounded-full">Step 2 of 7</span>
+                      <span className="font-caption text-caption text-secondary font-semibold bg-secondary-container/40 px-2.5 py-0.5 rounded-full">Step 2 of 8</span>
                     </div>
                     <p className="font-body-md text-body-md text-on-surface-variant">Configure guest capacity and layout specifications.</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-space-lg">
@@ -332,17 +376,17 @@ export function AddPropertySection0() {
                       ].map((c) => (
                         <div key={c.label} className="p-5 sm:p-6 rounded-xl bg-white border border-[#157375]/10 flex flex-col gap-4 shadow-sm hover:border-[#157375]/20 hover:shadow-md transition-all min-h-[160px] items-center text-center">
                           <div className="flex items-center gap-2 justify-center">
-                            <div className="w-8 h-8 rounded-lg bg-[#157375]/10 flex items-center justify-center text-[#157375] shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-[#157375] shrink-0">
                               <Icon name={c.label === "Bedrooms" ? "bedroom_parent" : c.label === "Beds" ? "bed" : c.label === "Bathrooms" ? "bathtub" : c.label === "Max Guests" ? "group" : "night_shelter"} className="material-symbols-outlined text-[20px]" />
                             </div>
-                            <span className="font-caption text-caption text-[#157375]/70 uppercase tracking-wider font-bold tracking-widest">{c.label}</span>
+                            <span className="font-caption text-caption text-[#46B1B1]/70 uppercase tracking-wider font-bold tracking-widest">{c.label}</span>
                           </div>
                           <div className="flex items-center gap-3 justify-center">
                             <button type="button" aria-label={`Decrease ${c.label}`} onClick={() => c.set(Math.max(c.min, c.val - 1))} className="w-10 h-10 rounded-full bg-[#157375] text-white flex items-center justify-center font-bold text-xl leading-none hover:bg-[#0f4a4c] active:scale-95 shadow-sm transition-all border border-[#157375]">−</button>
                             <span className="w-10 text-center font-bold text-[#157375] text-2xl tabular-nums">{c.val}</span>
                             <button type="button" aria-label={`Increase ${c.label}`} onClick={() => c.set(c.val + 1)} className="w-10 h-10 rounded-full bg-[#157375] text-white flex items-center justify-center font-bold text-xl leading-none hover:bg-[#0f4a4c] active:scale-95 shadow-sm transition-all border border-[#157375]">+</button>
                           </div>
-                          <span className="font-caption text-caption text-[#157375]/60 text-center">{c.sub}</span>
+                          <span className="font-caption text-caption text-[#46B1B1]/60 text-center">{c.sub}</span>
                         </div>
                       ))}
                     </div>
@@ -351,7 +395,7 @@ export function AddPropertySection0() {
                   <WizardStep id="step-panel-3" className="wizard-panel bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md" number={3}>
                     <div className="flex items-center justify-between pb-space-xs border-b border-surface-container">
                       <div className="flex items-center gap-space-xs"><span className="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-label-sm">03</span><h2 className="font-title-md text-title-md text-on-surface font-bold">Base Pricing (USD)</h2></div>
-                      <span className="font-caption text-caption text-secondary font-semibold bg-secondary-container/40 px-2.5 py-0.5 rounded-full">Step 3 of 7</span>
+                      <span className="font-caption text-caption text-secondary font-semibold bg-secondary-container/40 px-2.5 py-0.5 rounded-full">Step 3 of 8</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-space-md items-center">
                       <div className="md:col-span-6 flex flex-col gap-space-xxs">
@@ -365,7 +409,7 @@ export function AddPropertySection0() {
                       </div>
                       <div className="md:col-span-6 p-space-sm bg-surface-container-low rounded-xl flex items-start gap-space-xs border border-surface-container">
                         <Icon name="info" className="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5" />
-                        <div className="flex flex-col gap-0.5"><span className="font-label-sm text-label-sm font-semibold text-on-surface">Seasonal Multipliers in Step 6</span><p className="font-body-md text-body-md text-on-surface-variant">Customize peak ski weeks and holidays without overriding base quote.</p></div>
+                        <div className="flex flex-col gap-0.5"><span className="font-label-sm text-label-sm font-semibold text-on-surface">Seasonal Multipliers in Step 7</span><p className="font-body-md text-body-md text-on-surface-variant">Customize peak ski weeks and holidays without overriding base quote.</p></div>
                       </div>
                     </div>
                   </WizardStep>
@@ -403,7 +447,7 @@ export function AddPropertySection0() {
                   <WizardStep id="step-panel-5" className="wizard-panel bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg" number={5}>
                     <div className="flex items-center justify-between pb-space-xs border-b border-surface-container">
                       <div className="flex items-center gap-space-xs"><span className="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-label-sm">05</span><h2 className="font-title-md text-title-md text-on-surface font-bold">Amenities & Master Rules</h2></div>
-                      <span className="font-caption text-caption text-secondary font-semibold bg-secondary-container/40 px-2.5 py-0.5 rounded-full">Step 5 of 7</span>
+                      <span className="font-caption text-caption text-secondary font-semibold bg-secondary-container/40 px-2.5 py-0.5 rounded-full">Step 5 of 8</span>
                     </div>
                     {catLoading ? (
                       <div className="py-8 flex items-center justify-center"><div className="w-6 h-6 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>
@@ -442,10 +486,10 @@ export function AddPropertySection0() {
                                       </div>
                                       <div className="flex items-center gap-2">
                                         <div className="inline-flex bg-white border border-[#157375]/10 p-1 rounded-lg shadow-sm">
-                                          <button type="button" onClick={() => setRuleStates((prev) => ({ ...prev, [r.id]: { ...prev[r.id], allowed: true } }))} className={`px-3 py-1 rounded-md font-label-sm text-label-sm transition-colors ${state.allowed ? "bg-[#ECFDF5] text-[#059669] font-bold" : "text-[#157375] hover:bg-[#157375]/5 font-medium"}`}>Allowed</button>
-                                          <button type="button" onClick={() => setRuleStates((prev) => ({ ...prev, [r.id]: { ...prev[r.id], allowed: false } }))} className={`px-3 py-1 rounded-md font-label-sm text-label-sm transition-colors ${!state.allowed ? "bg-[#FFF1F2] text-[#E11D48] font-bold" : "text-[#157375] hover:bg-[#157375]/5 font-medium"}`}>Not Allowed</button>
+                                          <button type="button" onClick={() => setRuleStates((prev) => ({ ...prev, [r.id]: { ...prev[r.id], allowed: true } }))} className={`px-3 py-1 rounded-md font-label-sm text-label-sm transition-colors ${state.allowed ? "bg-[#ECFDF5] text-[#059669] font-bold" : "text-[#157375] hover:bg-surface-container-high font-medium"}`}>Allowed</button>
+                                          <button type="button" onClick={() => setRuleStates((prev) => ({ ...prev, [r.id]: { ...prev[r.id], allowed: false } }))} className={`px-3 py-1 rounded-md font-label-sm text-label-sm transition-colors ${!state.allowed ? "bg-[#FFF1F2] text-[#E11D48] font-bold" : "text-[#157375] hover:bg-surface-container-high font-medium"}`}>Not Allowed</button>
                                         </div>
-                                        <input value={state.value} onChange={(e) => setRuleStates((prev) => ({ ...prev, [r.id]: { ...prev[r.id], value: e.target.value } }))} placeholder="value (optional)" maxLength={100} className="w-32 h-8 px-2 bg-white border border-[#157375]/10 rounded-lg text-sm text-[#157375] placeholder:text-[#157375]/40 focus:outline-none focus:ring-1 focus:ring-primary focus:border-[#157375]/20" />
+                                        <input value={state.value} onChange={(e) => setRuleStates((prev) => ({ ...prev, [r.id]: { ...prev[r.id], value: e.target.value } }))} placeholder="value (optional)" maxLength={100} className="w-32 h-8 px-2 bg-white border border-[#157375]/10 rounded-lg text-sm text-[#157375] placeholder:text-[#46B1B1]/40 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/20" />
                                       </div>
                                     </div>
                                   );
@@ -460,40 +504,62 @@ export function AddPropertySection0() {
 
                   <WizardStep id="step-panel-6" className="wizard-panel bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md" number={6}>
                     <div className="flex items-center justify-between pb-space-xs border-b border-surface-container">
-                      <div className="flex items-center gap-space-xs"><span className="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-label-sm">06</span><div><h2 className="font-title-md text-title-md text-[#157375] font-bold">Seasonal Pricing</h2><p className="font-caption text-caption text-[#157375]/70">Optional peak intervals</p></div></div>
-                      <span className="font-caption text-caption text-[#157375]/70 bg-white border border-[#157375]/10 px-2.5 py-0.5 rounded-full">Optional</span>
+                      <div className="flex items-center gap-space-xs"><span className="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-label-sm">06</span><h2 className="font-title-md text-title-md text-on-surface font-bold">Listing Description</h2></div>
+                      <span className="font-caption text-caption text-secondary font-semibold bg-secondary-container/40 px-2.5 py-0.5 rounded-full">Step 6 of 8</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+                      <div className="md:col-span-2 flex flex-col gap-space-xxs">
+                        <div className="flex items-center justify-between gap-2">
+                          <label className="font-label-md text-label-md text-[#157375] font-semibold">Detailed Listing Description</label>
+                          <button type="button" onClick={handleGenerateAI} disabled={aiLoading} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFE8CC] hover:bg-[#FFDCC2] text-[#7A3E1A] font-label-sm text-label-sm font-semibold shadow-sm border border-[#FFDCC2] transition-colors disabled:opacity-60 shrink-0">
+                            <Icon name="auto_awesome" className="material-symbols-outlined text-[18px] text-[#7A3E1A]" />
+                            {aiLoading ? "Generating…" : "Generate with StayLeb AI"}
+                          </button>
+                        </div>
+                        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required minLength={10} rows={4} className="w-full p-3 bg-[#EEF0FF] border border-[#157375]/10 rounded-xl text-[#1E293B] font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary/20 placeholder:text-[#64748B] resize-y shadow-sm" placeholder="Perched on the tranquil terraces of Qartaba overlooking the Adonis River valley, this hand-hewn natural stone chalet blends authentic Lebanese mountain architecture with modern conveniences. Features uninterrupted solar backup power, an artisanal wood fireplace, and panoramic sunset decks." />
+                        <p className="font-caption text-caption text-[#46B1B1]/60">{description.length}/10 min characters • StayLeb AI uses your title, location and capacity to craft authentic tone</p>
+                        {aiError && <div role="alert" className="p-2 rounded-lg bg-[#FFF1F2] text-[#E11D48] text-sm flex items-center gap-2"><Icon name="error" className="material-symbols-outlined text-[18px]" />{aiError}</div>}
+                      </div>
+                    </div>
+                  </WizardStep>
+
+                  <WizardStep id="step-panel-7" className="wizard-panel bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md" number={7}>
+                    <div className="flex items-center justify-between pb-space-xs border-b border-surface-container">
+                      <div className="flex items-center gap-space-xs"><span className="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-label-sm">07</span><div><h2 className="font-title-md text-title-md text-[#157375] font-bold">Seasonal Pricing</h2><p className="font-caption text-caption text-[#46B1B1]/70">Optional peak intervals</p></div></div>
+                      <span className="font-caption text-caption text-[#46B1B1]/70 bg-white border border-[#157375]/10 px-2.5 py-0.5 rounded-full">Optional</span>
                     </div>
                     {seasonalPrices.length > 0 && (
                       <div className="flex flex-col gap-2">
                         {seasonalPrices.map((s, idx) => (
                           <div key={idx} className="p-space-sm bg-white border border-[#157375]/10 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs shadow-sm">
                             <div className="flex items-center gap-space-xs">
-                              <div className="w-8 h-8 rounded-lg bg-[#157375]/10 text-[#157375] flex items-center justify-center"><Icon name="ac_unit" className="material-symbols-outlined text-[18px]" /></div>
-                              <div><p className="font-label-md text-label-md font-semibold text-[#157375]">{s.season_name}</p><p className="font-caption text-caption text-[#157375]/70">{s.start_date} → {s.end_date}</p></div>
+                              <div className="w-8 h-8 rounded-lg bg-primary/10 text-[#157375] flex items-center justify-center"><Icon name="ac_unit" className="material-symbols-outlined text-[18px]" /></div>
+                              <div><p className="font-label-md text-label-md font-semibold text-[#157375]">{s.season_name}</p><p className="font-caption text-caption text-[#46B1B1]/70">{s.start_date} → {s.end_date}</p></div>
                             </div>
-                            <div className="flex items-center gap-space-sm"><span className="font-title-md text-title-md text-[#157375] font-bold">${Number(s.price_per_night).toFixed(2)}<span className="text-body-md font-normal text-[#157375]/70">/night</span></span><button type="button" onClick={() => setSeasonalPrices((prev) => prev.filter((_, i) => i !== idx))} className="p-1 rounded-full bg-[#FFF1F2] text-[#E11D48] hover:bg-error-container/30 border border-[#E11D48]/10"><Icon name="close" className="material-symbols-outlined text-[18px]" /></button></div>
+                            <div className="flex items-center gap-space-sm"><span className="font-title-md text-title-md text-[#157375] font-bold">${Number(s.price_per_night).toFixed(2)}<span className="text-body-md font-normal text-[#46B1B1]/70">/night</span></span><button type="button" onClick={() => setSeasonalPrices((prev) => prev.filter((_, i) => i !== idx))} className="p-1 rounded-full bg-[#FFF1F2] text-[#E11D48] hover:bg-error-container/30 border border-[#E11D48]/10"><Icon name="close" className="material-symbols-outlined text-[18px]" /></button></div>
                           </div>
                         ))}
                       </div>
                     )}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-space-sm bg-white border border-[#157375]/10 p-space-sm rounded-xl items-end">
-                      <div className="flex flex-col gap-1 min-w-0"><label className="font-caption text-caption font-semibold text-[#157375]">Season Name *</label><input value={seasonForm.season_name} onChange={(e) => setSeasonForm({ ...seasonForm, season_name: e.target.value })} placeholder="Winter Ski Peak" className="h-9 px-2 bg-white border border-[#157375]/10 rounded-lg text-sm text-[#157375] placeholder:text-[#157375]/40 focus:outline-none focus:ring-1 focus:ring-primary focus:border-[#157375]/20 w-full" /></div>
-                      <div className="flex flex-col gap-1 min-w-0"><label className="font-caption text-caption font-semibold text-[#157375]">Start *</label><input type="date" value={seasonForm.start_date} onChange={(e) => setSeasonForm({ ...seasonForm, start_date: e.target.value })} className="h-9 px-2 bg-white border border-[#157375]/10 rounded-lg text-sm text-[#157375] focus:outline-none focus:ring-1 focus:ring-primary focus:border-[#157375]/20 w-full" /></div>
-                      <div className="flex flex-col gap-1 min-w-0"><label className="font-caption text-caption font-semibold text-[#157375]">End *</label><input type="date" value={seasonForm.end_date} onChange={(e) => setSeasonForm({ ...seasonForm, end_date: e.target.value })} className="h-9 px-2 bg-white border border-[#157375]/10 rounded-lg text-sm text-[#157375] focus:outline-none focus:ring-1 focus:ring-primary focus:border-[#157375]/20 w-full" /></div>
-                      <div className="flex flex-col gap-1 min-w-0"><label className="font-caption text-caption font-semibold text-white">Price *</label><div className="flex gap-2 items-center min-w-0"><input type="number" step="0.01" value={seasonForm.price_per_night} onChange={(e) => setSeasonForm({ ...seasonForm, price_per_night: e.target.value })} placeholder="280" className="flex-1 min-w-0 h-9 px-2 bg-[#157375] border border-[#157375]/10 rounded-lg text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-primary focus:border-[#157375]/20" /><button type="button" onClick={addSeason} className="shrink-0 whitespace-nowrap px-4 h-9 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white font-label-sm font-semibold shadow-sm border border-[#157375] flex items-center justify-center">Add</button></div></div>
+                      <div className="flex flex-col gap-1 min-w-0"><label className="font-caption text-caption font-semibold text-[#157375]">Season Name *</label><input value={seasonForm.season_name} onChange={(e) => setSeasonForm({ ...seasonForm, season_name: e.target.value })} placeholder="Winter Ski Peak" className="h-9 px-2 bg-white border border-[#157375]/10 rounded-lg text-sm text-[#157375] placeholder:text-[#46B1B1]/40 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/20 w-full" /></div>
+                      <div className="flex flex-col gap-1 min-w-0"><label className="font-caption text-caption font-semibold text-[#157375]">Start *</label><input type="date" value={seasonForm.start_date} onChange={(e) => setSeasonForm({ ...seasonForm, start_date: e.target.value })} className="h-9 px-2 bg-white border border-[#157375]/10 rounded-lg text-sm text-[#157375] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/20 w-full" /></div>
+                      <div className="flex flex-col gap-1 min-w-0"><label className="font-caption text-caption font-semibold text-[#157375]">End *</label><input type="date" value={seasonForm.end_date} onChange={(e) => setSeasonForm({ ...seasonForm, end_date: e.target.value })} className="h-9 px-2 bg-white border border-[#157375]/10 rounded-lg text-sm text-[#157375] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/20 w-full" /></div>
+                      <div className="flex flex-col gap-1 min-w-0"><label className="font-caption text-caption font-semibold text-white">Price *</label><div className="flex gap-2 items-center min-w-0"><input type="number" step="0.01" value={seasonForm.price_per_night} onChange={(e) => setSeasonForm({ ...seasonForm, price_per_night: e.target.value })} placeholder="280" className="flex-1 min-w-0 h-9 px-2 bg-[#157375] border border-[#157375]/10 rounded-lg text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/20" /><button type="button" onClick={addSeason} className="shrink-0 whitespace-nowrap px-4 h-9 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white font-label-sm font-semibold shadow-sm border border-[#157375] flex items-center justify-center">Add</button></div></div>
                     </div>
                     {seasonError && <div className="p-2 rounded-lg bg-[#FFF1F2] text-[#E11D48] text-sm flex items-center gap-2"><Icon name="error" className="material-symbols-outlined text-[18px]" />{seasonError}</div>}
                     <p className="font-caption text-caption text-on-surface-variant">Validate: start ≤ end, no overlaps. Backend will reject overlaps.</p>
                   </WizardStep>
 
-                  <WizardStep id="step-panel-7" className="wizard-panel bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md" number={7}>
+                  <WizardStep id="step-panel-8" className="wizard-panel bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md" number={8}>
                     <div className="flex items-center justify-between pb-space-xs border-b border-surface-container">
-                      <div className="flex items-center gap-space-xs"><span className="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-label-sm">07</span><h2 className="font-title-md text-title-md text-on-surface font-bold">Review & Final Submission</h2></div>
+                      <div className="flex items-center gap-space-xs"><span className="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center font-bold text-label-sm">08</span><h2 className="font-title-md text-title-md text-on-surface font-bold">Review & Final Submission</h2></div>
                       <span className="font-caption text-caption text-secondary font-semibold bg-secondary-container/40 px-2.5 py-0.5 rounded-full">Ready for Admin Review</span>
                     </div>
                     <p className="font-body-md text-body-md text-on-surface-variant">Please verify all parameters. You can jump back via Edit buttons.</p>
                     <div className="flex flex-col gap-space-sm">
                       <div className="p-space-sm bg-surface-container-low rounded-xl flex items-center justify-between"><div className="flex flex-col"><span className="font-caption text-caption text-on-surface-variant">Basic Info</span><span className="font-label-md text-label-md text-on-surface font-bold">{title || "—"} · {propertyType} · {location || "—"}</span></div><button type="button" onClick={() => go(1)} className="font-label-sm text-label-sm text-primary hover:underline font-semibold">Edit</button></div>
+                      <div className="p-space-sm bg-surface-container-low rounded-xl flex items-center justify-between"><div className="flex flex-col min-w-0"><span className="font-caption text-caption text-on-surface-variant">Description</span><span className="font-label-md text-label-md text-on-surface font-semibold break-words whitespace-pre-wrap">{description || "—"}</span></div><button type="button" onClick={() => go(6)} className="font-label-sm text-label-sm text-primary hover:underline font-semibold shrink-0 ml-3">Edit</button></div>
                       <div className="p-space-sm bg-surface-container-low rounded-xl flex items-center justify-between"><div className="flex flex-col"><span className="font-caption text-caption text-on-surface-variant">Capacity</span><span className="font-label-md text-label-md text-on-surface font-semibold">{bedrooms} BR · {beds} Beds · {bathrooms} Baths · Max {maxGuests} · Min {minNights} Nights</span></div><button type="button" onClick={() => go(2)} className="font-label-sm text-label-sm text-primary hover:underline font-semibold">Edit</button></div>
                       <div className="p-space-sm bg-surface-container-low rounded-xl flex items-center justify-between"><div className="flex flex-col"><span className="font-caption text-caption text-on-surface-variant">Pricing</span><span className="font-label-md text-label-md text-on-surface font-semibold">${Number(price || 0).toFixed(2)} / night · {seasonalPrices.length} seasonal {seasonalPrices.length === 1 ? "tier" : "tiers"}</span></div><button type="button" onClick={() => go(3)} className="font-label-sm text-label-sm text-primary hover:underline font-semibold">Edit</button></div>
                       <div className="p-space-sm bg-surface-container-low rounded-xl flex items-center justify-between"><div className="flex flex-col"><span className="font-caption text-caption text-on-surface-variant">Photography & Amenities</span><span className="font-label-md text-label-md text-on-surface font-semibold">{images.length} photos · {selectedAmenities.size} amenities · {rules.length} rules</span></div><button type="button" onClick={() => go(4)} className="font-label-sm text-label-sm text-primary hover:underline font-semibold">Edit</button></div>
@@ -510,7 +576,7 @@ export function AddPropertySection0() {
                       <Icon name="arrow_back" className="material-symbols-outlined text-[18px]" /> Back
                     </button>
                     <div className="flex items-center gap-space-xs">
-                      {step < 7 ? (
+                      {step < totalSteps ? (
                         <button type="button" onClick={handleNext} className="h-11 px-space-lg rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md font-bold shadow-sm transition-all flex items-center gap-1.5 active:scale-[0.99]">
                           <span>Continue</span><Icon name="arrow_forward" className="material-symbols-outlined text-[18px]" />
                         </button>
@@ -537,23 +603,18 @@ export function AddPropertySection0() {
                   </div>
                 </div>
                 <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
-                  <div className="flex items-center justify-between"><h3 className="font-title-md text-title-md text-on-surface font-bold">Listing Readiness</h3><span className="bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold px-2 py-0.5 rounded-full">Step {step} of 7</span></div>
+                  <div className="flex items-center justify-between"><h3 className="font-title-md text-title-md text-on-surface font-bold">Listing Readiness</h3><span className="bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold px-2 py-0.5 rounded-full">Step {step} of 8</span></div>
                   <div className="w-full bg-surface-container h-2 rounded-full overflow-hidden"><div className="bg-primary-container h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }} /></div>
                   <div className="flex flex-col gap-space-xs font-label-sm text-label-sm">
-                    {[
-                      { n: 1, label: "Basic Information" },
-                      { n: 2, label: "Capacity Details" },
-                      { n: 3, label: "Base Pricing" },
-                      { n: 4, label: `Photography (${images.length} photos)` },
-                      { n: 5, label: "Amenities & Rules" },
-                      { n: 6, label: "Seasonal Pricing" },
-                      { n: 7, label: "Review & Submit" },
-                    ].map((item) => (
-                      <div key={item.n} className={`flex items-center justify-between ${step === item.n ? "text-primary font-semibold" : step > item.n ? "text-[#059669]" : "text-on-surface-variant"}`}>
-                        <span className="flex items-center gap-1.5"><Icon name={step > item.n ? "check_circle" : step === item.n ? "radio_button_checked" : "radio_button_unchecked"} className="material-symbols-outlined text-[16px]" /> {item.n}. {item.label}</span>
-                        <span className="text-xs">{step > item.n ? "Done" : step === item.n ? "In Progress" : "Upcoming"}</span>
-                      </div>
-                    ))}
+                    {WIZARD_STEPS.map((item) => {
+                      const label = item.number === 4 ? `Photography (${images.length} photos)` : item.readiness;
+                      return (
+                        <div key={item.number} className={`flex items-center justify-between ${step === item.number ? "text-primary font-semibold" : step > item.number ? "text-[#059669]" : "text-on-surface-variant"}`}>
+                          <span className="flex items-center gap-1.5"><Icon name={step > item.number ? "check_circle" : step === item.number ? "radio_button_checked" : "radio_button_unchecked"} className="material-symbols-outlined text-[16px]" /> {item.number}. {label}</span>
+                          <span className="text-xs">{step > item.number ? "Done" : step === item.number ? "In Progress" : "Upcoming"}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="bg-surface-container-low/70 rounded-xl p-space-md flex items-center gap-space-sm">

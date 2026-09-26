@@ -198,9 +198,6 @@ export function OwnerReviewsSection0() {
                 <div className="flex flex-col">
                   <div className="flex items-center justify-between mb-space-sm">
                     <span className="font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold">Portfolio Rating</span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container font-caption text-caption font-semibold">
-                      <Icon name="hotel_class" className="material-symbols-outlined text-[14px]" /> Top Tier Host
-                    </span>
                   </div>
                   {statsLoading ? (
                     <div className="flex items-center gap-2 py-4">
@@ -333,7 +330,7 @@ export function OwnerReviewsSection0() {
                         <div className="w-12 h-12 rounded-full bg-surface-container text-primary font-bold flex items-center justify-center font-title-md text-title-md">G</div>
                         <div className="flex flex-col">
                           <span className="font-label-md text-label-md text-on-surface font-semibold">StayLeb Guest</span>
-                          <span className="font-caption text-caption text-secondary font-medium">Verified StayLeb Guest</span>
+                          <span className="font-caption text-caption text-secondary font-medium">Verified Guest</span>
                           <span className="font-caption text-caption text-on-surface-variant mt-1">{new Date(rev.created_at).toLocaleDateString()}</span>
                           <span className="font-caption text-caption text-on-surface-variant">Booking #SL-{String(rev.booking_id).padStart(4, "0")}</span>
                         </div>
@@ -390,9 +387,9 @@ export function OwnerReviewsSection0() {
                                 setReportReason("");
                                 setReportError(null);
                               }}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-[#46B1B1]/30 text-[#46B1B1] hover:bg-[#46B1B1] hover:text-white text-xs font-semibold transition-colors"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface font-label-sm text-label-sm hover:bg-surface-container-highest text-xs font-semibold transition-colors shadow-sm"
                             >
-                              <Icon name="flag" className="material-symbols-outlined text-[14px]" />
+                              <Icon name="flag" className="material-symbols-outlined text-[14px] text-primary" />
                               Report Review
                             </button>
                           )}
@@ -420,38 +417,46 @@ export function OwnerReviewsSection0() {
           </div>
           {reportTarget && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setReportTarget(null)}>
-              <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                    <Icon name="flag" className="material-symbols-outlined text-[20px]" />
+              <div className="bg-surface-container-lowest rounded-2xl max-w-lg w-full p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                      <Icon name="flag" className="material-symbols-outlined text-[20px]" />
+                    </div>
+                    <div>
+                      <h3 className="font-title-md text-title-md text-on-surface">Report Review</h3>
+                      <p className="font-caption text-caption text-on-surface-variant">Review #{reportTarget.id} · {reportTarget.property.title}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-[#1E293B]">Report Review</h3>
-                    <p className="text-xs text-[#64748B]">Review #{reportTarget.id} · {reportTarget.property.title}</p>
-                  </div>
+                  <button onClick={() => setReportTarget(null)} className="p-2 rounded-lg hover:bg-surface-container transition-colors">
+                    <Icon name="close" className="material-symbols-outlined text-[20px] text-on-surface-variant" />
+                  </button>
                 </div>
-                <p className="text-sm text-[#64748B] mb-3">The review will remain visible while the admin investigates. Please explain why this review should be reviewed.</p>
-                <textarea
-                  value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value)}
-                  placeholder="Reason for reporting (5–500 characters)…"
-                  maxLength={500}
-                  rows={4}
-                  className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#46B1B1]/30 text-sm"
-                />
-                <div className="flex justify-between text-xs text-[#64748B] mt-1">
+                <p className="text-sm text-on-surface-variant mb-3">The review will remain visible while the admin investigates. Please explain why this review should be reviewed.</p>
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-caption text-caption text-on-surface uppercase tracking-wider font-semibold">Reason</label>
+                  <textarea
+                    value={reportReason}
+                    onChange={(e) => setReportReason(e.target.value)}
+                    placeholder="Reason for reporting (5–500 characters)…"
+                    maxLength={500}
+                    rows={4}
+                    className="w-full p-3 rounded-xl border border-primary/20 bg-white text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-on-surface-variant mt-1">
                   <span>{reportReason.length} / 500</span>
                   <span>Minimum 5 characters</span>
                 </div>
                 {reportError && <div className="mt-3 p-2 rounded-lg bg-rose-50 border border-rose-200 text-sm text-rose-700">{reportError}</div>}
                 <div className="flex justify-end gap-2 mt-4">
-                  <button onClick={() => setReportTarget(null)} disabled={reportBusy} className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-medium">
+                  <button onClick={() => setReportTarget(null)} disabled={reportBusy} className="px-4 py-2 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm font-medium hover:bg-surface-container-high transition-colors">
                     Cancel
                   </button>
                   <button
                     onClick={handleReport}
                     disabled={reportBusy || reportReason.trim().length < 5}
-                    className="px-4 py-2 rounded-xl bg-[#46B1B1] text-white hover:bg-[#157375] text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 rounded-lg bg-primary text-white font-label-sm text-label-sm font-semibold shadow-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {reportBusy ? "Reporting…" : "Submit Report"}
                   </button>
@@ -460,7 +465,7 @@ export function OwnerReviewsSection0() {
             </div>
           )}
           {reportSuccess && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#157375] text-white px-5 py-3 rounded-xl shadow-lg text-sm z-50 flex items-center gap-2">
+            <div className="fixed bottom-6 right-6 bg-primary text-white px-5 py-3 rounded-xl shadow-lg text-sm z-50 flex items-center gap-2">
               <Icon name="check_circle" className="material-symbols-outlined text-[18px]" />
               {reportSuccess}
             </div>

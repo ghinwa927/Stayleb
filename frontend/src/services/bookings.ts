@@ -19,6 +19,7 @@ export type BookingResponse = {
   number_of_nights: number;
   total_price: string;
   status: string;
+  expires_at: string | null;
   commission_percentage: string;
   commission_amount: string;
   owner_earnings: string;
@@ -26,9 +27,8 @@ export type BookingResponse = {
   cancellation_percentage: string | null;
   cancellation_fee: string | null;
   refund_amount: string | null;
-  // internal fields returned by backend but never shown to client
-  cancellation_commission_amount?: string;
-  owner_cancellation_earnings?: string;
+  cancellation_commission_amount: string;
+  owner_cancellation_earnings: string;
   created_at: string;
   updated_at: string;
 };

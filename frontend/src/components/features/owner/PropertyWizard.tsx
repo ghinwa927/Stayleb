@@ -3,7 +3,7 @@ import {createContext,useContext,useState,type ReactNode,type HTMLAttributes} fr
 interface WizardState { step:number;go:(n:number)=>void;next:()=>void;back:()=>void;totalSteps:number }
 const Context=createContext<WizardState | null>(null);
 export function usePropertyWizard(){return useContext(Context);}
-export function PropertyWizard({children, totalSteps=7}:{children:ReactNode; totalSteps?:number}){
+export function PropertyWizard({children, totalSteps=8}:{children:ReactNode; totalSteps?:number}){
  const [step,setStep]=useState(1);
  function go(next:number){setStep(Math.min(totalSteps,Math.max(1,next)));if(typeof window!=='undefined') window.scrollTo({top:0,behavior:'smooth'});}
  function next(){

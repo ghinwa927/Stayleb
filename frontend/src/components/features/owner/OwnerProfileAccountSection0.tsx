@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
-import { apiFetch } from "@/services/api";
+import { apiFetch, logoutRequest, changePasswordRequest } from "@/services/api";
+import { getMyProperties, type PropertyResponse } from "@/services/owner";
 
 export function OwnerProfileAccountSection0() {
-  const [user, setUser] = useState<{ full_name: string; email: string; phone: string | null; role: string } | null>(null);
+  const [user, setUser] = useState<{ full_name: string; email: string; phone: string | null; role: string; is_active?: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
@@ -17,6 +19,8 @@ export function OwnerProfileAccountSection0() {
   const [confirmPass, setConfirmPass] = useState("");
   const [passBusy, setPassBusy] = useState(false);
   const [passMsg, setPassMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [ownerProperties, setOwnerProperties] = useState<PropertyResponse[]>([]);
+  const [propertiesLoading, setPropertiesLoading] = useState(true);
 
   useEffect(() => {
     apiFetch("/users/me")
@@ -28,6 +32,13 @@ export function OwnerProfileAccountSection0() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    getMyProperties()
+      .then(setOwnerProperties)
+      .catch(() => setOwnerProperties([]))
+      .finally(() => setPropertiesLoading(false));
   }, []);
 
   async function handleProfileUpdate() {
@@ -83,15 +94,33 @@ export function OwnerProfileAccountSection0() {
     }
   }
 
-  const displayName = user?.full_name || "Tony Karam";
-  const displayEmail = user?.email || "tony.k@example.com";
-  const initials = displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+  const displayName = user?.full_name || "";
+  const displayEmail = user?.email || "";
+  const hasIdentity = !!displayName;
+  const initials = hasIdentity ? displayName.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase() : "—";
+  const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  async function handleOwnerLogout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await logoutRequest();
+    } catch {
+      // logoutRequest already swallows fetch errors and clears local state;
+      // this catch is a safety net for unexpected throws
+    } finally {
+      window.dispatchEvent(new Event("stayleb-auth"));
+      router.push("/auth/login");
+      setLoggingOut(false);
+    }
+  }
 
   return <>
   <main className={"w-full pt-6 min-h-screen bg-background"}><div className={"flex flex-col w-full px-space-md sm:px-space-lg lg:px-space-xl py-space-md max-w-7xl mx-auto"}>
 
   {profileMsg && (
-    <div className={`fixed top-20 right-6 z-50 flex items-center gap-space-sm px-space-md py-space-sm rounded-xl shadow-xl transition-all duration-300 ${profileMsg.ok ? "bg-[#ECFDF5] border border-[#059669]/20 text-[#065F46]" : "bg-[#FFF1F2] border border-[#E11D48]/20 text-[#E11D48]"}`}>
+    <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-space-sm px-space-md py-space-sm rounded-xl shadow-xl transition-all duration-300 ${profileMsg.ok ? "bg-[#ECFDF5] border border-[#059669]/20 text-[#065F46]" : "bg-[#FFF1F2] border border-[#E11D48]/20 text-[#E11D48]"}`}>
       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${profileMsg.ok ? "bg-[#059669] text-white" : "bg-[#E11D48] text-white"}`}>
         <Icon name={profileMsg.ok ? "check_circle" : "error"} className="material-symbols-outlined text-[18px]" />
       </div>
@@ -137,7 +166,7 @@ export function OwnerProfileAccountSection0() {
   </div>
   <div className={"flex flex-col items-center sm:items-start text-center sm:text-left flex-1 min-w-0"}>
   <div className={"flex flex-wrap items-center justify-center sm:justify-start gap-space-xs mb-1"}>
-  <h2 className={"font-title-md text-title-md text-[#157375] font-bold truncate"}>{loading ? "Loading…" : displayName}</h2>
+  <h2 className={"font-title-md text-title-md text-[#157375] font-bold truncate"}>{loading ? "—" : hasIdentity ? displayName : "—"}</h2>
   <span className={"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold"}>
   <Icon name="verified" className="material-symbols-outlined text-[14px]" />{"Verified Owner / Host"}</span>
   </div>
@@ -159,7 +188,7 @@ export function OwnerProfileAccountSection0() {
   </label>
   <div className={"relative flex items-center"}>
   <Icon name="person" className="material-symbols-outlined absolute left-3 text-outline text-[20px]" />
-  <input value={loading ? "Loading…" : editName} onChange={(e) => setEditName(e.target.value)} disabled={loading || profileBusy} className={"w-full h-11 pl-10 pr-space-md bg-surface-container-lowest rounded-xl text-[#157375] font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-low transition-all border border-transparent focus:border-primary/20 placeholder:text-[#157375]/40"} type={"text"} placeholder={"Enter full legal name"} />
+  <input value={loading ? "" : editName} onChange={(e) => setEditName(e.target.value)} disabled={loading || profileBusy} className={"w-full h-11 pl-10 pr-space-md bg-surface-container-lowest rounded-xl text-[#157375] font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-low transition-all border border-transparent focus:border-primary/20 placeholder:text-[#157375]/40"} type={"text"} placeholder={loading ? "—" : "Enter full legal name"} />
   </div>
   </div>
 
@@ -171,7 +200,7 @@ export function OwnerProfileAccountSection0() {
   </div>
   <div className={"relative flex items-center"}>
   <Icon name="mail" className="material-symbols-outlined absolute left-3 text-outline text-[20px]" />
-  <input value={loading ? "Loading…" : editEmail} onChange={(e) => setEditEmail(e.target.value)} disabled={loading || profileBusy} className={"w-full h-11 pl-10 pr-space-md bg-surface-container-lowest rounded-xl text-[#157375] font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-low transition-all border border-transparent focus:border-primary/20 placeholder:text-[#157375]/40"} type={"email"} placeholder={"name@example.com"} />
+  <input value={loading ? "" : editEmail} onChange={(e) => setEditEmail(e.target.value)} disabled={loading || profileBusy} className={"w-full h-11 pl-10 pr-space-md bg-surface-container-lowest rounded-xl text-[#157375] font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-low transition-all border border-transparent focus:border-primary/20 placeholder:text-[#157375]/40"} type={"email"} placeholder={loading ? "—" : "name@example.com"} />
   </div>
   <span className={"font-caption text-caption text-[#157375]/60"}>{"Used for login and StayLeb notifications. Retrieved from users table."}</span>
   </div>
@@ -184,7 +213,7 @@ export function OwnerProfileAccountSection0() {
   <span>{"+961"}</span>
   </div>
   <div className={"col-span-8 sm:col-span-9 relative flex items-center"}>
-  <input value={loading ? "Loading…" : editPhone} onChange={(e) => setEditPhone(e.target.value)} disabled={loading || profileBusy} className={"w-full h-11 px-space-md bg-surface-container-lowest rounded-xl text-[#157375] font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-low transition-all tracking-wide font-mono border border-transparent focus:border-primary/20 placeholder:text-[#157375]/40"} type={"tel"} placeholder={"70 987 654"} />
+  <input value={loading ? "" : editPhone} onChange={(e) => setEditPhone(e.target.value)} disabled={loading || profileBusy} className={"w-full h-11 px-space-md bg-surface-container-lowest rounded-xl text-[#157375] font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-low transition-all tracking-wide font-mono border border-transparent focus:border-primary/20 placeholder:text-[#157375]/40"} type={"tel"} placeholder={loading ? "—" : "70 987 654"} />
   </div>
   </div>
   <span className={"font-caption text-caption text-[#157375]/60"}>{"Used for high-priority SMS notifications and emergency guest assistance. Retrieved from users table."}</span>
@@ -273,13 +302,34 @@ export function OwnerProfileAccountSection0() {
   <Icon name="villa" className="material-symbols-outlined text-[20px]" />
   </div>
   <div className={"flex flex-col"}>
-  <span className={"font-label-md text-label-md text-[#157375] font-semibold"}>{"3 Total Properties"}</span>
-  <span className={"font-caption text-caption text-[#157375]/60"}>{"Faraya, Faqra & Ouyoun El Simane"}</span>
+  <span className={"font-label-md text-label-md text-[#157375] font-semibold"}>{propertiesLoading ? "—" : `${ownerProperties.length} Total ${ownerProperties.length === 1 ? "Property" : "Properties"}`}</span>
+  {(() => {
+    const approvedCount = ownerProperties.filter((p) => p.status === "approved").length;
+    const pendingCount = ownerProperties.filter((p) => p.status === "pending").length;
+    const rejectedCount = ownerProperties.filter((p) => p.status === "rejected").length;
+    const parts: string[] = [];
+    if (approvedCount > 0) parts.push(`${approvedCount} Approved`);
+    if (pendingCount > 0) parts.push(`${pendingCount} Pending`);
+    if (rejectedCount > 0) parts.push(`${rejectedCount} Rejected`);
+    const locationLabel = ownerProperties.length === 0 ? "No properties yet" : `${ownerProperties.length} ${ownerProperties.length === 1 ? "property" : "properties"} in portfolio`;
+    return <span className={"font-caption text-caption text-[#157375]/60"}>{propertiesLoading ? "—" : locationLabel}</span>;
+  })()}
   </div>
   </div>
   <div className={"flex flex-col items-end"}>
-  <span className={"font-caption text-caption font-semibold text-primary"}>{"2 Approved"}</span>
-  <span className={"font-caption text-caption text-tertiary"}>{"1 Pending Review"}</span>
+  {(() => {
+    const approvedCount = ownerProperties.filter((p) => p.status === "approved").length;
+    const pendingCount = ownerProperties.filter((p) => p.status === "pending").length;
+    const rejectedCount = ownerProperties.filter((p) => p.status === "rejected").length;
+    if (propertiesLoading) return <span className={"font-caption text-caption text-[#157375]/60"}>—</span>;
+    return (
+      <>
+        <span className={"font-caption text-caption font-semibold text-primary"}>{`${approvedCount} Approved`}</span>
+        <span className={"font-caption text-caption text-tertiary"}>{`${pendingCount} Pending`}</span>
+        {rejectedCount > 0 && <span className={"font-caption text-caption text-[#E11D48]"}>{`${rejectedCount} Rejected`}</span>}
+      </>
+    );
+  })()}
   </div>
   </div>
 
@@ -287,14 +337,14 @@ export function OwnerProfileAccountSection0() {
   <Icon name="verified_user" className="material-symbols-outlined text-secondary text-[22px] shrink-0 mt-0.5" />
   <div className={"flex flex-col"}>
   <span className={"font-label-md text-label-md text-[#157375] font-semibold"}>{"Active & In Good Standing"}</span>
-  <p className={"font-caption text-caption text-[#157375]/60 mt-0.5"}>{"Compliant with StayLeb host code of conduct. Last identity integrity verification was completed March 2024."}</p>
+  <p className={"font-caption text-caption text-[#157375]/60 mt-0.5"}>{"Compliant with StayLeb host code of conduct."}</p>
   </div>
   </div>
   </div>
 
   <div className={"pt-space-xs"}>
-  <Link className={"w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-error-container text-on-error-container font-label-md text-label-md font-semibold hover:opacity-90 active:scale-[0.99] transition-all"} href={"/auth/login"}>
-  <Icon name="logout" className="material-symbols-outlined text-[18px]" />{"Sign Out of StayLeb Host Portal"}</Link>
+  <button onClick={handleOwnerLogout} disabled={loggingOut} className={"w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-error-container text-on-error-container font-label-md text-label-md font-semibold hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-50"} type="button">
+  <Icon name="logout" className="material-symbols-outlined text-[18px]" />{loggingOut ? "Signing out…" : "Sign Out of StayLeb Host Portal"}</button>
   </div>
   </div>
   </div>

@@ -9,6 +9,22 @@ import type { BookingResponse, BookingPreviewResponse } from '@/services/booking
 type Stay = { checkIn: string; checkOut: string; adults: number; children: number; method: 'Card' | 'Cash'; name: string; email: string; };
 const initial: Stay = { checkIn:'2026-09-25',checkOut:'2026-09-28',adults:2,children:2,method:'Card',name:'Maya Haddad',email:'maya.haddad@example.com' };
 export type BookingDraft = { propertyId: string; checkIn: string; checkOut: string; guests: number };
+
+// Helper: check if booking is a temporary checkout hold (pending with expires_at)
+function isTemporaryCheckoutHold(booking: BookingResponse | null): boolean {
+  if (!booking) return false;
+  return booking.status === 'pending' && !!booking.expires_at;
+}
+
+// Helper: get seconds until expires_at, null if not applicable or expired
+function getExpiresAtSecondsRemaining(booking: BookingResponse | null): number | null {
+  if (!booking?.expires_at) return null;
+  const expires = new Date(booking.expires_at).getTime();
+  const now = Date.now();
+  const diff = Math.max(0, Math.floor((expires - now) / 1000));
+  return diff;
+}
+
 const BookingContext = createContext<{
   stay: Stay;
   update: (patch: Partial<Stay>) => void;
@@ -20,7 +36,9 @@ const BookingContext = createContext<{
   booking: BookingResponse | null;
   setBooking: (b: BookingResponse | null) => void;
   bookingLoading: boolean;
-}>({stay:initial,update:()=>{}, draft:null, setDraft:()=>{}, clearDraft:()=>{}, preview:null, setPreview:()=>{}, booking:null, setBooking:()=>{}, bookingLoading:false});
+  isTemporaryCheckoutHold: (booking: BookingResponse | null) => boolean;
+  getExpiresAtSecondsRemaining: (booking: BookingResponse | null) => number | null;
+}>({stay:initial,update:()=>{}, draft:null, setDraft:()=>{}, clearDraft:()=>{}, preview:null, setPreview:()=>{}, booking:null, setBooking:()=>{}, bookingLoading:false, isTemporaryCheckoutHold, getExpiresAtSecondsRemaining});
 
 const DRAFT_KEY = 'stayleb-booking-draft';
 const PREVIEW_KEY = 'stayleb-booking-preview';
@@ -94,25 +112,25 @@ export function BookingProvider({children}:{children:ReactNode}) {
    getBooking(bid).then(b=> setBooking(b)).catch(()=>{}).finally(()=> setBookingLoading(false));
  },[pathname]);
 
- return <BookingContext.Provider value={{stay,update:patch=>setStay(current=>({...current,...patch})), draft, setDraft, clearDraft, preview, setPreview, booking, setBooking, bookingLoading}}>{children}</BookingContext.Provider>;
+ return <BookingContext.Provider value={{stay,update:patch=>setStay(current=>({...current,...patch})), draft, setDraft, clearDraft, preview, setPreview, booking, setBooking, bookingLoading, isTemporaryCheckoutHold, getExpiresAtSecondsRemaining}}>{children}</BookingContext.Provider>;
 }
 export function useBooking() {
- const {stay,update,draft,setDraft,clearDraft,preview,setPreview,booking, setBooking, bookingLoading}=useContext(BookingContext);
+ const {stay,update,draft,setDraft,clearDraft,preview,setPreview,booking, setBooking, bookingLoading, isTemporaryCheckoutHold, getExpiresAtSecondsRemaining}=useContext(BookingContext);
  // If real booking exists, derive nights/lodging/total from booking
  if (booking) {
    const nights = booking.number_of_nights;
    const lodging = Number(booking.total_price);
-   return {stay,update,draft,setDraft,clearDraft,preview,setPreview,nights,lodging,total:lodging, booking, setBooking, bookingLoading };
+   return {stay,update,draft,setDraft,clearDraft,preview,setPreview,nights,lodging,total:lodging, booking, setBooking, bookingLoading, isTemporaryCheckoutHold, getExpiresAtSecondsRemaining };
  }
  // If draft exists, derive nights from draft (for preview)
  if (draft) {
    const nights = draft.checkIn && draft.checkOut && draft.checkOut > draft.checkIn ? Math.max(0,Math.round((Date.parse(draft.checkOut)-Date.parse(draft.checkIn))/86400000)) : 0;
    const lodging = preview ? Number(preview.total_price) : 0;
    const total = preview ? Number(preview.total_price) : lodging;
-   return {stay,update,draft,setDraft,clearDraft,preview,setPreview,nights,lodging,total, booking: null, setBooking, bookingLoading};
+   return {stay,update,draft,setDraft,clearDraft,preview,setPreview,nights,lodging,total, booking: null, setBooking, bookingLoading, isTemporaryCheckoutHold, getExpiresAtSecondsRemaining};
  }
-  const nights=Math.max(0,Math.round((Date.parse(stay.checkOut)-Date.parse(stay.checkIn))/86400000));
-  const lodging=0;
-  return {stay,update,draft,setDraft,clearDraft,preview,setPreview,nights,lodging,total:0, booking: null, setBooking, bookingLoading};
+   const nights=Math.max(0,Math.round((Date.parse(stay.checkOut)-Date.parse(stay.checkIn))/86400000));
+   const lodging=0;
+   return {stay,update,draft,setDraft,clearDraft,preview,setPreview,nights,lodging,total:0, booking: null, setBooking, bookingLoading, isTemporaryCheckoutHold, getExpiresAtSecondsRemaining};
 }
 export const money=(value:number | string)=> new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(value));

@@ -80,7 +80,7 @@ export function MyBookingsSection0() {
      <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-primary"><Icon name="travel_explore" className="material-symbols-outlined text-[32px]" /></div>
      <h3 className="font-title-md text-title-md text-on-surface">No bookings yet</h3>
      <p className="font-body-md text-body-md text-on-surface-variant">When you book a StayLeb chalet, your reservation details will appear here.</p>
-     <Link className="px-6 py-2.5 rounded-lg bg-primary text-white font-label-md text-label-md inline-block shadow-sm" href="/search">Discover Properties</Link>
+     <Link className="px-6 py-2.5 rounded-lg bg-primary text-white font-label-md text-label-md inline-block shadow-sm" href="/account/properties">Discover Properties</Link>
    </div>
   ) : filtered.length===0 ? (
     <div className="p-8 bg-surface-container-lowest rounded-xl shadow-sm text-center">

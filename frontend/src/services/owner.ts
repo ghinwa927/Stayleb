@@ -70,6 +70,28 @@ export type Rule = {
   is_active: boolean;
 };
 
+export type PropertyDescriptionRule = {
+  name: string;
+  allowed: boolean;
+  value: string | null;
+};
+
+export type PropertyDescriptionRequest = {
+  title: string;
+  property_type: "chalet" | "furnished_house";
+  location: string;
+  bedrooms: number;
+  beds: number;
+  bathrooms: number;
+  max_guests: number;
+  amenities: string[];
+  rules: PropertyDescriptionRule[];
+};
+
+export type PropertyDescriptionResponse = {
+  description: string;
+};
+
 export type PropertyBlockedDate = {
   id: number;
   property_id: number;
@@ -123,6 +145,10 @@ export async function updateProperty(id: number | string, payload: PropertyUpdat
 
 export async function deleteProperty(id: number | string): Promise<void> {
   await apiFetch(`/properties/${id}`, { method: "DELETE" });
+}
+
+export async function generatePropertyDescription(payload: PropertyDescriptionRequest): Promise<PropertyDescriptionResponse> {
+  return apiFetch("/ai/property/generate-description", { method: "POST", body: JSON.stringify(payload) });
 }
 
 // Amenities / Rules

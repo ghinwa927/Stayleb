@@ -1,12 +1,18 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { PropertyDetailsSection0 } from "@/components/features/market/PropertyDetailsSection0";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { Footer } from "@/components/layout/Footer";
 import { AppShell } from "@/components/layout/Appshell";
+import { useSearchParams } from "next/navigation";
 import { isAuthenticated } from "@/lib/authGuard";
 
 export default function Page() {
+  return <Suspense fallback={<p className="p-8 text-center">Loading property…</p>}><PropertyPage /></Suspense>;
+}
+
+function PropertyPage() {
+  const searchKey = useSearchParams().toString();
   const [isClient, setIsClient] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -19,7 +25,7 @@ export default function Page() {
     return (
       <>
         <PublicHeader />
-        <PropertyDetailsSection0 />
+        <PropertyDetailsSection0 key={searchKey} />
         <Footer />
       </>
     );
@@ -29,7 +35,7 @@ export default function Page() {
     // Client header = AppShell account header (no left sidebar, profile dropdown with Properties etc)
     return (
       <AppShell area="account">
-        <PropertyDetailsSection0 />
+        <PropertyDetailsSection0 key={searchKey} />
       </AppShell>
     );
   }
@@ -38,7 +44,7 @@ export default function Page() {
   return (
     <>
       <PublicHeader />
-      <PropertyDetailsSection0 />
+      <PropertyDetailsSection0 key={searchKey} />
       <Footer />
     </>
   );

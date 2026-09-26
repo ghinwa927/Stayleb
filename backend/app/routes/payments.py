@@ -175,6 +175,7 @@ async def stripe_webhook(
 
         if booking and booking.status == "pending":
             booking.status = "confirmed"
+            booking.expires_at = None
 
         try:
             db.commit()

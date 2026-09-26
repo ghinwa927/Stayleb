@@ -9,7 +9,7 @@ from email.mime.image import MIMEImage
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-LOGO_PATH = BASE_DIR / "assets" / "stayleb_logo.png"
+LOGO_PATH = BASE_DIR / "assets" / "stayleb_logo.jpg"
 
 
 def send_email(to: str, subject: str, html_content: str):

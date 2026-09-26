@@ -6,6 +6,7 @@ import { useState, useEffect, type ReactNode } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { ActionButton } from '@/components/ui/Interactions';
 import { logoutRequest } from '@/services/api';
+import { FavoritesProvider } from "@/components/features/market/ListingSearch";
 
 type Area = 'market' | 'account' | 'owner' | 'admin';
 const navigation: Record<Exclude<Area,'market'>, [string,string,string][]> = {
@@ -56,7 +57,7 @@ export function AppShell({ area, children }: { area: Area; children: ReactNode }
   const name = realName || "";
   const hasName = !!name;
   const initials = (name || "—").split(' ').filter(Boolean).map(s=>s[0]).join('').toUpperCase().slice(0,2) || "—";
-  const nav = workspace ? navigation[area as Exclude<Area,'market'>] : [['Discover','/','explore'],['Search','/search','search'],['AI Smart Search','/ai-search','auto_awesome']];
+  const nav = workspace ? navigation[area as Exclude<Area,'market'>] : [['Discover','/','explore'],['Search','/search','search']];
   // Account nav will be shown inside profile dropdown, not sidebar
   const accountNav = navigation.account;
   async function handleLogout(){ await logoutRequest(); setAuthed(false); setProfile(false); setRealName(null); window.dispatchEvent(new Event("stayleb-auth")); router.push("/"); }
@@ -89,7 +90,7 @@ export function AppShell({ area, children }: { area: Area; children: ReactNode }
           {!workspace && authed && <><Link href="/" className="hidden sm:block text-xs text-[#46B1B1] hover:underline">Explore stays</Link><button onClick={handleLogout} className="hidden sm:block text-xs text-[#46B1B1]/70 hover:text-[#46B1B1]">Log Out</button></>}
           {(area !== 'admin' && (workspace || isAccount)) && <ActionButton actionLabel="notifications" aria-label="Notifications" className="p-2 text-[#46B1B1] bg-transparent hover:bg-transparent"><Icon name="notifications" /></ActionButton>}
           <div className="relative">
-            <button aria-label="Account and workspace menu" aria-expanded={profile} className="w-9 h-9 rounded-full bg-primary text-white text-xs font-bold hover:bg-primary flex items-center justify-center" onClick={()=>setProfile(!profile)}>{workspace || isAccount ? initials : <Icon name="person" className="text-lg" />}</button>
+            <button aria-label="Account and workspace menu" aria-expanded={profile} className="w-9 h-9 rounded-full bg-primary text-white !text-white text-xs font-bold hover:bg-primary flex items-center justify-center" onClick={()=>setProfile(!profile)}>{workspace || isAccount ? initials : <Icon name="person" className="text-lg text-white" />}</button>
             {profile && (
               <div className="absolute right-0 top-12 w-72 rounded-2xl border bg-white shadow-xl overflow-hidden z-50">
                 {isAccount ? (
@@ -110,7 +111,7 @@ export function AppShell({ area, children }: { area: Area; children: ReactNode }
                             href={url}
                             onClick={()=>setProfile(false)}
                             aria-current={active?'page':undefined}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${active?'bg-primary text-white font-semibold':'text-[#46B1B1] hover:bg-slate-100'}`}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${active?'bg-primary text-white !text-white font-semibold':'text-[#46B1B1] hover:bg-slate-100'}`}
                           >
                             <Icon name={icon} className={`text-[18px] ${active?'text-white':'text-[#46B1B1]/70'}`} />
                             {label}
@@ -150,6 +151,8 @@ export function AppShell({ area, children }: { area: Area; children: ReactNode }
       </div>
       {!workspace && open && <nav className="lg:hidden bg-white shadow-lg p-4 grid">{nav.map(([label,url])=><Link className="p-3" key={url} href={url} onClick={()=>setOpen(false)}>{label}</Link>)}</nav>}
     </header>
-    <div id="main-content" className={shellMainClass}>{children}</div>
+    <div id="main-content" className={shellMainClass}>
+      {area === 'account' ? <FavoritesProvider>{children}</FavoritesProvider> : children}
+    </div>
   </div>;
 }

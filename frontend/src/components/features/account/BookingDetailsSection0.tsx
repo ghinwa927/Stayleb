@@ -243,7 +243,7 @@ export function BookingDetailsSection0() {
           <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748B;margin-top:4px"><span>You are cancelling ${days} day${days === 1 ? "" : "s"} before check-in</span><span>${tier.shortLabel}</span></div>
           <div style="display:flex;justify-content:space-between;font-size:13px;color:#B45309;margin-top:6px"><span>Cancellation deduction (${tier.pct}%)</span><span style="font-weight:600">${formatPrice(fee)}</span></div>
           <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:#157375;margin-top:8px;padding-top:8px;border-top:1px dashed #46B1B1"><span>Estimated refund</span><span>${formatPrice(estimatedRefund)}</span></div>
-          <div style="font-size:11px;color:#64748B;margin-top:8px;line-height:1.4">If you continue, your booking will be cancelled. For card payments, eligible refunds are processed through the original payment method by StayLeb. This is an estimate — the backend is the source of truth.</div>
+          <div style="font-size:11px;color:#64748B;margin-top:8px;line-height:1.4">If you continue, your booking will be cancelled. For card payments, eligible refunds are processed through the original payment method by StayLeb. This is an estimate — final amounts are confirmed by StayLeb.</div>
         </div>`;
     } else {
       // No payment or pending/failed stripe

@@ -169,6 +169,7 @@ def get_admin_booking_stats(
     to_date: Optional[date] = None,
     property_id: Optional[int] = None,
     group_by: Optional[Literal["day", "month"]] = None,
+    owner_id: Optional[int] = None,
 ):
     zero = Decimal("0.00")
 
@@ -200,6 +201,13 @@ def get_admin_booking_stats(
     if property_id is not None:
         query = query.filter(
             Booking.property_id == property_id
+        )
+
+    # Optional owner filter — restrict to bookings of properties owned by owner_id
+    # Used by Owner Dashboard to reuse the same financial logic.
+    if owner_id is not None:
+        query = query.join(Property, Property.id == Booking.property_id).filter(
+            Property.owner_id == owner_id
         )
 
     bookings = query.all()

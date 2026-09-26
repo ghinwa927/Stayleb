@@ -1,10 +1,11 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from math import ceil
 
-from sqlalchemy import asc, desc, func
+from sqlalchemy import asc, desc, func, or_
 from sqlalchemy.orm import Session
 
+from app.models.booking import Booking
 from app.models.property import Property
 from app.models.property_amenity import PropertyAmenity
 from app.models.property_blocked_date import PropertyBlockedDate
@@ -95,6 +96,7 @@ def search_properties(
 
     # ---------------------------------
     # Amenities
+    #
     # Property must contain ALL selected
     # amenities.
     # ---------------------------------
@@ -122,7 +124,7 @@ def search_properties(
         )
 
     # ---------------------------------
-    # Dates / blocked dates
+    # Dates / availability
     # ---------------------------------
 
     if check_in is not None and check_out is not None:
@@ -132,8 +134,14 @@ def search_properties(
                 "Check-out date must be after check-in date"
             )
 
+        # ---------------------------------
+        # Owner-blocked dates
+        # ---------------------------------
+
         blocked_property_ids = (
-            db.query(PropertyBlockedDate.property_id)
+            db.query(
+                PropertyBlockedDate.property_id
+            )
             .filter(
                 PropertyBlockedDate.start_date < check_out,
                 PropertyBlockedDate.end_date > check_in,
@@ -145,10 +153,54 @@ def search_properties(
         )
 
         # ---------------------------------
+        # Existing active bookings
+        #
+        # confirmed
+        #     -> always blocks
+        #
+        # pending + expires_at IS NULL
+        #     -> blocks
+        #
+        # pending + expires_at > now
+        #     -> blocks
+        #
+        # pending + expires_at <= now
+        #     -> does NOT block
+        # ---------------------------------
+
+        now = datetime.now()
+
+        booked_property_ids = (
+            db.query(Booking.property_id)
+            .filter(
+                or_(
+                    Booking.status == "confirmed",
+
+                    (
+                        (Booking.status == "pending")
+                        & (
+                            Booking.expires_at.is_(None)
+                            | (Booking.expires_at > now)
+                        )
+                    ),
+                ),
+
+                Booking.check_in < check_out,
+                Booking.check_out > check_in,
+            )
+        )
+
+        query = query.filter(
+            ~Property.id.in_(booked_property_ids)
+        )
+
+        # ---------------------------------
         # Minimum-night requirement
         # ---------------------------------
 
-        requested_nights = (check_out - check_in).days
+        requested_nights = (
+            check_out - check_in
+        ).days
 
         query = query.filter(
             Property.min_nights <= requested_nights
@@ -157,8 +209,8 @@ def search_properties(
     # ---------------------------------
     # Base price filtering
     #
-    # Only use base price when the user
-    # did NOT select dates.
+    # Only use base price when dates
+    # were NOT selected.
     #
     # When dates are selected, seasonal
     # pricing is handled after the query.
@@ -183,8 +235,8 @@ def search_properties(
     # price sorting uses base price.
     #
     # With dates:
-    # price sorting will be corrected
-    # later using actual stay pricing.
+    # price sorting happens later using
+    # the actual stay pricing.
     # ---------------------------------
 
     if sort == "price_low":
@@ -202,13 +254,13 @@ def search_properties(
             )
 
     elif sort == "newest":
+
         query = query.order_by(
             desc(Property.created_at)
         )
 
     else:
-        # Temporary behavior for
-        # "recommended".
+        # Temporary behavior for "recommended".
         query = query.order_by(
             desc(Property.created_at)
         )
@@ -222,9 +274,9 @@ def search_properties(
     # ---------------------------------
     # Build search results
     #
-    # If dates were selected, calculate
-    # the actual price of the stay using
-    # base + seasonal pricing.
+    # When dates are selected, calculate
+    # actual stay pricing using base +
+    # seasonal prices.
     # ---------------------------------
 
     search_results = []
@@ -233,7 +285,10 @@ def search_properties(
 
         stay_pricing = None
 
-        if check_in is not None and check_out is not None:
+        if (
+            check_in is not None
+            and check_out is not None
+        ):
 
             stay_pricing = calculate_stay_price(
                 db=db,
@@ -279,15 +334,15 @@ def search_properties(
 
     # ---------------------------------
     # Date-aware price sorting
-    #
-    # If dates were selected, sort using
-    # the actual average nightly price
-    # for those dates.
     # ---------------------------------
 
-    if check_in is not None and check_out is not None:
+    if (
+        check_in is not None
+        and check_out is not None
+    ):
 
         if sort == "price_low":
+
             search_results.sort(
                 key=lambda result: result[
                     "stay_pricing"
@@ -295,6 +350,7 @@ def search_properties(
             )
 
         elif sort == "price_high":
+
             search_results.sort(
                 key=lambda result: result[
                     "stay_pricing"
@@ -305,8 +361,9 @@ def search_properties(
     # ---------------------------------
     # Pagination
     #
-    # Must happen AFTER seasonal price
-    # filtering and date-aware sorting.
+    # Pagination happens AFTER
+    # seasonal-price filtering and
+    # date-aware sorting.
     # ---------------------------------
 
     total = len(search_results)
@@ -314,7 +371,9 @@ def search_properties(
     start = (page - 1) * page_size
     end = start + page_size
 
-    paginated_results = search_results[start:end]
+    paginated_results = search_results[
+        start:end
+    ]
 
     total_pages = (
         ceil(total / page_size)
@@ -335,27 +394,36 @@ def search_properties(
         property_data = {
             column.name: getattr(
                 property,
-                column.name
+                column.name,
             )
             for column in Property.__table__.columns
         }
 
-        # Add relationships expected by
+        # Relationships expected by
         # PropertyResponse.
-        property_data["images"] = property.images
-        property_data["amenities"] = property.amenities
+
+        property_data["images"] = (
+            property.images
+        )
+
+        property_data["amenities"] = (
+            property.amenities
+        )
+
         property_data["property_rules"] = (
             property.property_rules
         )
+
         property_data["seasonal_prices"] = (
             property.seasonal_prices
         )
 
-        # Add search-specific calculated
+        # Search-specific calculated
         # pricing.
-        property_data["stay_pricing"] = result[
-            "stay_pricing"
-        ]
+
+        property_data["stay_pricing"] = (
+            result["stay_pricing"]
+        )
 
         items.append(property_data)
 

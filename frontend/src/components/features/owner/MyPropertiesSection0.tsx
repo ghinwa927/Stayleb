@@ -110,32 +110,35 @@ export function MyPropertiesSection0() {
   return (
     <>
       <div className="">
-        <main className="relative pt-6 w-full px-space-lg pb-space-xl bg-surface min-h-screen">
+        <main className="w-full pt-6 px-space-lg pb-space-xl min-h-screen bg-surface-container-low">
           <div className="flex flex-col w-full">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-space-md mb-space-lg">
-              <div className="flex flex-col">
-                <div className="flex items-center gap-space-xs mb-space-xxs">
-                  <span className="font-caption text-caption uppercase tracking-wider text-primary font-bold">Host Operations</span>
-                  <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
-                  <span className="font-caption text-caption text-on-surface-variant">Lebanon Portfolio</span>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md mb-space-xl">
+              <div className="flex flex-col gap-space-xxs">
+                <div className="flex items-center gap-space-xs text-[#46B1B1] font-label-sm text-label-sm">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+                    Host Dashboard
+                  </span>
+                  <span>•</span>
+                  <span>Lebanon Portfolio Live</span>
                 </div>
-                <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">My Properties</h1>
-                <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-0.5">Manage your chalets and furnished houses, check approval statuses, and configure listings.</p>
+                <h1 className="font-headline-lg text-headline-lg text-[#46B1B1] tracking-tight mt-1">My Properties</h1>
+                <p className="font-body-md text-body-md text-[#46B1B1]/70">Manage your chalets and furnished houses, check approval statuses, and configure listings.</p>
               </div>
               <div className="flex items-center gap-space-sm shrink-0">
-                <div className="hidden lg:flex items-center bg-surface-container-high px-space-md py-space-xs rounded-xl gap-space-sm">
+                <div className="hidden lg:flex items-center bg-surface-container-lowest px-space-md py-space-xs rounded-xl gap-space-sm shadow-sm">
                   <div className="flex flex-col items-end">
-                    <span className="font-caption text-caption text-on-surface-variant">Portfolio</span>
+                    <span className="font-caption text-caption uppercase tracking-wider text-outline font-semibold">Portfolio</span>
                     <span className="font-label-md text-label-md text-primary font-bold">{counts.all} {counts.all === 1 ? "Property" : "Properties"}</span>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center">
-                    <Icon name="cottage" className="material-symbols-outlined text-[18px]" />
+                  <div className="w-8 h-8 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+                    <Icon name="cottage" className="material-symbols-outlined text-[20px]" />
                   </div>
                 </div>
-                <Link href="/owner/properties/new" className="flex items-center gap-space-xs bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md py-space-sm px-space-md rounded-xl transition-all shadow-md active:scale-95">
-                  <Icon name="add" className="material-symbols-outlined text-[20px]" />
-                  <span>+ Add Property</span>
+                <Link href="/owner/properties/new" className="inline-flex items-center gap-space-xxs px-space-md py-2.5 rounded-lg bg-primary text-white font-label-md text-label-md shadow-sm hover:bg-primary/90 transition-all">
+                  <Icon name="add" className="material-symbols-outlined text-[18px]" />
+                  <span>Add Property</span>
                 </Link>
               </div>
             </div>
@@ -182,7 +185,7 @@ export function MyPropertiesSection0() {
                 <div className="flex-1">
                   <p className="font-label-md text-label-md font-semibold text-[#E11D48]">Failed to load properties</p>
                   <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">{error}</p>
-                  <button onClick={load} className="mt-3 px-4 py-1.5 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] text-sm font-medium shadow-sm">Retry</button>
+                  <button onClick={load} className="mt-3 px-4 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-white border border-primary text-sm font-medium shadow-sm">Retry</button>
                 </div>
               </div>
             )}
@@ -230,7 +233,7 @@ export function MyPropertiesSection0() {
                 <Icon name="search_off" className="material-symbols-outlined text-[40px] text-on-surface-variant mb-2" />
                 <p className="font-title-sm text-title-sm font-semibold text-on-surface">No properties match your filters</p>
                 <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">Try adjusting search or filter tabs.</p>
-                <button onClick={() => { setFilter("all"); setQuery(""); }} className="mt-4 px-4 py-2 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] text-sm font-medium shadow-sm">Clear filters</button>
+                <button onClick={() => { setFilter("all"); setQuery(""); }} className="mt-4 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white border border-primary text-sm font-medium shadow-sm">Clear filters</button>
               </div>
             )}
 
@@ -274,7 +277,6 @@ export function MyPropertiesSection0() {
                               <span className="font-headline-md text-headline-md font-bold text-primary">${Number(price).toFixed(2)}</span>
                               <span className="font-caption text-caption text-on-surface-variant">base / night</span>
                             </div>
-                            <span className="font-caption text-caption text-secondary font-medium">Payout: USD cash</span>
                           </div>
                         </div>
 
@@ -309,14 +311,14 @@ export function MyPropertiesSection0() {
                             <span>{property.amenities.length} amenities</span>
                           </div>
                           <div className="flex items-center gap-space-xs flex-wrap">
-                            <Link href={`/owner/properties/${property.id}/preview`} className="px-space-md py-1.5 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] font-label-md text-label-md font-semibold transition-colors inline-flex items-center gap-1">
+                            <Link href={`/owner/properties/${property.id}/preview`} className="px-space-md py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-white border border-primary font-label-md text-label-md font-semibold transition-colors inline-flex items-center gap-1 shadow-sm">
                               <Icon name="visibility" className="material-symbols-outlined text-[16px]" /> Preview
                             </Link>
-                            <Link href={`/owner/properties/${property.id}/edit`} className="px-space-md py-1.5 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] font-label-md text-label-md font-semibold transition-colors">Edit Listing</Link>
-                            <Link href={`/owner/availability?property=${property.id}`} className="px-space-md py-1.5 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] font-label-md text-label-md font-semibold transition-colors flex items-center gap-1">
+                            <Link href={`/owner/properties/${property.id}/edit`} className="px-space-md py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-[#46B1B1] border border-surface-container-highest font-label-md text-label-md font-semibold transition-colors shadow-sm">Edit Listing</Link>
+                            <Link href={`/owner/availability?property=${property.id}`} className="px-space-md py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-[#46B1B1] border border-surface-container-highest font-label-md text-label-md font-semibold transition-colors flex items-center gap-1 shadow-sm">
                               <Icon name="calendar_today" className="material-symbols-outlined text-[16px]" /> Availability
                             </Link>
-                            <button onClick={() => setDeleteTarget(property)} className="p-1.5 rounded-lg bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] transition-colors" title="Delete property" aria-label={`Delete ${property.title}`}>
+                            <button onClick={() => setDeleteTarget(property)} className="p-1.5 rounded-lg bg-[#FFF1F2] hover:bg-[#FFE4E6] text-[#E11D48] border border-[#E11D48]/20 transition-colors" title="Delete property" aria-label={`Delete ${property.title}`}>
                               <Icon name="delete" className="material-symbols-outlined text-[18px]" />
                             </button>
                           </div>
@@ -328,16 +330,16 @@ export function MyPropertiesSection0() {
               </div>
             )}
 
-            <div className="mt-space-xl pt-space-md flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant font-caption text-caption">
+            <div className="mt-space-xl pt-space-md flex flex-col md:flex-row items-center justify-between gap-space-md text-[#46B1B1]/70 font-caption text-caption">
               <div className="flex items-center gap-space-md">
-                <span className="flex items-center gap-1"><Icon name="payments" className="material-symbols-outlined text-[14px] text-primary" /> Direct Host Payouts in Fresh USD Cash</span>
+                <span className="flex items-center gap-1"><Icon name="payments" className="material-symbols-outlined text-[14px] text-primary" /> Host payouts processed in fresh USD</span>
                 <span>·</span>
-                <span>Zero booking commission surcharges</span>
+                <span>Live portfolio management</span>
               </div>
               <div className="flex items-center gap-space-xs">
-                <span>Lebanon Operations Center</span>
-                <span className="inline-block w-2 h-2 rounded-full bg-[#059669]" />
-                <span className="font-mono text-on-surface">BEY-HQ-LIVE</span>
+                <span>StayLeb Host Dashboard</span>
+                <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span className="font-semibold text-[#46B1B1]">All systems operational</span>
               </div>
             </div>
           </div>
@@ -349,8 +351,8 @@ export function MyPropertiesSection0() {
           <div className="space-y-4">
             <p className="font-body-md text-body-md text-on-surface-variant">You are about to delete <strong className="text-on-surface">{deleteTarget.title}</strong>. This action cannot be undone and will remove all associated images, seasonal pricing and blocked dates.</p>
             <div className="flex justify-end gap-3 pt-2">
-              <button disabled={deleting} onClick={() => setDeleteTarget(null)} className="px-5 py-2.5 rounded-xl bg-white text-[#157375] border border-[#157375]/10 hover:bg-[#157375] hover:text-white font-label-md text-label-md transition-colors disabled:opacity-50">Cancel</button>
-              <button disabled={deleting} onClick={confirmDelete} className="px-5 py-2.5 rounded-xl bg-[#157375] hover:bg-[#0f4a4c] text-white border border-[#157375] disabled:opacity-50 font-label-md text-label-md font-semibold transition-colors flex items-center gap-2">
+              <button disabled={deleting} onClick={() => setDeleteTarget(null)} className="px-5 py-2.5 rounded-xl bg-surface-container text-[#46B1B1] border border-surface-container-highest hover:bg-surface-container-high font-label-md text-label-md transition-colors disabled:opacity-50 font-semibold">Cancel</button>
+              <button disabled={deleting} onClick={confirmDelete} className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white border border-primary disabled:opacity-50 font-label-md text-label-md font-semibold transition-colors flex items-center gap-2 shadow-sm">
                 {deleting ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Icon name="delete" className="material-symbols-outlined text-[18px]" />}
                 {deleting ? "Deleting…" : "Delete property"}
               </button>
