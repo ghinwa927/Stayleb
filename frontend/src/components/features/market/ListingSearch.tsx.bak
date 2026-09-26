@@ -1,0 +1,350 @@
+"use client";
+import { createContext, useContext, useState, useSyncExternalStore, type ReactNode, type SelectHTMLAttributes } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { coastalStays } from '@/lib/mock-data/listings';
+import { properties } from '@/lib/mock-data/properties';
+import type { Property } from '@/lib/types';
+import { Icon } from '@/components/ui/Icon';
+import { LocalImage } from '@/components/ui/LocalImage';
+import { useSearchState } from '@/components/ui/Interactions';
+import { usePathname } from 'next/navigation';
+import { requireAuth } from '@/lib/authGuard';
+
+type Filters = { maxPrice: number; guests: number; amenities: string[]; sort: string };
+const defaults: Filters = { maxPrice: 500, guests: 1, amenities: [], sort: 'recommended' };
+type ListingState = { filters: Filters; update: (patch: Partial<Filters>) => void };
+const ListingContext = createContext<ListingState>({ filters: defaults, update: () => {} });
+export function ListingProvider({ children }: { children: ReactNode }) {
+  const [filters, setFilters] = useState(defaults);
+  return <ListingContext.Provider value={{ filters, update: (patch) => setFilters((v) => ({ ...v, ...patch })) }}>{children}</ListingContext.Provider>;
+}
+
+const subscribe = (callback: () => void) => {
+  window.addEventListener('stayleb-favorites', callback);
+  window.addEventListener('storage', callback);
+  return () => {
+    window.removeEventListener('stayleb-favorites', callback);
+    window.removeEventListener('storage', callback);
+  };
+};
+const readFavorites = () => localStorage.getItem('stayleb-saved-property-ids') || '["batroun-sunset","cedar-peak","azure-horizon"]';
+const serverFavorites = () => '["batroun-sunset","cedar-peak","azure-horizon"]';
+
+export function FavoriteButton({ id }: { id: string }) {
+  const saved = JSON.parse(useSyncExternalStore(subscribe, readFavorites, serverFavorites)) as string[];
+  const active = saved.includes(id);
+  const router = useRouter();
+  const pathname = usePathname();
+  return (
+    <button
+      type="button"
+      aria-label={active ? 'Remove from favorites' : 'Save to favorites'}
+      aria-pressed={active}
+      onClick={() => {
+        if (!requireAuth({ nextPath: pathname || '/account/favorites', action: 'favorites', router })) return;
+        localStorage.setItem('stayleb-saved-property-ids', JSON.stringify(active ? saved.filter((v) => v !== id) : [...saved, id]));
+        window.dispatchEvent(new Event('stayleb-favorites'));
+      }}
+      className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all duration-300 active:scale-90 ${
+        active ? 'bg-white text-rose-500' : 'bg-white/90 text-slate-600 hover:bg-white hover:text-rose-400'
+      }`}
+    >
+      <Icon name="favorite" className={`text-[18px] transition-all ${active ? 'filled' : ''}`} />
+      <style jsx>{`
+        .filled {
+          font-variation-settings: 'FILL' 1;
+        }
+      `}</style>
+    </button>
+  );
+}
+
+export function PropertyCard({ property }: { property: Property }) {
+  return (
+    <article className="group bg-white rounded-[22px] overflow-hidden shadow-[0_2px_16px_rgba(17,28,45,0.06)] hover:shadow-[0_12px_36px_rgba(17,28,45,0.12)] border border-white transition-all duration-500 hover:-translate-y-1 flex flex-col">
+      <div className="aspect-[4/3] relative overflow-hidden bg-surface-container">
+        <Link href={`/properties/${property.id}`} className="block w-full h-full">
+          <LocalImage
+            src={property.image}
+            alt={property.name}
+            className="w-full h-full object-cover transition-transform duration-[700ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-[1.07]"
+          />
+        </Link>
+        <div className="absolute top-3.5 left-3.5 flex gap-1.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/92 backdrop-blur-md px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-on-surface shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Instant Book
+          </span>
+        </div>
+        <div className="absolute top-3.5 right-3.5">
+          <FavoriteButton id={property.id} />
+        </div>
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/20 via-black/0 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      </div>
+
+      <div className="p-4 sm:p-5 flex flex-col flex-1">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-[11px] font-semibold tracking-[0.08em] uppercase text-on-surface-variant/70 truncate">{property.location}</span>
+          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-on-surface shrink-0">
+            <Icon name="star" className="text-[14px] text-amber-500" />
+            {property.rating}
+          </span>
+        </div>
+
+        <Link href={`/properties/${property.id}`} className="mt-1 block">
+          <h3 className="text-[17px] font-semibold leading-6 tracking-tight text-on-surface group-hover:text-primary transition-colors line-clamp-1">{property.name}</h3>
+        </Link>
+        <p className="text-[13px] text-on-surface-variant mt-1 line-clamp-1">
+          {property.guests} guests · {property.bedrooms} beds · {property.amenities[2] ?? property.amenities[0]}
+        </p>
+
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {property.amenities.slice(0, 2).map((amenity) => (
+            <span key={amenity} className="inline-flex items-center rounded-full bg-surface-container-low px-2.5 py-1 text-[11px] font-medium text-on-surface-variant">
+              {amenity}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-surface-container-low flex items-end justify-between">
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[18px] font-bold tracking-tight text-on-surface">${property.nightlyRate}</span>
+              <span className="text-[13px] text-on-surface-variant">/ night</span>
+            </div>
+            <span className="text-[11px] text-on-surface-variant">${property.nightlyRate * 3} total · 3 nts</span>
+          </div>
+          <span className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant group-hover:bg-primary group-hover:text-on-primary transition-colors duration-300">
+            <Icon name="arrow_outward" className="text-[16px]" />
+          </span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export function SearchFilters() {
+  const { filters, update } = useContext(ListingContext);
+  const { setQuery } = useSearchState();
+  const amenityOptions: [string, string, string][] = [
+    ['pool', 'Private Pool', 'pool'],
+    ['sea', 'Sea View / Seafront', 'water'],
+    ['solar', '24/7 Solar Power', 'solar_power'],
+    ['wi-fi', 'High-Speed Wi-Fi', 'wifi'],
+    ['stone', 'Stone Architecture', 'castle'],
+  ];
+  const percent = ((filters.maxPrice - 100) / 500) * 100;
+
+  return (
+    <aside className="w-full lg:w-[300px] shrink-0 lg:sticky lg:top-[104px] h-fit space-y-4">
+      <div className="bg-white rounded-[20px] p-6 shadow-[0_2px_16px_rgba(17,28,45,0.06)] border border-surface-container-low">
+        <div className="flex items-center justify-between">
+          <h2 className="text-[15px] font-semibold tracking-tight">Filters</h2>
+          <button
+            onClick={() => {
+              update(defaults);
+              setQuery('');
+            }}
+            className="text-[13px] font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            Clear all
+          </button>
+        </div>
+
+        <div className="mt-7">
+          <div className="flex items-center justify-between">
+            <p className="text-[12px] font-semibold tracking-[0.06em] uppercase text-on-surface-variant">Price per night</p>
+            <span className="rounded-full bg-primary-container/15 text-primary px-2.5 py-1 text-[12px] font-semibold">Up to ${filters.maxPrice}</span>
+          </div>
+          <div className="relative mt-4">
+            <div className="absolute top-1/2 -translate-y-1/2 h-1.5 w-full rounded-full bg-surface-container-low overflow-hidden">
+              <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${percent}%` }} />
+            </div>
+            <input
+              aria-label="Maximum nightly price"
+              type="range"
+              min={100}
+              max={600}
+              step={25}
+              value={filters.maxPrice}
+              onChange={(e) => update({ maxPrice: Number(e.target.value) })}
+              className="relative w-full h-1.5 appearance-none bg-transparent accent-primary cursor-pointer
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110
+                [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-[3px] [&::-moz-range-thumb]:border-primary"
+            />
+          </div>
+          <div className="flex justify-between text-[11px] text-on-surface-variant mt-2">
+            <span>$100</span>
+            <span>$600</span>
+          </div>
+        </div>
+
+        <div className="mt-7 flex items-center justify-between rounded-2xl bg-surface-container-lowest border border-surface-container-low px-4 py-3.5">
+          <div>
+            <p className="text-[13px] font-semibold">Guests</p>
+            <p className="text-[11px] text-on-surface-variant">How many travelers?</p>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <button
+              aria-label="Fewer guests"
+              onClick={() => update({ guests: Math.max(1, filters.guests - 1) })}
+              className="w-8 h-8 rounded-full bg-white border border-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-low transition-colors shadow-sm active:scale-95"
+            >
+              −
+            </button>
+            <span className="w-6 text-center text-[15px] font-semibold tabular-nums">{filters.guests}</span>
+            <button
+              aria-label="More guests"
+              onClick={() => update({ guests: Math.min(10, filters.guests + 1) })}
+              className="w-8 h-8 rounded-full bg-on-surface text-white flex items-center justify-center hover:bg-on-surface/90 transition-colors shadow-sm active:scale-95"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <fieldset className="mt-7">
+          <legend className="text-[12px] font-semibold tracking-[0.06em] uppercase text-on-surface-variant mb-3">Amenities</legend>
+          <div className="space-y-2.5">
+            {amenityOptions.map(([value, label, icon]) => {
+              const active = filters.amenities.includes(value);
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => update({ amenities: active ? filters.amenities.filter((i) => i !== value) : [...filters.amenities, value] })}
+                  className={`w-full flex items-center gap-3 rounded-2xl px-3.5 py-3 text-left border transition-all ${
+                    active ? 'bg-primary text-on-primary border-primary shadow-sm' : 'bg-surface-container-low border-transparent hover:bg-surface-container'
+                  }`}
+                >
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${active ? 'bg-white/20' : 'bg-white'}`}>
+                    <Icon name={icon} className={`text-[18px] ${active ? 'text-white' : 'text-on-surface-variant'}`} />
+                  </span>
+                  <span className={`text-[13px] font-medium ${active ? 'text-white' : 'text-on-surface'}`}>{label}</span>
+                  <span className={`ml-auto w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${active ? 'bg-white border-white' : 'border-outline-variant bg-white'}`}>
+                    {active && <Icon name="check" className="text-[14px] text-primary" />}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <button
+          className="w-full mt-7 rounded-full bg-surface-container-low text-on-surface text-[13px] font-semibold py-3 hover:bg-surface-container transition-colors"
+          onClick={() => {
+            const el = document.getElementById('listing-results');
+            el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+        >
+          Show results
+        </button>
+      </div>
+
+      <div className="hidden lg:flex items-center gap-2.5 rounded-2xl bg-primary/5 border border-primary/10 px-4 py-3.5">
+        <Icon name="verified_user" className="text-primary text-[18px]" />
+        <p className="text-[12px] leading-4 text-on-surface-variant">
+          <span className="font-semibold text-on-surface">StayLeb Guarantee</span> · Verified hosts & 24/7 power
+        </p>
+      </div>
+    </aside>
+  );
+}
+
+export function SortSelect(props: SelectHTMLAttributes<HTMLSelectElement>) {
+  const { filters, update } = useContext(ListingContext);
+  return (
+    <div className="relative">
+      <select
+        {...props}
+        value={filters.sort}
+        onChange={(e) => update({ sort: e.target.value })}
+        className={`appearance-none rounded-full bg-white border border-surface-container pl-3 pr-8 py-2 text-[13px] font-medium text-on-surface shadow-sm hover:border-outline-variant focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${props.className ?? ''}`}
+      >
+        <option value="recommended">Recommended</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="rating">Highest Rated</option>
+      </select>
+      <Icon name="expand_more" className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant" />
+    </div>
+  );
+}
+
+export function SearchResultsGrid() {
+  const { filters, update } = useContext(ListingContext);
+  const { query, setQuery } = useSearchState();
+  let visible = coastalStays.filter((property) => {
+    const text = [property.name, property.location, ...property.amenities].join(' ').toLowerCase();
+    return (
+      property.nightlyRate <= filters.maxPrice &&
+      property.guests >= filters.guests &&
+      text.includes(query.toLowerCase()) &&
+      filters.amenities.every((a) => text.includes(a))
+    );
+  });
+  if (filters.sort === 'price-low') visible = visible.toSorted((a, b) => a.nightlyRate - b.nightlyRate);
+  if (filters.sort === 'price-high') visible = visible.toSorted((a, b) => b.nightlyRate - a.nightlyRate);
+  if (filters.sort === 'rating') visible = visible.toSorted((a, b) => b.rating - a.rating);
+  return (
+    <div id="listing-results" className="w-full">
+      <div className="flex items-center gap-2 text-[13px] text-on-surface-variant mb-5">
+        <span className="inline-flex items-center gap-2 rounded-full bg-white border border-surface-container-low px-3 py-1.5 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          {visible.length} {visible.length === 1 ? 'stay' : 'stays'} found
+        </span>
+        {filters.amenities.length > 0 && <span className="hidden sm:inline text-on-surface-variant/60">· {filters.amenities.length} filter applied</span>}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
+        {visible.map((property) => (
+          <PropertyCard key={property.id} property={property} />
+        ))}
+      </div>
+      {!visible.length && (
+        <div className="mt-6 bg-white rounded-[20px] border border-surface-container-low p-10 md:p-14 text-center shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center mx-auto text-primary">
+            <Icon name="search_off" className="text-[28px]" />
+          </div>
+          <h2 className="font-semibold text-[18px] mt-4 tracking-tight">No stays match these filters</h2>
+          <p className="text-[13px] text-on-surface-variant my-2 max-w-md mx-auto">Try a broader location, higher budget, or fewer amenities — coastal gems are waiting.</p>
+          <button
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary text-on-primary px-5 py-2.5 text-[13px] font-semibold hover:bg-primary/90 transition-colors"
+            onClick={() => {
+              update(defaults);
+              setQuery('');
+            }}
+          >
+            <Icon name="restart_alt" className="text-[16px]" /> Clear all filters
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function FavoritesGrid() {
+  const ids = JSON.parse(useSyncExternalStore(subscribe, readFavorites, serverFavorites)) as string[];
+  const records = [...coastalStays, ...properties.filter((p) => !coastalStays.some((i) => i.id === p.id))].filter((p) => ids.includes(p.id));
+  return (
+    <div>
+      {records.length ? (
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          {records.map((property) => (
+            <PropertyCard property={property} key={property.id} />
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white rounded-[20px] border border-surface-container-low text-center py-16 px-6 shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center mx-auto text-primary">
+            <Icon name="favorite_border" className="text-[26px]" />
+          </div>
+          <h2 className="text-[18px] font-semibold mt-4">No saved stays yet</h2>
+          <p className="text-on-surface-variant mt-2 mb-5 text-sm">Tap the heart on any property to save it here.</p>
+          <Link href="/search" className="inline-flex rounded-full bg-primary text-white px-5 py-2.5 text-sm font-semibold">
+            Discover Properties
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}

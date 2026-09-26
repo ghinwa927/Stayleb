@@ -2,18 +2,16 @@ from fastapi import APIRouter, Depends, Response, Request, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
-from app.schemas.user import RegisterRequest, UserResponse
-from app.services.auth_service import register_user
 from app.schemas.user import (
     RegisterRequest,
     LoginRequest,
     UserResponse,
-    TokenResponse
+    TokenResponse,
+    ResetPasswordRequest,
+    ChangePasswordRequest,
 )
-from app.services.auth_service import (
-    register_user,
-    login_user
-)
+from app.services.auth_service import register_user, login_user, reset_password
+from app.dependencies import get_current_user
 
 from datetime import datetime, timezone
 from sqlalchemy import select
@@ -62,7 +60,8 @@ def login(
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=7 * 24 * 60 * 60
+        max_age=7 * 24 * 60 * 60,
+        path="/"
     )
 
     return {
@@ -169,7 +168,8 @@ def logout(
         key="refresh_token",
         httponly=True,
         secure=False,
-        samesite="lax"
+        samesite="lax",
+        path="/"
     )
 
     return {
@@ -209,3 +209,37 @@ def verify_reset_otp_route(
             status_code=400,
             detail=str(e),
         )
+
+@router.post("/change-password")
+def change_password_route(
+    data: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    from app.core.security import verify_password, hash_password
+    from app.core.password_validation import validate_password
+
+    if not verify_password(data.current_password, current_user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+
+    validate_password(data.new_password)
+
+    current_user.password_hash = hash_password(data.new_password)
+    # revoke all refresh tokens for this user for security
+    from sqlalchemy import delete
+    from app.models.refresh_token import RefreshToken
+
+    db.execute(delete(RefreshToken).where(RefreshToken.user_id == current_user.id))
+    db.commit()
+    return {"message": "Password updated successfully"}
+
+@router.post("/reset-password")
+def reset_password_route(
+    data: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    return reset_password(
+        db=db,
+        reset_token=data.reset_token,
+        new_password=data.new_password,
+    )

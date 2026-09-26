@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.models.user import User, UserRole
 from app.models.refresh_token import RefreshToken
+from app.core.password_validation import validate_password
 from app.schemas.user import RegisterRequest, LoginRequest
 from app.core.security import (
     hash_password,
@@ -14,6 +15,7 @@ from app.core.security import (
     create_access_token,
     create_refresh_token,
     hash_refresh_token,
+    verify_password_reset_token,
 )
 
 from datetime import datetime, timedelta, timezone
@@ -26,6 +28,7 @@ from app.services.otp_service import generate_otp, hash_otp,verify_otp
 from app.services.email_service import send_email
 from app.templates.otp_email import generate_otp_template
 from app.core.security import create_password_reset_token
+from app.core.password_validation import validate_password
 
 def register_user(db: Session, user_data: RegisterRequest):
 
@@ -39,6 +42,9 @@ def register_user(db: Session, user_data: RegisterRequest):
             status_code=status.HTTP_409_CONFLICT,
             detail="Email already registered"
         )
+
+    # Validate password strength
+    validate_password(user_data.password)
 
     # Create the new user
     new_user = User(
@@ -54,9 +60,6 @@ def register_user(db: Session, user_data: RegisterRequest):
     db.refresh(new_user)
 
     return new_user
-
-from app.core.security import verify_password, create_access_token
-
 
 def login_user(db: Session, login_data: LoginRequest):
 
@@ -237,3 +240,40 @@ def verify_password_reset_otp(
     )
 
     return reset_token
+
+def reset_password(
+    db: Session,
+    reset_token: str,
+    new_password: str,
+):
+
+    # Verify reset token and get user ID
+    user_id = verify_password_reset_token(reset_token)
+
+    # Find user
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Apply the SAME password rules used during registration
+    validate_password(new_password)
+
+    # Hash and update password
+    user.password_hash = hash_password(new_password)
+
+    # Revoke all existing login sessions
+    db.execute(
+        delete(RefreshToken).where(
+            RefreshToken.user_id == user.id
+        )
+    )
+
+    db.commit()
+
+    return {
+        "message": "Password reset successfully. Please log in again."
+    }

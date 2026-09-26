@@ -3,6 +3,7 @@ from enum import Enum
 from sqlalchemy import String, Boolean, DateTime, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 
 from app.database.database import Base
 
@@ -68,3 +69,13 @@ class User(Base):
         onupdate=func.now(),
         nullable=False
     )
+
+    bookings = relationship(
+    "Booking",
+    back_populates="client",
+)
+    favorites = relationship(
+    "Favorite",
+    back_populates="client",
+    cascade="all, delete-orphan",
+)
