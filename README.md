@@ -714,4 +714,3 @@ GitHub: `ghinwa927`
 
 This project was developed as a full-stack web development project.
 
-If you plan to make the repository publicly reusable, add an appropriate open-source license before allowing redistribution or commercial reuse.
