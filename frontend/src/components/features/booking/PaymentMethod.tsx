@@ -6,14 +6,90 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 import { useBooking, money } from "./BookingContext";
-import { BookingSummary, BookingProgress, BackToPropertyButton } from "./BookingSummary";
+import { BackToPropertyButton } from "./BookingSummary";
 import { Icon } from "@/components/ui/Icon";
+import { LocalImage } from "@/components/ui/LocalImage";
 import {
   createCashPayment,
   createStripePayment,
 } from "@/services/payments";
 import { createBooking, previewBooking, type BookingPreviewResponse } from "@/services/bookings";
 import { getPaymentByBooking } from "@/services/payments";
+import { getPublicProperty } from "@/services/properties";
+import type { PropertyResponse } from "@/services/owner";
+
+const HEADER_BG = "/images/payment_method.png";
+
+// Local stepper for the Payment Method page only (shared BookingProgress is left untouched
+// so Stay Details / Price & Review steps keep their current rendering).
+function PaymentMethodStepper() {
+  return (
+    <ol aria-label="Booking progress" className="flex items-center gap-1.5 sm:gap-2.5 text-[12px] font-semibold overflow-x-auto whitespace-nowrap py-1">
+      <li className="flex items-center gap-1.5 shrink-0">
+        <span className="w-6 h-6 rounded-full bg-[#46B1B1] text-white grid place-items-center shadow-sm">
+          <Icon name="check" className="material-symbols-outlined text-[15px]" />
+        </span>
+        <span className="text-[#157375]">Stay Details</span>
+      </li>
+      <span aria-hidden="true" className="w-6 sm:w-10 h-px bg-[#157375]/50 shrink-0" />
+      <li className="flex items-center gap-1.5 shrink-0">
+        <span className="w-6 h-6 rounded-full bg-[#46B1B1] text-white grid place-items-center shadow-sm">
+          <Icon name="check" className="material-symbols-outlined text-[15px]" />
+        </span>
+        <span className="text-[#157375]">Price & Review</span>
+      </li>
+      <span aria-hidden="true" className="w-6 sm:w-10 h-px bg-[#157375]/50 shrink-0" />
+      <li className="flex items-center gap-1.5 shrink-0" aria-current="step">
+        <span className="w-6 h-6 rounded-full bg-[#157375] text-white grid place-items-center font-bold text-[11px] shadow-[0_0_0_4px_rgba(21,115,117,0.15)]">
+          3
+        </span>
+        <span className="text-[#1E293B] font-bold">Payment</span>
+      </li>
+    </ol>
+  );
+}
+
+function PaymentMethodHeader({ propertyId }: { propertyId?: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-[22px] border border-[#E3ECF3] mb-5">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-cover bg-no-repeat"
+        style={{ backgroundImage: `url("${HEADER_BG}")`, backgroundPosition: 'center right' }}
+      />
+      <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-white/15" />
+      <div className="relative px-4 sm:px-6 py-5 flex flex-col gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-2.5">
+            <BackToPropertyButton
+              propertyId={propertyId}
+              className="bg-white border-[#E3ECF3] shadow-sm px-4 py-2.5 text-[13px] text-[#1E293B] hover:text-[#157375] hover:border-[#46B1B1]/50"
+            />
+            <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[12px] font-medium text-[#64748B]">
+              <span>Discover</span>
+              <span aria-hidden="true" className="text-[#94A3B8]">›</span>
+              <span>Property</span>
+              <span aria-hidden="true" className="text-[#94A3B8]">›</span>
+              <span aria-current="page" className="text-[#1E293B] font-semibold">Booking</span>
+            </nav>
+          </div>
+          <PaymentMethodStepper />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PaymentMethodShell({ propertyId, children }: { propertyId?: string; children: React.ReactNode }) {
+  return (
+    <main className="w-full min-h-screen bg-[#F4F7FB]">
+      <div className="max-w-[1320px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
+        <PaymentMethodHeader propertyId={propertyId} />
+        {children}
+      </div>
+    </main>
+  );
+}
 
 export function PaymentMethod() {
   const { booking, setBooking, draft, setDraft, preview: ctxPreview, setPreview: setCtxPreview, isTemporaryCheckoutHold, getExpiresAtSecondsRemaining } = useBooking();
@@ -23,7 +99,10 @@ export function PaymentMethod() {
 
   const [method, setMethod] = useState<"Card" | "Cash">("Card");
   const [loading, setLoading] = useState(false);
+  const [focusedMethod, setFocusedMethod] = useState<"Card" | "Cash" | null>(null);
   const [preview, setPreview] = useState<BookingPreviewResponse | null>(ctxPreview);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [property, setProperty] = useState<PropertyResponse | null>(null);
 
   const propertyId = params.id;
 
@@ -52,6 +131,9 @@ export function PaymentMethod() {
 
   useEffect(()=>{ if(ctxPreview) setPreview(ctxPreview); },[ctxPreview]);
 
+  // Property details for the summary card display (same service the booking summary uses).
+  useEffect(()=>{ if(propertyId) getPublicProperty(propertyId).then(setProperty).catch(()=>{}); },[propertyId]);
+
   // Fetch preview for total display (server-calculated) - reuse context preview if available
   useEffect(()=>{
     if(!effectiveDraft || booking) return;
@@ -59,12 +141,13 @@ export function PaymentMethod() {
       setPreview(ctxPreview);
       return;
     }
+    setPreviewLoading(true);
     previewBooking({
       property_id: Number(propertyId),
       check_in: effectiveDraft.checkIn,
       check_out: effectiveDraft.checkOut,
       guests: effectiveDraft.guests
-    }).then(p=>{ setPreview(p); setCtxPreview(p); }).catch(()=>{});
+    }).then(p=>{ setPreview(p); setCtxPreview(p); }).catch(()=>{}).finally(()=>setPreviewLoading(false));
   },[effectiveDraft, propertyId, booking]);
 
   // Checkout expiration countdown for temporary booking holds
@@ -120,24 +203,38 @@ export function PaymentMethod() {
   // bookingId for display/navigation after creation
   const existingBookingId = booking ? String(booking.id) : null;
 
+  // Display-only summary values (booking → server preview → draft, same precedence as total).
+  const summary = booking
+    ? { checkIn: booking.check_in, checkOut: booking.check_out, nights: booking.number_of_nights, guests: booking.guests }
+    : preview
+      ? { checkIn: preview.check_in, checkOut: preview.check_out, nights: preview.number_of_nights, guests: preview.guests }
+      : effectiveDraft
+        ? {
+            checkIn: effectiveDraft.checkIn,
+            checkOut: effectiveDraft.checkOut,
+            nights: Math.max(0, Math.round((Date.parse(effectiveDraft.checkOut) - Date.parse(effectiveDraft.checkIn)) / 86400000)),
+            guests: effectiveDraft.guests,
+          }
+        : null;
+  const heroImage = property?.images?.find(i=>i.is_primary)?.image_url || property?.images?.[0]?.image_url;
+  const railLoading = !booking && !preview && (previewLoading || !effectiveDraft);
+
   if (!mounted) {
-    return <main className="booking-main"><div className="mb-4"><BackToPropertyButton propertyId={propertyId} /></div><BookingProgress step={3} /><div className="panel p-6 text-center"><p className="text-sm text-slate-500">Loading booking details…</p></div></main>;
+    return <PaymentMethodShell propertyId={propertyId}><div className="bg-white rounded-[20px] border border-[#E3ECF3] shadow-sm p-6 text-center"><p className="text-sm text-[#64748B]">Loading booking details…</p></div></PaymentMethodShell>;
   }
 
   // If no draft and no booking, prompt to go back to stay details
   if (!effectiveDraft && !booking) {
     return (
-      <main className="booking-main">
-        <div className="mb-4"><BackToPropertyButton propertyId={propertyId} /></div>
-        <BookingProgress step={3} />
-        <div className="panel p-6 text-center">
-          <p className="text-sm text-slate-500">
+      <PaymentMethodShell propertyId={propertyId}>
+        <div className="bg-white rounded-[20px] border border-[#E3ECF3] shadow-sm p-6 text-center">
+          <p className="text-sm text-[#64748B]">
             No stay details found.
           </p>
-          <p className="text-xs text-slate-500 mt-2">Please select dates and guests first. No booking has been created yet.</p>
+          <p className="text-xs text-[#64748B] mt-2">Please select dates and guests first. No booking has been created yet.</p>
           <Link href={`/properties/${propertyId}`} className="text-primary text-sm underline mt-4 inline-block">Back to Property Details</Link>
         </div>
-      </main>
+      </PaymentMethodShell>
     );
   }
 
@@ -255,33 +352,31 @@ export function PaymentMethod() {
   };
 
   const isTempHold = booking && isTemporaryCheckoutHold(booking);
+  const ctaDisabled = loading || railLoading;
 
   return (
-    <main className="booking-main">
-      <div className="mb-4"><BackToPropertyButton propertyId={propertyId} /></div>
-      <BookingProgress step={3} />
-
-      <div className="booking-grid">
-        <div>
-          <p className="text-xs text-primary uppercase tracking-wider mb-2">
+    <PaymentMethodShell propertyId={propertyId}>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start">
+        <div className="lg:col-span-8 min-w-0">
+          <p className="text-[11.5px] text-[#46B1B1] font-bold uppercase tracking-[0.14em] mb-2">
             Secure transaction step
           </p>
 
-          <h1 className="text-3xl font-semibold">
+          <h1 className="text-[26px] sm:text-[32px] font-extrabold tracking-tight text-[#1E293B]">
             Select How You Would Like to Pay
           </h1>
 
-          <p className="text-sm text-slate-500 mt-3 mb-6">
+          <p className="text-[13.5px] text-[#64748B] mt-2 mb-6 leading-relaxed">
             Choose between immediate confirmation via Stripe
             or a cash booking request requiring owner approval.
           </p>
 
           {isTempHold && expiresAtSeconds !== null && expiresAtSeconds > 0 && (
-            <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
-              <div className="flex items-center gap-2">
+            <div className="mb-5 p-4 rounded-[20px] bg-white border border-amber-200 shadow-sm">
+              <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-amber-50">
                 <Icon name="schedule" className="material-symbols-outlined text-amber-700 text-[22px]" />
                 <div>
-                  <p className="font-semibold text-amber-800">Complete your booking within <span className="font-mono text-lg">{formatCountdown(expiresAtSeconds)}</span></p>
+                  <p className="font-semibold text-amber-800 text-[13.5px]">Complete your booking within <span className="font-mono text-lg">{formatCountdown(expiresAtSeconds)}</span></p>
                   <p className="text-xs text-amber-700">This temporary hold expires automatically. Your dates will be released if not confirmed.</p>
                 </div>
               </div>
@@ -293,111 +388,240 @@ export function PaymentMethod() {
               Payment method
             </legend>
 
-            {(["Card", "Cash"] as const).map((m) => (
-              <label
-                key={m}
-                className={`panel block cursor-pointer border-2 ${
-                  method === m
-                    ? "border-primary"
-                    : "border-transparent"
-                }`}
-              >
-                <div className="flex gap-3">
-                  <Icon
-                    name={
-                      m === "Card"
-                        ? "credit_card"
-                        : "payments"
-                    }
-                    className={
-                      m === "Card"
-                        ? "text-primary"
-                        : "text-amber-600"
-                    }
-                  />
-
-                  <div className="flex-1">
-                    <strong>
-                      {m === "Card"
-                        ? "Pay Online with Stripe"
-                        : "Pay Cash upon Arrival"}
-                    </strong>
-
-                    <span
-                      className={`block text-xs mt-2 ${
-                        m === "Card"
-                          ? "text-emerald-700"
-                          : "text-amber-700"
-                      }`}
-                    >
-                      {m === "Card"
-                        ? "Instant Automated Confirmation"
-                        : "Host Approval Required"}
-                    </span>
-
-                    <p className="text-xs text-slate-500 mt-3">
-                      {m === "Card"
-                        ? "Pay securely online. Your reservation is confirmed after Stripe verifies the payment."
-                        : "Send a reservation request for owner approval."}
-                    </p>
-                  </div>
-
+            {(["Card", "Cash"] as const).map((m) => {
+              const selected = method === m;
+              const isCard = m === "Card";
+              return (
+                <label
+                  key={m}
+                  className={`block cursor-pointer rounded-[20px] border-2 p-5 sm:p-6 transition-all ${
+                    selected
+                      ? isCard
+                        ? "border-[#157375] bg-gradient-to-br from-[#46B1B1]/[0.10] to-[#157375]/[0.10] shadow-[0_8px_28px_rgba(21,115,117,0.16)]"
+                        : "border-amber-500/70 bg-[#FFFBEB] shadow-[0_8px_28px_rgba(217,119,6,0.14)]"
+                      : "border-[#E3ECF3] bg-white hover:border-[#46B1B1]/40 hover:shadow-[0_4px_18px_rgba(21,115,117,0.08)]"
+                  } ${focusedMethod === m ? "ring-2 ring-[#157375] ring-offset-2" : ""}`}
+                >
                   <input
                     type="radio"
                     name="paymentMethod"
-                    checked={method === m}
+                    checked={selected}
                     onChange={() => setMethod(m)}
-                    className="accent-teal-700"
+                    onFocus={() => setFocusedMethod(m)}
+                    onBlur={() => setFocusedMethod(null)}
+                    aria-label={isCard ? "Pay Online with Stripe" : "Pay Cash upon Arrival"}
+                    className="sr-only"
                   />
-                </div>
+                  <div className="flex gap-4">
+                    <span className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                      isCard ? "bg-[#46B1B1]/15" : "bg-amber-100"
+                    }`}>
+                      <Icon
+                        name={isCard ? "credit_card" : "payments"}
+                        className={`material-symbols-outlined text-[26px] ${isCard ? "text-[#157375]" : "text-amber-600"}`}
+                      />
+                    </span>
 
-                <ul className="mt-5 text-xs space-y-2 pl-9">
-                  {(m === "Card"
-                    ? [
-                        "Secure Stripe payment",
-                        "Automatic payment verification",
-                        "Booking confirmation after successful payment",
-                      ]
-                    : [
-                        "Pay USD directly at check-in",
-                        "Booking remains pending",
-                        "Owner approval required",
-                      ]
-                  ).map((text) => (
-                    <li key={text}>✓ {text}</li>
-                  ))}
-                </ul>
-              </label>
-            ))}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <strong className="text-[17px] font-extrabold tracking-tight text-[#1E293B]">
+                          {isCard ? "Pay Online with Stripe" : "Pay Cash upon Arrival"}
+                        </strong>
+                        <span
+                          aria-hidden="true"
+                          className={`w-6 h-6 rounded-full border-2 grid place-items-center shrink-0 mt-0.5 transition-colors ${
+                            selected
+                              ? isCard
+                                ? "border-[#157375]"
+                                : "border-amber-500"
+                              : "border-[#CBD5E1] bg-white"
+                          }`}
+                        >
+                          {selected && (
+                            <span className={`w-3 h-3 rounded-full ${isCard ? "bg-[#157375]" : "bg-amber-500"}`} />
+                          )}
+                        </span>
+                      </div>
+
+                      <span
+                        className={`inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full text-[11.5px] font-bold ${
+                          isCard
+                            ? "bg-[#46B1B1]/15 text-[#157375]"
+                            : "bg-amber-100 text-amber-700"
+                        }`}
+                      >
+                        <Icon name={isCard ? "bolt" : "person"} className="material-symbols-outlined text-[14px]" />
+                        {isCard ? "Instant Confirmation" : "Host Approval Required"}
+                      </span>
+
+                      <p className="text-[13px] text-[#64748B] mt-2.5 leading-relaxed">
+                        {isCard
+                          ? "Pay securely online. Your reservation is confirmed after Stripe verifies the payment."
+                          : "Send a reservation request for owner approval."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <ul className="mt-4 space-y-2.5 sm:pl-16">
+                    {(isCard
+                      ? [
+                          "Secure Stripe payment",
+                          "Automatic payment verification",
+                          "Booking confirmation after successful payment",
+                        ]
+                      : [
+                          "Pay USD directly at check-in",
+                          "Booking remains pending",
+                          "Owner approval required",
+                        ]
+                    ).map((text) => (
+                      <li key={text} className="flex items-center gap-2.5 text-[13px] font-medium text-[#1E293B]">
+                        <span className={`w-5 h-5 rounded-full grid place-items-center shrink-0 ${isCard ? "bg-[#157375]" : "bg-amber-100"}`}>
+                          <Icon name="check" className={`material-symbols-outlined text-[13px] font-bold ${isCard ? "text-white" : "text-amber-600"}`} />
+                        </span>
+                        {text}
+                      </li>
+                    ))}
+                  </ul>
+                </label>
+              );
+            })}
           </fieldset>
 
-          <div className="flex flex-wrap justify-between gap-4 mt-7 items-center">
-            <div className="flex flex-wrap gap-3 items-center">
-              <Link
-  href={`/market/book/${propertyId}/summary`}
->
-                ← Back to Trip Details
-              </Link>
-              <span className="text-slate-300">|</span>
-              <BackToPropertyButton propertyId={propertyId} variant="compact" />
-            </div>
-
-            <button
-              disabled={loading}
-              onClick={handleContinue}
-              className="primary-button"
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-7 text-[13.5px] font-semibold">
+            <Link
+              href={`/market/book/${propertyId}/summary`}
+              className="inline-flex items-center gap-1.5 text-[#1E293B] hover:text-[#157375] transition-colors"
             >
-              {loading
-                ? "Processing…"
-                : method === "Card"
-                  ? `Continue to Secure Payment (${money(total)})`
-                  : "Send Cash Booking Request →"}
-            </button>
+              <span aria-hidden="true">←</span> Back to Trip Details
+            </Link>
+            <span aria-hidden="true" className="text-[#CBD5E1]">|</span>
+            <BackToPropertyButton propertyId={propertyId} variant="compact" />
           </div>
+
+          <button
+            disabled={ctaDisabled}
+            onClick={handleContinue}
+            className={`mt-4 w-full py-4 px-6 rounded-2xl font-bold text-[15px] transition-all flex items-center justify-center gap-2 group ${
+              method === "Card"
+                ? "bg-gradient-to-r from-[#157375] to-[#46B1B1] hover:from-[#0E4E50] hover:to-[#157375] text-white shadow-[0_10px_24px_rgba(21,115,117,0.35)]"
+                : "bg-gradient-to-r from-[#157375] to-[#46B1B1] hover:from-[#0E4E50] hover:to-[#157375] text-white shadow-[0_10px_24px_rgba(21,115,117,0.35)]"
+            } disabled:opacity-60 disabled:cursor-not-allowed`}
+          >
+            {loading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                Processing…
+              </>
+            ) : method === "Card"
+              ? (
+                <>
+                  <span>Continue to Secure Payment ({money(total)})</span>
+                  <Icon name="arrow_forward" className="material-symbols-outlined text-white text-[20px] transition-transform group-hover:translate-x-1" />
+                </>
+              )
+              : (
+                <span>Send Cash Booking Request →</span>
+              )}
+          </button>
         </div>
 
-        <BookingSummary preview={preview} draft={effectiveDraft} />
+        <div className="lg:col-span-4 min-w-0">
+          <div className="lg:sticky lg:top-24 space-y-4">
+            <div className="bg-white rounded-[22px] border border-[#E3ECF3] shadow-[0_8px_30px_rgba(21,115,117,0.10)] overflow-hidden">
+              {heroImage ? (
+                <div className="h-48 overflow-hidden">
+                  <LocalImage src={heroImage} alt={property?.title ?? 'Property'} className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <div className="h-48 bg-[#EAF1F6] animate-pulse" />
+              )}
+              <div className="p-5 sm:p-6">
+                {property ? (
+                  <>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10.5px] font-bold uppercase tracking-wider">
+                      <Icon name="verified" className="material-symbols-outlined text-[13px]" />Verified Superhost
+                    </span>
+                    <h2 className="text-[18px] font-extrabold tracking-tight text-[#1E293B] mt-2">{property.title}</h2>
+                    <p className="text-[13px] text-[#64748B] mt-1 flex items-center gap-1">
+                      <Icon name="location_on" className="material-symbols-outlined text-[15px] text-[#46B1B1]" />{property.location}
+                    </p>
+                    <p className="text-[12.5px] text-[#157375] font-semibold mt-1 flex items-center gap-1">
+                      <Icon name="star" className="material-symbols-outlined text-[14px]" />Verified listing
+                    </p>
+                  </>
+                ) : (
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-4 w-2/3 bg-[#EAF1F6] rounded" />
+                    <div className="h-3 w-1/2 bg-[#EAF1F6] rounded" />
+                  </div>
+                )}
+                {summary ? (
+                  <div className="mt-4 rounded-2xl bg-[#46B1B1]/[0.07] border border-[#46B1B1]/15 p-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-[10.5px] font-bold uppercase tracking-wider text-[#64748B] flex items-center gap-1">
+                          <Icon name="calendar_month" className="material-symbols-outlined text-[15px] text-[#157375]" />Check-in
+                        </p>
+                        <p className="text-[13.5px] font-bold text-[#1E293B] mt-1">{summary.checkIn}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10.5px] font-bold uppercase tracking-wider text-[#64748B] flex items-center gap-1">
+                          <Icon name="event" className="material-symbols-outlined text-[15px] text-[#157375]" />Check-out
+                        </p>
+                        <p className="text-[13.5px] font-bold text-[#1E293B] mt-1">{summary.checkOut}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-[#46B1B1]/15 flex items-center gap-5 text-[13px] font-semibold text-[#1E293B]">
+                      <span className="flex items-center gap-1.5">
+                        <Icon name="bedtime" className="material-symbols-outlined text-[17px] text-[#157375]" />{summary.nights} night{summary.nights === 1 ? '' : 's'}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Icon name="group" className="material-symbols-outlined text-[17px] text-[#157375]" />{summary.guests} guest{summary.guests === 1 ? '' : 's'}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-4 h-24 bg-[#F4F7FB] border border-[#E3ECF3] rounded-2xl animate-pulse" />
+                )}
+                <h3 className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] mt-5 mb-2.5 flex items-center gap-1.5">
+                  <Icon name="receipt_long" className="material-symbols-outlined text-[16px]" />Price breakdown
+                </h3>
+                {railLoading ? (
+                  <div className="space-y-2 animate-pulse" aria-hidden="true">
+                    <div className="h-4 bg-[#EAF1F6] rounded w-full" />
+                    <div className="h-14 bg-[#46B1B1]/10 border border-[#46B1B1]/15 rounded-2xl w-full" />
+                  </div>
+                ) : (
+                  <>
+                    <dl className="text-[13.5px] space-y-2">
+                      <div className="flex justify-between text-[#475569]">
+                        <dt>Chalet stay ({summary?.nights ?? 0} night{(summary?.nights ?? 0) === 1 ? '' : 's'})</dt>
+                        <dd className="font-semibold text-[#1E293B]">{money(total)}</dd>
+                      </div>
+                    </dl>
+                    <div className="mt-3 flex justify-between items-center p-4 rounded-2xl bg-gradient-to-r from-[#46B1B1]/[0.12] to-[#157375]/[0.12] border border-[#46B1B1]/20">
+                      <span className="font-extrabold text-[#1E293B] text-[14.5px]">Total</span>
+                      <span className="text-[19px] font-extrabold text-[#157375]">{money(total)}</span>
+                    </div>
+                  </>
+                )}
+                <p className="text-[11.5px] mt-3 text-[#64748B]">Calculated with seasonal rates · No hidden markup.</p>
+                {!booking && <p className="text-[11.5px] text-[#64748B]">No booking created yet.</p>}
+              </div>
+            </div>
+            <div className="bg-white rounded-[20px] border border-[#E3ECF3] shadow-[0_2px_14px_rgba(21,115,117,0.06)] p-5 flex gap-3">
+              <span className="w-11 h-11 rounded-2xl bg-[#46B1B1]/10 flex items-center justify-center shrink-0">
+                <Icon name="verified_user" className="material-symbols-outlined text-[22px] text-[#157375]" />
+              </span>
+              <div>
+                <strong className="text-[14px] font-extrabold text-[#1E293B]">StayLeb Payment Protection</strong>
+                <p className="mt-1 text-[12.5px] text-[#64748B]">Your payment is protected.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </main>
+    </PaymentMethodShell>
   );
 }

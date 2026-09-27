@@ -42,7 +42,7 @@ class CommissionSettlement(Base):
     )
 
     status = Column(
-        Enum("unpaid", "paid"),
+        Enum("unpaid", "paid", name="commission_settlement_status_enum"),
         nullable=False,
         default="unpaid",
     )

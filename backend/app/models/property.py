@@ -21,7 +21,7 @@ class Property(Base):
     description = Column(Text, nullable=False)
 
     property_type = Column(
-        Enum("chalet", "furnished_house"),
+        Enum("chalet", "furnished_house", name="property_type_enum"),
         nullable=False
     )
 
@@ -38,7 +38,7 @@ class Property(Base):
     min_nights = Column(Integer, nullable=False, default=1)
 
     status = Column(
-        Enum("pending", "approved", "rejected"),
+        Enum("pending", "approved", "rejected", name="property_status_enum"),
         nullable=False,
         default="pending"
     )

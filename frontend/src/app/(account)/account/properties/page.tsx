@@ -13,7 +13,7 @@ export default function Page() {
   return (
     <Suspense fallback={<div className="p-10 text-center">Loading properties…</div>}>
       <ListingProvider>
-        <div className="bg-background">
+        <div className="bg-surface-container-low">
           <SearchResultsSection0 />
         </div>
       </ListingProvider>

@@ -2,12 +2,13 @@
 import { useState, type InputHTMLAttributes, type ReactNode } from "react";
 import { Eye, EyeOff, LockKeyhole } from "lucide-react";
 
-interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
+interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "prefix"> {
   readonly label: string;
   readonly icon?: ReactNode;
   readonly error?: string;
   readonly action?: ReactNode;
   readonly hint?: string;
+  readonly prefix?: ReactNode;
 }
 export function Field({
   label,
@@ -17,6 +18,7 @@ export function Field({
   hint,
   id,
   type,
+  prefix,
   ...props
 }: FieldProps) {
   const [visible, setVisible] = useState(false);
@@ -31,6 +33,7 @@ export function Field({
         <span className="input-icon">
           {icon ?? (password ? <LockKeyhole size={18} /> : null)}
         </span>
+        {prefix && <span className="input-prefix">{prefix}</span>}
         <input
           {...props}
           id={id}
@@ -39,6 +42,7 @@ export function Field({
           aria-describedby={
             error ? `${id}-error` : hint ? `${id}-hint` : undefined
           }
+          className={prefix ? "has-prefix" : ""}
         />
         {password && (
           <button

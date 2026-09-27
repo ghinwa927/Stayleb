@@ -66,21 +66,21 @@ export function ClientRegistrationAuthFlowSection0() {
                     <span className="font-caption text-caption text-outline tracking-wider uppercase">Authentic Escapes</span>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-white font-label-sm text-label-sm">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>Client Account
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>Client Account
                 </span>
               </div>
 
               <div className="w-full max-w-xl mx-auto my-auto flex flex-col">
                 <div className="mb-8">
-                  <h1 className="font-headline-lg text-headline-lg text-on-surface mb-2 font-bold tracking-tight">Create Your Client Account</h1>
+                  <h1 className="font-headline-lg text-headline-lg text-[#157375] mb-2 font-bold tracking-tight">Create Your Client Account</h1>
                   <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
                     Join StayLeb to reserve authentic stays, save your favorite chalets, and manage your trips across Lebanon.
                   </p>
                 </div>
 
                 {error && (
-                  <div className="mb-4 p-3 rounded-xl bg-error-container text-white flex items-start gap-2">
+                  <div className="mb-4 p-3 rounded-xl bg-error-container text-on-error-container flex items-start gap-2 border border-error/20">
                     <Icon name="error" className="material-symbols-outlined text-[20px] text-error shrink-0" />
                     <p className="font-label-sm text-label-sm flex-1">{error}</p>
                     <button type="button" onClick={() => setError(null)} className="p-1"><Icon name="close" className="material-symbols-outlined text-[16px]" /></button>
@@ -98,7 +98,7 @@ export function ClientRegistrationAuthFlowSection0() {
                     <label className="font-label-md text-label-md text-on-surface font-medium" htmlFor="client-fullName">Full Name</label>
                     <div className="relative flex items-center">
                       <Icon name="person" className="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none" />
-                      <input id="client-fullName" className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-container-low text-white placeholder:text-white font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary transition-all" placeholder="e.g., Maya Haddad" required type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                      <input id="client-fullName" className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-container-low text-[#1E293B] placeholder:text-[#64748B]/70 font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary focus:border-primary/40 border border-transparent transition-all" placeholder="e.g., Maya Haddad" required type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
                     </div>
                   </div>
 
@@ -106,7 +106,7 @@ export function ClientRegistrationAuthFlowSection0() {
                     <label className="font-label-md text-label-md text-on-surface font-medium" htmlFor="client-email">Email Address</label>
                     <div className="relative flex items-center">
                       <Icon name="mail" className="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none" />
-                      <input id="client-email" className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-container-low text-white placeholder:text-white font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary transition-all" placeholder="maya@example.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                      <input id="client-email" className="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-container-low text-[#1E293B] placeholder:text-[#64748B]/70 font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary focus:border-primary/40 border border-transparent transition-all" placeholder="maya@example.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
                   </div>
 
@@ -118,21 +118,21 @@ export function ClientRegistrationAuthFlowSection0() {
                         <span className="font-label-md text-label-md text-on-surface font-semibold">+961</span>
                         <span className="w-[1px] h-4 bg-outline-variant ml-1"></span>
                       </div>
-                      <input id="client-phone" className="w-full h-11 pl-24 pr-4 rounded-xl bg-surface-container-low text-white placeholder:text-white font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary transition-all" placeholder="70 123 456" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                      <input id="client-phone" className="w-full h-11 pl-24 pr-4 rounded-xl bg-surface-container-low text-[#1E293B] placeholder:text-[#64748B]/70 font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary focus:border-primary/40 border border-transparent transition-all" placeholder="70 123 456" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="font-label-md text-label-md text-on-surface font-medium" htmlFor="client-password">Password</label>
-                      <Link className="font-label-sm text-label-sm text-white hover:underline font-semibold focus:outline-none" href="/auth/forgot-password">Forgot Password?</Link>
-                    </div>
+                    <label className="font-label-md text-label-md text-on-surface font-medium" htmlFor="client-password">Password</label>
                     <div className="relative flex items-center">
                       <Icon name="lock" className="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none" />
-                      <input id="client-password" className="w-full h-11 pl-10 pr-10 rounded-xl bg-surface-container-low text-white placeholder:text-white font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary transition-all" placeholder="••••••••" required type={showPass ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
-                      <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3.5 text-outline hover:text-on-surface focus:outline-none" aria-label="Toggle password">
+                      <input id="client-password" className="w-full h-11 pl-10 pr-10 rounded-xl bg-surface-container-low text-[#1E293B] placeholder:text-[#64748B]/70 font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary focus:border-primary/40 border border-transparent transition-all" placeholder="Create a strong password" required type={showPass ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
+                      <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3.5 text-[#64748B] hover:text-[#157375] focus:outline-none transition-colors" aria-label="Toggle password">
                         <Icon name={showPass ? "visibility_off" : "visibility"} className="material-symbols-outlined text-[20px]" />
                       </button>
+                    </div>
+                    <div className="flex justify-end">
+                      <Link className="font-label-sm text-label-sm text-primary hover:text-[#157375] font-semibold transition-colors" href="/auth/forgot-password">Forgot Password?</Link>
                     </div>
                     <div className="flex flex-col gap-1 pt-1">
                       <div className="w-full h-1.5 rounded-full bg-surface-container overflow-hidden flex gap-1">
@@ -143,7 +143,7 @@ export function ClientRegistrationAuthFlowSection0() {
                       </div>
                       <div className="flex justify-between items-center text-caption font-caption text-outline">
                         <span>{!password ? "Enter minimum 8 characters" : password.length < 8 ? "Weak — add uppercase & number" : "Strong password"}</span>
-                        <span className="text-tertiary font-semibold flex items-center gap-1"><Icon name="shield" className="material-symbols-outlined text-[13px]" /> Protected</span>
+                        <span className="text-emerald-700 font-semibold flex items-center gap-1"><Icon name="shield" className="material-symbols-outlined text-[13px]" /> Protected</span>
                       </div>
                     </div>
                   </div>
@@ -152,7 +152,7 @@ export function ClientRegistrationAuthFlowSection0() {
                     <label className="font-label-md text-label-md text-on-surface font-medium" htmlFor="client-confirm">Confirm Password</label>
                     <div className="relative flex items-center">
                       <Icon name="verified_user" className="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none" />
-                      <input id="client-confirm" className="w-full h-11 pl-10 pr-10 rounded-xl bg-surface-container-low text-white placeholder:text-white font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary transition-all" placeholder="••••••••" required type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                      <input id="client-confirm" className="w-full h-11 pl-10 pr-10 rounded-xl bg-surface-container-low text-[#1E293B] placeholder:text-[#64748B]/70 font-body-md text-body-md shadow-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary focus:border-primary/40 border border-transparent transition-all" placeholder="••••••••" required type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                       <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3.5 text-outline hover:text-on-surface focus:outline-none" aria-label="Toggle confirm password">
                         <Icon name={showConfirm ? "visibility_off" : "visibility"} className="material-symbols-outlined text-[20px]" />
                       </button>
@@ -160,7 +160,7 @@ export function ClientRegistrationAuthFlowSection0() {
                   </div>
 
                   <div className="flex items-start gap-3 pt-2">
-                    <input className="mt-1 w-5 h-5 rounded-md text-white accent-primary bg-surface-container-low focus:ring-0 cursor-pointer" id="termsCheckbox" required type="checkbox" />
+                    <input className="mt-1 w-5 h-5 rounded-md accent-[#157375] bg-surface-container-low focus:ring-0 cursor-pointer" id="termsCheckbox" required type="checkbox" />
                     <label className="font-body-md text-body-md text-on-surface-variant leading-tight select-none" htmlFor="termsCheckbox">
                       I agree to StayLeb <span className="text-primary font-semibold">Terms of Service</span> and <span className="text-primary font-semibold">Privacy Policy</span>
                     </label>
@@ -173,8 +173,8 @@ export function ClientRegistrationAuthFlowSection0() {
                 </form>
 
                 <div className="w-full text-center py-4 mt-6">
-                  <p className="font-body-md text-body-md text-on-surface-variant">Already have an account? <Link className="text-white font-label-md text-label-md font-semibold hover:underline ml-1" href="/auth/login">Sign In</Link></p>
-                  <p className="mt-2 text-caption font-caption text-outline">Looking to host? <Link className="text-white font-semibold hover:underline ml-0.5" href="/auth/register/owner">List your property</Link></p>
+                  <p className="font-body-md text-body-md text-on-surface-variant">Already have an account? <Link className="text-primary font-label-md text-label-md font-semibold hover:underline ml-1" href="/auth/login">Sign In</Link></p>
+                  <p className="mt-2 text-caption font-caption text-outline">Looking to host? <Link className="text-primary font-semibold hover:underline ml-0.5" href="/auth/register/owner">List your property</Link></p>
                 </div>
               </div>
               <div className="hidden">
@@ -208,7 +208,7 @@ export function ClientRegistrationAuthFlowSection0() {
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-outline-variant/30">
                     <div className="flex -space-x-2 overflow-hidden">
-                      <div className="inline-block h-8 w-8 rounded-full ring-2 ring-surface-container-lowest bg-surface-container-high flex items-center justify-center text-xs font-bold text-white">KL</div>
+                      <div className="inline-block h-8 w-8 rounded-full ring-2 ring-surface-container-lowest bg-surface-container-high flex items-center justify-center text-xs font-bold text-[#157375]">KL</div>
                       <div className="inline-block h-8 w-8 rounded-full ring-2 ring-surface-container-lowest bg-primary-fixed-dim flex items-center justify-center text-xs font-bold text-on-primary-fixed">RN</div>
                       <div className="inline-block h-8 w-8 rounded-full ring-2 ring-surface-container-lowest bg-secondary-fixed flex items-center justify-center text-xs font-bold text-on-secondary-fixed">ZB</div>
                     </div>

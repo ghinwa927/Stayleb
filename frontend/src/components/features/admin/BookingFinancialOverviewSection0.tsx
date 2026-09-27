@@ -410,7 +410,7 @@ export function BookingFinancialOverviewSection0() {
                     <input value={searchInput} onChange={(e) => setSearchInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()} placeholder="Search client name, email, property title/location, booking ID" className="flex-1 h-10 px-3 rounded-lg border bg-white text-sm text-[#46B1B1] placeholder:text-[#46B1B1]/50" />
                     <button onClick={handleSearchSubmit} className="px-4 h-10 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-[#115E60]">Search</button>
                   </div>
-                  <button onClick={clearFilters} className="px-4 h-10 rounded-lg bg-white border text-sm hover:bg-slate-50">Clear</button>
+                  <button onClick={clearFilters} className="px-4 h-10 rounded-lg bg-white border border-[#157375]/20 text-sm text-[#157375] font-medium hover:bg-[#f0f3ff] hover:text-[#157375]">Clear</button>
                 </div>
                 <div className="text-xs text-[#46B1B1] mt-2">All filters are applied instantly to the booking list.</div>
               </div>

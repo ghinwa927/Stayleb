@@ -50,7 +50,7 @@ export function ForgotPasswordSection0() {
                       <span className="font-caption text-caption text-on-surface-variant uppercase tracking-wider text-[9px] mt-0.5">Lebanon Stays &amp; Chalets</span>
                     </div>
                   </Link>
-                  <Link href="/auth/login" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low text-white hover:bg-surface-container hover:text-white transition-all duration-200 font-label-md text-label-md group">
+                  <Link href="/auth/login" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low text-[#157375] hover:bg-surface-container-high transition-all duration-200 font-label-md text-label-md group">
                     <Icon name="arrow_back" className="material-symbols-outlined text-[18px] group-hover:-translate-x-0.5 transition-transform" />
                     <span>Back to Login</span>
                   </Link>
@@ -62,7 +62,7 @@ export function ForgotPasswordSection0() {
                       <Icon name="lock_reset" className="material-symbols-outlined text-[15px]" />
                       <span>Account Recovery</span>
                     </div>
-                    <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-3">Forgot your password?</h1>
+                    <h1 className="font-headline-lg text-headline-lg text-[#157375] tracking-tight mb-3">Forgot your password?</h1>
                     <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
                       Enter the email address associated with your StayLeb account. We&apos;ll send a 6-digit verification code to reset your password.
                     </p>
@@ -82,7 +82,7 @@ export function ForgotPasswordSection0() {
                         <span className="absolute left-3.5 text-on-surface-variant/70 flex items-center pointer-events-none">
                           <Icon name="mail" className="material-symbols-outlined text-[20px]" />
                         </span>
-                        <input autoFocus className="w-full h-12 pl-11 pr-10 rounded-xl bg-surface-container-low text-white placeholder:text-white/50 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_#46B1B1] transition-all" id="recovery-email" name="email" placeholder="name@example.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                        <input autoFocus className="w-full h-12 pl-11 pr-10 rounded-xl bg-surface-container-low text-[#1E293B] placeholder:text-[#64748B]/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_#46B1B1] focus:border-primary/40 border border-transparent transition-all" id="recovery-email" name="email" placeholder="name@example.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                       </div>
                     </div>
 
@@ -94,7 +94,7 @@ export function ForgotPasswordSection0() {
 
                   <div className="mt-8 pt-6 flex flex-col items-center justify-center gap-2 text-center bg-surface-container-low/50 rounded-xl p-4">
                     <p className="font-body-md text-body-md text-on-surface-variant">
-                      Remember your password? <Link className="font-label-md text-label-md font-semibold text-white hover:text-primary-container underline underline-offset-4 ml-1" href="/auth/login">Log In</Link>
+                      Remember your password? <Link className="font-label-md text-label-md font-semibold text-primary hover:text-[#157375] underline underline-offset-4 ml-1" href="/auth/login">Log In</Link>
                     </p>
                     <div className="flex items-center gap-2 font-caption text-caption text-on-surface-variant/75 mt-1">
                       <Icon name="shield" className="material-symbols-outlined text-[14px]" />
@@ -126,7 +126,7 @@ export function ForgotPasswordSection0() {
                   </div>
                 </div>
                 <div className="absolute bottom-8 left-8 right-8 z-10">
-                  <div className="p-6 rounded-xl bg-surface-container-lowest/85 backdrop-blur-md shadow-xl text-white max-w-lg">
+                  <div className="p-6 rounded-xl bg-surface-container-lowest/85 backdrop-blur-md shadow-xl max-w-lg">
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 rounded-lg bg-primary-container text-white flex items-center justify-center flex-shrink-0 shadow-sm">
                         <Icon name="verified_user" className="material-symbols-outlined text-[24px]" />

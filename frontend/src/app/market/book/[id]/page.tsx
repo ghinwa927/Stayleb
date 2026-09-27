@@ -16,5 +16,5 @@ export default function Page(){
       router.replace(`/properties/${params.id}`);
     }
   },[params.id, draft, router]);
-  return <div className="p-10 text-center text-sm text-slate-500">Redirecting to booking review…</div>;
+  return <div className="p-10 text-center text-sm text-[#64748B]">Redirecting to booking review…</div>;
 }

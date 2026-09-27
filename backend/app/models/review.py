@@ -72,7 +72,7 @@ class Review(Base):
     )
 
     moderation_status = Column(
-      Enum("visible", "flagged", "removed"),
+      Enum("visible", "flagged", "removed", name="review_moderation_status_enum"),
       nullable=False,
       default="visible",
       server_default="visible",

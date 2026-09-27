@@ -248,7 +248,7 @@ export function CashBookingRequestDetailsSection0() {
       {approveModalOpen && (
         <Modal title={`Approve cash booking #${bookingId}?`} onClose={() => setApproveModalOpen(false)}>
           <div className="text-[#46B1B1] text-sm mb-6">
-            <p>Approving confirms the booking (<strong>pending → confirmed</strong>). The payment remains <strong style="color:#92400E">Pending Cash</strong> — it is <strong>not</strong> marked as paid. Commission becomes owed.</p>
+            <p>Approving confirms the booking (<strong>pending → confirmed</strong>). The payment remains <strong style={{ color: "#92400E" }}>Pending Cash</strong> — it is <strong>not</strong> marked as paid. Commission becomes owed.</p>
           </div>
           <div className="flex gap-3 justify-end">
             <button onClick={() => setApproveModalOpen(false)} className="px-4 py-2 rounded-lg bg-surface-container text-[#46B1B1] font-label-sm hover:bg-surface-container-high transition-colors">

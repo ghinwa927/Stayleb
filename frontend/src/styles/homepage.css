@@ -312,6 +312,7 @@
 }
 .search-button:hover {
   background: var(--brand);
+  color: white;
 }
 .popular-filters {
   display: flex;
@@ -411,6 +412,12 @@
   background: white;
   border-radius: 6px;
   padding: 6px 12px;
+  color: #157375;
+  font-weight: 600;
+}
+.ai-clarification button:hover {
+  background: #f0f3ff;
+  color: #157375;
 }
 .assurances {
   position: relative;
@@ -675,6 +682,7 @@
 }
 .property-bottom button:hover {
   background: var(--brand);
+  color: white;
 }
 .filter-caption {
   font-size: 12px;

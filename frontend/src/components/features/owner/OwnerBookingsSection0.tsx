@@ -302,8 +302,8 @@ export function OwnerBookingsSection0() {
               <p className={"font-body-md text-body-md text-[#46B1B1]"}>{"Manage guest reservations, approve cash bookings, and track stay statuses."}</p>
             </div>
             <div className={"flex items-center gap-space-xs shrink-0"}>
-              <button onClick={loadAll} className="inline-flex items-center gap-space-xxs px-space-md py-2.5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow-md text-[#46B1B1] font-label-md text-label-md transition-all">
-                <Icon name="refresh" className="material-symbols-outlined text-[18px] text-primary" />
+              <button onClick={loadAll} className="inline-flex items-center gap-space-xxs px-space-md py-2.5 rounded-lg bg-primary text-white font-label-md text-label-md shadow-sm hover:bg-primary/90 transition-all">
+                <Icon name="refresh" className="material-symbols-outlined text-[18px]" />
                 <span>Refresh</span>
               </button>
             </div>
@@ -435,7 +435,8 @@ export function OwnerBookingsSection0() {
               </div>
               <div className={"md:col-span-3 flex items-center gap-2"}>
                 {(search || propertyFilter !== "all" || filter !== "all") && (
-                  <button onClick={() => { setSearch(""); setPropertyFilter("all"); setFilter("all"); }} className="text-xs text-primary underline ml-auto hover:text-[#46B1B1]">
+                  <button onClick={() => { setSearch(""); setPropertyFilter("all"); setFilter("all"); }} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors">
+                    <Icon name="filter_alt_off" className="material-symbols-outlined text-[14px]" />
                     Clear filters
                   </button>
                 )}
@@ -451,7 +452,10 @@ export function OwnerBookingsSection0() {
             ) : filtered.length === 0 ? (
               <div className="p-10 text-center">
                 <p className="text-sm text-[#46B1B1]/70">No {filter} bookings match your filters.</p>
-                <button onClick={() => { setFilter("all"); setSearch(""); }} className="mt-2 text-sm text-primary underline hover:text-[#46B1B1]">Clear filters</button>
+                <button onClick={() => { setFilter("all"); setSearch(""); }} className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors">
+                    <Icon name="filter_alt_off" className="material-symbols-outlined text-[14px]" />
+                    Clear filters
+                  </button>
               </div>
             ) : (
               <div className={"w-full overflow-x-auto"}>
@@ -518,46 +522,46 @@ export function OwnerBookingsSection0() {
                               {isPendingCash && <span className="text-amber-700">Awaiting approval</span>}
                             </RecordStatus>
                           </td>
-                          <td className={"py-3.5 px-space-md text-right whitespace-nowrap"}>
-                            <div className="flex items-center justify-end gap-2">
-                              <Link href={`/owner/bookings/${b.id}`} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container text-primary text-xs font-semibold hover:bg-surface-container-high transition-colors">
-                                View
-                                <Icon name="arrow_forward" className="material-symbols-outlined text-[14px]" />
-                              </Link>
-                              {isPendingCash && (
-                                <>
-                                  <button
-                                    disabled={actionId === String(b.id)}
-                                    onClick={() => setApproveModalId(b.id)}
-                                    className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 flex items-center justify-center disabled:opacity-50 transition-colors"
-                                    title="Approve"
-                                  >
-                                    <Icon name="check" className="material-symbols-outlined text-[18px]" />
-                                  </button>
-                                  <button
-                                    disabled={actionId === String(b.id)}
-                                    onClick={() => setRejectModalId(b.id)}
-                                    className="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 flex items-center justify-center disabled:opacity-50 transition-colors"
-                                    title="Reject"
-                                  >
-                                    <Icon name="close" className="material-symbols-outlined text-[18px]" />
-                                  </button>
-                                </>
-                              )}
-                              {isConfirmedCashPending && (
-                                <button
-                                  disabled={actionId === String(b.id)}
-                                  onClick={() => setMarkPaidModalId(b.id)}
-                                  className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 flex items-center gap-1 disabled:opacity-50 shadow-sm transition-colors"
-                                  title="Confirm Cash Received"
-                                >
-                                  {actionId === String(b.id) ? <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Icon name="verified" className="material-symbols-outlined text-[14px]" />}
-                                  <span className="hidden sm:inline">Confirm Cash Received</span>
-                                  <span className="sm:hidden">Paid</span>
-                                </button>
-                              )}
-                            </div>
-                          </td>
+<td className={"py-3.5 px-space-md text-right whitespace-nowrap"}>
+                             <div className="flex items-center justify-end gap-2">
+                               <Link href={`/owner/bookings/${b.id}`} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-colors">
+                                 View
+                                 <Icon name="arrow_forward" className="material-symbols-outlined text-[14px]" />
+                               </Link>
+                               {isPendingCash && (
+                                 <>
+                                   <button
+                                     disabled={actionId === String(b.id)}
+                                     onClick={() => setApproveModalId(b.id)}
+                                     className="w-8 h-8 rounded-lg bg-primary text-white hover:bg-primary/90 flex items-center justify-center disabled:opacity-50 transition-colors"
+                                     title="Approve"
+                                   >
+                                     <Icon name="check" className="material-symbols-outlined text-[18px]" />
+                                   </button>
+                                   <button
+                                     disabled={actionId === String(b.id)}
+                                     onClick={() => setRejectModalId(b.id)}
+                                     className="w-8 h-8 rounded-lg bg-rose-600 text-white hover:bg-rose-700 flex items-center justify-center disabled:opacity-50 transition-colors"
+                                     title="Reject"
+                                   >
+                                     <Icon name="close" className="material-symbols-outlined text-[18px]" />
+                                   </button>
+                                 </>
+                               )}
+                               {isConfirmedCashPending && (
+                                 <button
+                                   disabled={actionId === String(b.id)}
+                                   onClick={() => setMarkPaidModalId(b.id)}
+                                   className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 flex items-center gap-1 disabled:opacity-50 shadow-sm transition-colors"
+                                   title="Confirm Cash Received"
+                                 >
+                                   {actionId === String(b.id) ? <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Icon name="verified" className="material-symbols-outlined text-[14px]" />}
+                                   <span className="hidden sm:inline">Confirm Cash Received</span>
+                                   <span className="sm:hidden">Paid</span>
+                                 </button>
+                               )}
+                             </div>
+                           </td>
                         </RecordRow>
                       );
                     })}

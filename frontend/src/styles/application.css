@@ -119,9 +119,20 @@ small {
 }
 .primary-button:hover {
   background: var(--brand-hover);
+  color: white;
 }
 .primary-button:active {
   transform: translateY(1px);
+  color: white;
+}
+.primary-button:disabled {
+  background: var(--brand);
+  color: white;
+}
+.primary-button:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+  color: white;
 }
 .back-link {
   display: inline-flex;
@@ -441,12 +452,22 @@ small {
   width: 100%;
   max-width: 448px;
   margin: auto;
+  color: #157375;
+}
+.auth-inner .field-label,
+.auth-inner .checkbox-label {
+  color: #157375;
+}
+.auth-inner .input-wrap input,
+.auth-inner .otp-inputs input {
+  color: #157375;
 }
 .auth-inner h1 {
   font-size: 28px;
   font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 36px;
+  color: #157375;
 }
 .auth-description {
   color: var(--muted);
@@ -489,6 +510,52 @@ small {
 .field-label a:hover {
   text-decoration: underline;
 }
+.forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.forgot-row a {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand);
+}
+.forgot-row a:hover {
+  text-decoration: underline;
+}
+/* StayLeb login split (reference design) — scoped to the login form only */
+.login-split .field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+.login-split .input-wrap input {
+  height: 56px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #1e293b;
+}
+.login-split .input-wrap input::placeholder {
+  color: #94a3b8;
+}
+.login-split .input-wrap input:focus {
+  background: #fff;
+  border-color: #46b1b1;
+  box-shadow: 0 0 0 3px #46b1b120;
+}
+.login-split .checkbox-label {
+  color: #1e293b;
+  font-size: 14px;
+}
+.login-split .checkbox-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: #157375;
+}
+.login-split .hide-field-label .field-label {
+  display: none;
+}
 .input-wrap {
   position: relative;
   display: flex;
@@ -524,6 +591,20 @@ small {
   pointer-events: none;
   display: flex;
   align-items: center;
+}
+.input-prefix {
+  position: absolute;
+  left: 48px;
+  color: var(--muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.input-wrap input.has-prefix {
+  padding-left: 100px;
 }
 .password-toggle {
   position: absolute;
@@ -582,9 +663,53 @@ small {
 }
 .login-inner h1,
 .register-inner h1 {
-  font-size: 30px;
-  line-height: 36px;
+  color: #1e293b;
+}
+/* Register refinement: compact density, soft inputs, polished role cards */
+.register-inner .auth-form {
+  gap: 12px;
+}
+.register-inner .account-options {
+  margin-bottom: 16px;
+}
+.register-inner .input-wrap input {
+  background: #fff;
+  border: 1px solid #dce5e7;
+  height: 48px;
+  border-radius: 12px;
+}
+.register-inner .input-wrap input:focus {
+  background: #fff;
+}
+.register-inner .account-options button {
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.register-inner .account-options button.selected {
+  border: 2px solid #3a9a9e80;
+  background: #3a9a9e10;
+  box-shadow: 0 0 0 3px #3a9a9e10;
+}
+.register-inner .encryption {
+  color: #64748b;
+}
+.register-inner .account-options button {
+  position: relative;
+}
+.register-inner .account-options button.selected::after {
+  content: "✓";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #157375;
+  color: #fff;
+  font-size: 13px;
   font-weight: 700;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
 }
 .login-inner .auth-description {
   color: #64748b;
@@ -726,7 +851,9 @@ small {
 }
 .register-bottom {
   text-align: center;
-  margin-top: 24px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #edf1f3;
   color: #4b5563;
 }
 .encryption {
@@ -737,6 +864,65 @@ small {
   color: #9ca3af;
   font-size: 12px;
   margin-top: 16px;
+}
+.role-selector {
+  margin-bottom: 1.5rem;
+}
+.role-selector p {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+}
+.role-selector .flex {
+  display: flex;
+  gap: 0.75rem;
+}
+.role-selector button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-radius: 1.5rem;
+  border: 2px solid;
+  padding: 1rem;
+  transition: all 0.2s;
+}
+.role-selector button[aria-pressed="true"] {
+  border-color: #157375;
+  background-color: rgba(21, 115, 117, 0.1);
+  color: #157375;
+}
+.role-selector button[aria-pressed="false"] {
+  border-color: #e2e8f0;
+  background-color: white;
+}
+.role-selector button[aria-pressed="false"]:hover {
+  border-color: rgba(70, 177, 177, 0.5);
+  background-color: rgba(70, 177, 177, 0.04);
+}
+.role-selector button svg {
+  transition: color 0.2s;
+}
+.role-selector button[aria-pressed="true"] svg {
+  color: #157375;
+}
+.role-selector button[aria-pressed="false"] svg {
+  color: #64748b;
+}
+.role-selector button div {
+  text-align: left;
+}
+.role-selector strong {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.role-selector small {
+  display: block;
+  font-size: 0.875rem;
+  opacity: 0.7;
 }
 .section-icon {
   display: grid;

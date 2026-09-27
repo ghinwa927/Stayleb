@@ -209,8 +209,9 @@ def verify_password_reset_otp(
             "Too many invalid attempts. Request a new code."
         )
 
-    # MySQL normally returns a timezone-naive datetime
-    current_time = datetime.now(timezone.utc).replace(tzinfo=None)
+    # PasswordResetOTP.expires_at is DateTime(timezone=True), so PostgreSQL
+    # returns a timezone-aware datetime. Compare against an aware UTC now.
+    current_time = datetime.now(timezone.utc)
 
     # Check if OTP expired
     if reset_otp.expires_at < current_time:

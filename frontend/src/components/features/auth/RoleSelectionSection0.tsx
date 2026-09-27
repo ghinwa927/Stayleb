@@ -27,11 +27,11 @@ export function RoleSelectionSection0() { return <>
 
 <div className={"p-6 flex-1 flex flex-col justify-between"}>
 <div>
-<h2 className={"font-headline-sm text-headline-sm text-on-surface font-semibold mb-2 tracking-tight"}>{"\n              Book a Chalet or Furnished House\n            "}</h2>
+<h2 className={"font-headline-sm text-headline-sm text-[#157375] font-semibold mb-2 tracking-tight"}>{"\n              Book a Chalet or Furnished House\n            "}</h2>
 <p className={"font-body-md text-body-md text-on-surface-variant leading-relaxed mb-6"}>{"\n              Discover, save, and reserve exclusive alpine chalets and coastal villas across Lebanon. Enjoy verified 24/7 power and seamless check-ins.\n            "}</p>
 </div>
 <div className={"pt-2"}>
-<Link className={"w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[10px] bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-colors duration-150 active:scale-[0.98] shadow-sm"} href={"/auth/register"}>
+<Link className={"w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md transition-colors duration-150 active:scale-[0.98] shadow-sm"} href={"/auth/register"}>
 <span className={""}>{"Create Client Account"}</span>
 <Icon name="arrow_forward" className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-0.5" />
 </Link>
@@ -56,11 +56,11 @@ export function RoleSelectionSection0() { return <>
 
 <div className={"p-6 flex-1 flex flex-col justify-between"}>
 <div>
-<h2 className={"font-headline-sm text-headline-sm text-on-surface font-semibold mb-2 tracking-tight"}>{"\n              List My Property\n            "}</h2>
+<h2 className={"font-headline-sm text-headline-sm text-[#157375] font-semibold mb-2 tracking-tight"}>{"\n              List My Property\n            "}</h2>
 <p className={"font-body-md text-body-md text-on-surface-variant leading-relaxed mb-6"}>{"\n              Manage your stone villa or chalet, customize dynamic seasonal pricing, sync calendars, and welcome verified Lebanese and international guests.\n            "}</p>
 </div>
 <div className={"pt-2"}>
-<Link className={"w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[10px] bg-secondary text-on-secondary hover:bg-primary transition-colors duration-150 active:scale-[0.98] font-label-md text-label-md shadow-sm"} href={"/auth/register/owner"}>
+<Link className={"w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-secondary text-on-secondary hover:bg-primary transition-colors duration-150 active:scale-[0.98] font-label-md text-label-md shadow-sm"} href={"/auth/register/owner"}>
 <span className={""}>{"Create Owner Account"}</span>
 <Icon name="arrow_forward" className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-0.5" />
 </Link>

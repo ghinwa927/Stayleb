@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @theme {
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --color-on-primary-container: #a4f5f7;
   --color-on-secondary-fixed: #002020;
   --color-on-tertiary-fixed-variant: #5f3f32;
@@ -58,59 +59,59 @@
   --spacing-space-md: 1rem;
   --spacing-space-sm: 0.75rem;
   --spacing-space-xxs: 0.25rem;
-  --font-headline-lg: var(--font-outfit), sans-serif;
+  --font-headline-lg: var(--font-system), sans-serif;
   --text-headline-lg: 32px;
   --text-headline-lg--line-height: 40px;
   --text-headline-lg--letter-spacing: -0.02em;
   --text-headline-lg--font-weight: 700;
-  --font-display: var(--font-outfit), sans-serif;
+  --font-display: var(--font-system), sans-serif;
   --text-display: 44px;
   --text-display--line-height: 48px;
   --text-display--letter-spacing: -0.03em;
   --text-display--font-weight: 800;
-  --font-label-md: var(--font-jakarta), sans-serif;
+  --font-label-md: var(--font-system), sans-serif;
   --text-label-md: 14px;
   --text-label-md--line-height: 20px;
   --text-label-md--font-weight: 600;
-  --font-caption: var(--font-jakarta), sans-serif;
+  --font-caption: var(--font-system), sans-serif;
   --text-caption: 11px;
   --text-caption--line-height: 14px;
   --text-caption--letter-spacing: 0.06em;
   --text-caption--font-weight: 700;
-  --font-headline-lg-mobile: var(--font-outfit), sans-serif;
+  --font-headline-lg-mobile: var(--font-system), sans-serif;
   --text-headline-lg-mobile: 26px;
   --text-headline-lg-mobile--line-height: 32px;
   --text-headline-lg-mobile--letter-spacing: -0.02em;
   --text-headline-lg-mobile--font-weight: 700;
-  --font-label-sm: var(--font-jakarta), sans-serif;
+  --font-label-sm: var(--font-system), sans-serif;
   --text-label-sm: 12px;
   --text-label-sm--line-height: 16px;
   --text-label-sm--font-weight: 600;
-  --font-body-md: var(--font-jakarta), sans-serif;
+  --font-body-md: var(--font-system), sans-serif;
   --text-body-md: 14px;
   --text-body-md--line-height: 22px;
   --text-body-md--font-weight: 400;
-  --font-body-lg: var(--font-jakarta), sans-serif;
+  --font-body-lg: var(--font-system), sans-serif;
   --text-body-lg: 16px;
   --text-body-lg--line-height: 26px;
   --text-body-lg--font-weight: 400;
-  --font-headline-md: var(--font-outfit), sans-serif;
+  --font-headline-md: var(--font-system), sans-serif;
   --text-headline-md: 24px;
   --text-headline-md--line-height: 32px;
   --text-headline-md--letter-spacing: -0.02em;
   --text-headline-md--font-weight: 700;
-  --font-headline-sm: var(--font-outfit), sans-serif;
+  --font-headline-sm: var(--font-system), sans-serif;
   --text-headline-sm: 20px;
   --text-headline-sm--line-height: 28px;
   --text-headline-sm--font-weight: 700;
-  --font-title-md: var(--font-outfit), sans-serif;
+  --font-title-md: var(--font-system), sans-serif;
   --text-title-md: 18px;
   --text-title-md--line-height: 26px;
   --text-title-md--font-weight: 600;
 }
 @font-face { font-family: 'Material Symbols Outlined'; src: url('/fonts/material-symbols.ttf') format('truetype'); font-weight: 100 700; font-display: block; }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: var(--font-jakarta), Inter, sans-serif; background: #f9f9ff; color: #1E293B; font-size: 14px; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body { margin: 0; font-family: var(--font-system); background: #f9f9ff; color: #1E293B; font-size: 14px; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 button, select, a { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: .5; }
@@ -129,8 +130,17 @@ input, select, textarea { max-width: 100%; }
 .field { display: flex; flex-direction: column; gap: 7px; font-size: 13px; font-weight: 500; }
 .field input, .field select, .field textarea { width: 100%; min-height: 44px; border: 1px solid #bec9c8; background: #f9f9ff; border-radius: 8px; padding: 10px 12px; }
 .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 20px; background: #46B1B1; color: white; font-weight: 600; border-radius: 10px; transition: background .2s; }
-.primary-button:hover { background: #3A9E9E; }
-.secondary-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; background: #f0f3ff; border: 1px solid #d8e3fb; border-radius: 10px; }
+.primary-button:hover { background: #3A9E9E; color: white; }
+.primary-button:active { background: #2F8D8E; color: white; }
+.primary-button:disabled { background: #46B1B1; color: white; opacity: .55; }
+.primary-button:focus-visible { outline: 3px solid #157375; outline-offset: 3px; color: white; }
+.primary-button svg, .primary-button .material-symbols-outlined { color: white; }
+.secondary-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; background: #f0f3ff; border: 1px solid #d8e3fb; border-radius: 10px; color: #157375; font-weight: 600; transition: background .2s; }
+.secondary-button:hover { background: #e7eeff; color: #157375; }
+.secondary-button:active { background: #d8e3fb; color: #157375; }
+.secondary-button:disabled { background: #f0f3ff; color: #157375; opacity: .55; }
+.secondary-button:focus-visible { outline: 3px solid #157375; outline-offset: 3px; color: #157375; }
+.secondary-button svg, .secondary-button .material-symbols-outlined { color: #157375; }
 .panel { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px #1e293b08; }
 .booking-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; }
 .booking-main { max-width: 1120px; margin: auto; padding: 28px; }

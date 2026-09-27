@@ -219,11 +219,16 @@ export async function registerRequest(data: {
 
 export async function forgotPasswordRequest(email: string) {
   const clean = email.trim().toLowerCase();
-  const response = await fetch(`${API_URL}/auth/forgot-password`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: clean }),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: clean }),
+    });
+  } catch {
+    throw new Error("Cannot reach the StayLeb server. Please make sure the backend is running and try again.");
+  }
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
     const d = body.detail;
@@ -236,11 +241,16 @@ export async function forgotPasswordRequest(email: string) {
 }
 
 export async function verifyOtpRequest(email: string, otp: string) {
-  const response = await fetch(`${API_URL}/auth/verify-reset-otp`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: email.trim().toLowerCase(), otp: otp.trim() }),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}/auth/verify-reset-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim().toLowerCase(), otp: otp.trim() }),
+    });
+  } catch {
+    throw new Error("Cannot reach the StayLeb server. Please make sure the backend is running and try again.");
+  }
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
     const d = body.detail;

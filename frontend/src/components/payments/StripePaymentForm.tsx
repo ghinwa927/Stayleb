@@ -6,15 +6,18 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
+import { Icon } from "@/components/ui/Icon";
 
 type StripePaymentFormProps = {
   bookingId: number;
   propertyId?: string;
+  totalLabel?: string;
 };
 
 export default function StripePaymentForm({
   bookingId,
   propertyId,
+  totalLabel,
 }: StripePaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -83,11 +86,22 @@ export default function StripePaymentForm({
       <button
         type="submit"
         disabled={!stripe || !elements || processing}
-        className="primary-button w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#157375] to-[#46B1B1] hover:from-[#0E4E50] hover:to-[#157375] text-white font-bold text-[15px] shadow-[0_10px_24px_rgba(21,115,117,0.35)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {processing
-          ? "Processing payment..."
-          : "Pay securely"}
+          ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              Processing payment...
+            </>
+          )
+          : (
+            <>
+              <Icon name="lock" className="material-symbols-outlined text-white text-[18px]" />
+              <span>Pay securely{totalLabel ? ` ${totalLabel}` : ""}</span>
+              <Icon name="arrow_forward" className="material-symbols-outlined text-white text-[19px]" />
+            </>
+          )}
       </button>
 
       <p className="text-[11px] text-slate-500 text-center">

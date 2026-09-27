@@ -111,19 +111,19 @@ function KpiCard({
   icon: string;
   tone?: "teal" | "amber" | "slate";
 }) {
-  const iconClass = tone === "amber" ? "bg-amber-50 text-amber-700" : tone === "slate" ? "bg-surface-container-high text-on-surface-variant" : "bg-surface-container-high text-primary";
-  const valueClass = tone === "amber" ? "text-amber-700" : tone === "slate" ? "text-on-surface" : "text-primary";
+  const iconClass = tone === "amber" ? "bg-amber-50 text-amber-700" : tone === "slate" ? "bg-surface-container-high text-[#46B1B1]/70" : "bg-surface-container-high text-primary";
+  const valueClass = tone === "amber" ? "text-amber-700" : tone === "slate" ? "text-[#1E293B]" : "text-primary";
   return (
     <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between min-h-[150px] border border-primary/5">
       <div className="flex items-start justify-between gap-space-xs">
-        <span className="font-caption text-caption uppercase tracking-wider text-on-surface-variant font-semibold">{label}</span>
+        <span className="font-caption text-caption uppercase tracking-wider text-[#46B1B1]/70 font-semibold">{label}</span>
         <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${iconClass}`}>
           <Icon name={icon} className="material-symbols-outlined text-[18px]" />
         </span>
       </div>
       <div className="mt-space-md">
         <div className={`font-headline-lg text-headline-lg tracking-tight font-bold ${valueClass}`}>{value}</div>
-        <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">{detail}</p>
+        <p className="font-label-sm text-label-sm text-[#46B1B1]/70 mt-1">{detail}</p>
       </div>
     </div>
   );
@@ -133,7 +133,7 @@ function LoadingState({ label }: { label: string }) {
   return (
     <div className="p-12 flex flex-col items-center gap-3">
       <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="text-sm text-on-surface-variant">{label}</p>
+      <p className="text-sm text-[#46B1B1]/70">{label}</p>
     </div>
   );
 }
@@ -152,8 +152,8 @@ function EmptyState({ title, description, icon = "inbox" }: { title: string; des
   return (
     <div className="p-10 text-center">
       <Icon name={icon} className="material-symbols-outlined text-[34px] text-primary/50 mb-2" />
-      <h3 className="font-title-md text-title-md text-on-surface">{title}</h3>
-      <p className="text-sm text-on-surface-variant mt-1">{description}</p>
+      <h3 className="font-title-md text-title-md text-[#46B1B1]">{title}</h3>
+      <p className="text-sm text-[#46B1B1]/70 mt-1">{description}</p>
     </div>
   );
 }
@@ -186,15 +186,15 @@ function Pagination({
   const lastPage = safeTotalPages > 0 ? safeTotalPages : 1;
   return (
     <div className="bg-surface-container-low px-space-lg py-space-md flex flex-col sm:flex-row items-center justify-between gap-space-sm border-t">
-      <div className="text-xs text-on-surface-variant">
+      <div className="text-xs text-[#46B1B1]/70">
         {safeTotal > 0 ? <>Showing <strong>{firstRecord}</strong> to <strong>{lastRecord}</strong> of <strong>{safeTotal}</strong> {recordLabel} · Page <strong>{safePage}</strong> of <strong>{lastPage}</strong></> : <>No {recordLabel}</>}
       </div>
       <div className="flex items-center gap-2">
-        <button type="button" disabled={safePage <= 1} onClick={() => onPageChange(Math.max(1, safePage - 1))} className="h-9 px-3 rounded-lg border border-[#46B1B1]/20 bg-white text-sm text-primary hover:bg-surface-container disabled:bg-slate-100 disabled:text-on-surface-variant">
+        <button type="button" disabled={safePage <= 1} onClick={() => onPageChange(Math.max(1, safePage - 1))} className="h-9 px-3 rounded-lg border border-[#46B1B1]/20 bg-white text-sm text-[#46B1B1] hover:bg-surface-container disabled:bg-slate-100 disabled:text-[#46B1B1]/40">
           Previous
         </button>
-        <span className="text-xs text-on-surface-variant">Page {safePage} / {lastPage}</span>
-        <button type="button" disabled={safeTotalPages === 0 || safePage >= safeTotalPages} onClick={() => onPageChange(Math.min(safeTotalPages, safePage + 1))} className="h-9 px-3 rounded-lg border border-[#46B1B1]/20 bg-white text-sm text-primary hover:bg-surface-container disabled:bg-slate-100 disabled:text-on-surface-variant">
+        <span className="text-xs text-[#46B1B1]/70">Page {safePage} / {lastPage}</span>
+        <button type="button" disabled={safeTotalPages === 0 || safePage >= safeTotalPages} onClick={() => onPageChange(Math.min(safeTotalPages, safePage + 1))} className="h-9 px-3 rounded-lg border border-[#46B1B1]/20 bg-white text-sm text-[#46B1B1] hover:bg-surface-container disabled:bg-slate-100 disabled:text-[#46B1B1]/40">
           Next
         </button>
       </div>
@@ -435,25 +435,25 @@ export function OwnerEarningsCommissionSection0() {
     : "Commission settlement records will appear here when they are available.";
 
   return (
-    <main className="w-full pt-6 min-h-screen bg-background">
+    <main className="w-full pt-6 min-h-screen bg-surface-container-low">
       <div className="flex flex-col w-full">
         <div className="px-space-md sm:px-space-lg lg:px-margin-lg py-space-lg max-w-[1440px] mx-auto w-full flex flex-col gap-space-lg">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
             <div className="flex flex-col gap-space-xxs">
-              <div className="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+              <div className="flex items-center gap-space-xs text-[#46B1B1]/70 font-label-sm text-label-sm">
                 <Link className="hover:text-primary transition-colors" href="/owner">Dashboard</Link>
                 <Icon name="chevron_right" className="material-symbols-outlined text-[14px] text-outline" />
-                <span className="text-on-surface font-semibold">Earnings / Commission</span>
+                <span className="text-[#46B1B1] font-semibold">Earnings / Commission</span>
               </div>
-              <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">Earnings & Platform Commission</h1>
-              <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">Review your earnings, booking-level financial activity, and commission settlement history.</p>
+              <h1 className="font-headline-lg text-headline-lg text-[#46B1B1] tracking-tight mt-1">Earnings & Platform Commission</h1>
+              <p className="font-body-md text-body-md text-[#1E293B] max-w-3xl">Review your earnings, booking-level financial activity, and commission settlement history.</p>
             </div>
             <div className="flex items-center gap-space-xs shrink-0">
-              <button type="button" onClick={refreshActiveTab} className="flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest shadow-sm text-on-surface font-label-md text-label-md hover:shadow-md transition-all">
+              <button type="button" onClick={refreshActiveTab} className="flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest shadow-sm text-[#46B1B1] font-label-md text-label-md hover:shadow-md transition-all">
                 <Icon name="refresh" className="material-symbols-outlined text-[18px] text-primary" />
                 <span>Refresh</span>
               </button>
-              <button type="button" onClick={() => window.print()} className="flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest shadow-sm text-on-surface font-label-md text-label-md hover:shadow-md transition-all">
+              <button type="button" onClick={() => window.print()} className="flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest shadow-sm text-[#46B1B1] font-label-md text-label-md hover:shadow-md transition-all">
                 <Icon name="download" className="material-symbols-outlined text-[18px] text-primary" />
                 <span>Export</span>
               </button>
@@ -473,7 +473,7 @@ export function OwnerEarningsCommissionSection0() {
                 aria-selected={activeTab === tab.key}
                 aria-controls={`owner-${tab.key}-panel`}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center justify-center gap-space-xs px-space-lg py-3 rounded-xl font-label-md text-label-md transition-all ${activeTab === tab.key ? "bg-primary text-white font-semibold shadow-sm" : "text-primary hover:bg-surface-container"}`}
+                className={`flex items-center justify-center gap-space-xs px-space-lg py-3 rounded-xl font-label-md text-label-md transition-all ${activeTab === tab.key ? "bg-primary text-white font-semibold shadow-sm" : "text-[#46B1B1] hover:bg-surface-container"}`}
               >
                 <Icon name={tab.icon} className="material-symbols-outlined text-[19px]" />
                 <span>{tab.label}</span>
@@ -486,30 +486,30 @@ export function OwnerEarningsCommissionSection0() {
               <div className="rounded-[16px] bg-surface-container-lowest shadow-sm p-space-md sm:p-space-lg flex flex-col gap-space-md">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h2 className="font-title-md text-title-md text-on-surface">Earnings filters</h2>
-                    <p className="text-sm text-on-surface-variant">Filter your financial summary by date range or property.</p>
+                    <h2 className="font-title-md text-title-md text-[#46B1B1]">Earnings filters</h2>
+                    <p className="text-sm text-[#46B1B1]/70">Filter your financial summary by date range or property.</p>
                   </div>
                   <button type="button" onClick={clearOverviewFilters} className="self-start px-3 py-2 rounded-lg bg-surface-container text-primary text-sm font-medium hover:bg-surface-container-high">Clear filters</button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                   <div className="md:col-span-3">
-                    <label htmlFor="overview-from-date" className="text-xs font-semibold text-on-surface uppercase tracking-wider">From date</label>
-                    <input id="overview-from-date" type="date" value={overviewFromDate} onChange={(event) => setOverviewFromDate(event.target.value)} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    <label htmlFor="overview-from-date" className="text-xs font-semibold text-[#46B1B1] uppercase tracking-wider">From date</label>
+                    <input id="overview-from-date" type="date" value={overviewFromDate} onChange={(event) => setOverviewFromDate(event.target.value)} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-primary/20" />
                   </div>
                   <div className="md:col-span-3">
-                    <label htmlFor="overview-to-date" className="text-xs font-semibold text-on-surface uppercase tracking-wider">To date</label>
-                    <input id="overview-to-date" type="date" value={overviewToDate} onChange={(event) => setOverviewToDate(event.target.value)} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    <label htmlFor="overview-to-date" className="text-xs font-semibold text-[#46B1B1] uppercase tracking-wider">To date</label>
+                    <input id="overview-to-date" type="date" value={overviewToDate} onChange={(event) => setOverviewToDate(event.target.value)} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-primary/20" />
                   </div>
                   <div className="md:col-span-4">
-                    <label htmlFor="overview-property" className="text-xs font-semibold text-on-surface uppercase tracking-wider">Property</label>
-                    <select id="overview-property" value={overviewPropertyId} disabled={propertiesLoading} onChange={(event) => setOverviewPropertyId(event.target.value)} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-surface-container">
+                    <label htmlFor="overview-property" className="text-xs font-semibold text-[#46B1B1] uppercase tracking-wider">Property</label>
+                    <select id="overview-property" value={overviewPropertyId} disabled={propertiesLoading} onChange={(event) => setOverviewPropertyId(event.target.value)} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-surface-container">
                       <option value="">All Properties</option>
                       {properties.map((property) => <option key={property.id} value={String(property.id)}>{property.title} · {property.location}</option>)}
                     </select>
                   </div>
                   <div className="md:col-span-2">
-                    <label htmlFor="overview-group-by" className="text-xs font-semibold text-on-surface uppercase tracking-wider">Breakdown by</label>
-                    <select id="overview-group-by" value={overviewGroupBy} onChange={(event) => setOverviewGroupBy(event.target.value as "" | "day" | "month")} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <label htmlFor="overview-group-by" className="text-xs font-semibold text-[#46B1B1] uppercase tracking-wider">Breakdown by</label>
+                    <select id="overview-group-by" value={overviewGroupBy} onChange={(event) => setOverviewGroupBy(event.target.value as "" | "day" | "month")} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-primary/20">
                       <option value="">No grouping</option>
                       <option value="day">Day</option>
                       <option value="month">Month</option>
@@ -557,23 +557,23 @@ export function OwnerEarningsCommissionSection0() {
                   </div>
 
                   <div className="rounded-[16px] bg-surface-container-lowest shadow-sm overflow-hidden">
-                    <div className="p-space-md sm:p-space-lg pb-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                          <h2 className="font-title-md text-title-md text-on-surface">Earnings breakdown</h2>
-                          <p className="text-sm text-on-surface-variant">Historical breakdown of your earnings over time.</p>
-                        </div>
-                        <span className="text-xs text-on-surface-variant">{overview.breakdown.length} periods</span>
-                      </div>
-                    </div>
+<div className="p-space-md sm:p-space-lg pb-0">
+                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                         <div>
+                           <h2 className="font-title-md text-title-md text-[#46B1B1]">Earnings breakdown</h2>
+                           <p className="text-sm text-[#46B1B1]/70">Historical breakdown of your earnings over time.</p>
+                         </div>
+                         <span className="text-xs text-[#46B1B1]/70">{overview.breakdown.length} periods</span>
+                       </div>
+                     </div>
                     {overview.breakdown.length === 0 ? (
                       <EmptyState title="No breakdown data" description="No grouped earnings periods are available for the selected filters." icon="bar_chart" />
                     ) : (
                       <div className="overflow-x-auto mt-space-md">
                         <table className="w-full min-w-[720px] text-left border-collapse">
-                          <thead><tr className="bg-surface-container text-on-surface-variant font-caption text-caption uppercase tracking-wider"><th className="py-3 px-4 font-semibold">Period</th><th className="py-3 px-4 font-semibold text-right">Bookings</th><th className="py-3 px-4 font-semibold text-right">Gross booking volume</th><th className="py-3 px-4 font-semibold text-right">Platform commission</th><th className="py-3 px-4 font-semibold text-right">Owner earnings</th></tr></thead>
+                          <thead><tr className="bg-surface-container text-[#46B1B1]/70 font-caption text-caption uppercase tracking-wider"><th className="py-3 px-4 font-semibold">Period</th><th className="py-3 px-4 font-semibold text-right">Bookings</th><th className="py-3 px-4 font-semibold text-right">Gross booking volume</th><th className="py-3 px-4 font-semibold text-right">Platform commission</th><th className="py-3 px-4 font-semibold text-right">Owner earnings</th></tr></thead>
                           <tbody className="divide-y divide-slate-100 text-sm">
-                            {overview.breakdown.map((row, index) => <tr key={`${row.period}-${index}`} className="hover:bg-surface-container-low/50"><td className="py-3 px-4 font-medium text-primary">{formatPeriod(row.period)}</td><td className="py-3 px-4 text-right text-on-surface">{formatCount(row.total_bookings)}</td><td className="py-3 px-4 text-right font-medium text-on-surface">{formatMoney(row.gross_booking_volume)}</td><td className="py-3 px-4 text-right text-primary">{formatMoney(row.platform_commission)}</td><td className="py-3 px-4 text-right font-semibold text-emerald-700">{formatMoney(row.owner_earnings)}</td></tr>)}
+                            {overview.breakdown.map((row, index) => <tr key={`${row.period}-${index}`} className="hover:bg-surface-container-low/50"><td className="py-3 px-4 font-medium text-primary">{formatPeriod(row.period)}</td><td className="py-3 px-4 text-right text-[#1E293B]">{formatCount(row.total_bookings)}</td><td className="py-3 px-4 text-right font-medium text-[#1E293B]">{formatMoney(row.gross_booking_volume)}</td><td className="py-3 px-4 text-right text-primary">{formatMoney(row.platform_commission)}</td><td className="py-3 px-4 text-right font-semibold text-emerald-700">{formatMoney(row.owner_earnings)}</td></tr>)}
                           </tbody>
                         </table>
                       </div>
@@ -589,15 +589,15 @@ export function OwnerEarningsCommissionSection0() {
               <div className="rounded-[16px] bg-surface-container-lowest shadow-sm p-space-md sm:p-space-lg flex flex-col gap-space-md">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h2 className="font-title-md text-title-md text-on-surface">Earnings ledger filters</h2>
-                    <p className="text-sm text-on-surface-variant">View your detailed transaction history. All figures are final.</p>
+                    <h2 className="font-title-md text-title-md text-[#46B1B1]">Earnings ledger filters</h2>
+                    <p className="text-sm text-[#46B1B1]/70">View your detailed transaction history. All figures are final.</p>
                   </div>
                   <button type="button" onClick={clearLedgerFilters} className="self-start px-3 py-2 rounded-lg bg-surface-container text-primary text-sm font-medium hover:bg-surface-container-high">Clear filters</button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-                  <div className="md:col-span-3"><label htmlFor="ledger-from-date" className="text-xs font-semibold text-on-surface uppercase tracking-wider">From date</label><input id="ledger-from-date" type="date" value={ledgerFromDate} onChange={(event) => { setLedgerFromDate(event.target.value); setLedgerPage(1); }} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" /></div>
-                  <div className="md:col-span-3"><label htmlFor="ledger-to-date" className="text-xs font-semibold text-on-surface uppercase tracking-wider">To date</label><input id="ledger-to-date" type="date" value={ledgerToDate} onChange={(event) => { setLedgerToDate(event.target.value); setLedgerPage(1); }} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" /></div>
-                  <div className="md:col-span-6"><label htmlFor="ledger-property" className="text-xs font-semibold text-on-surface uppercase tracking-wider">Property</label><select id="ledger-property" value={ledgerPropertyId} disabled={propertiesLoading} onChange={(event) => { setLedgerPropertyId(event.target.value); setLedgerPage(1); }} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-surface-container"><option value="">All Properties</option>{properties.map((property) => <option key={property.id} value={String(property.id)}>{property.title} · {property.location}</option>)}</select></div>
+                  <div className="md:col-span-3"><label htmlFor="ledger-from-date" className="text-xs font-semibold text-[#46B1B1] uppercase tracking-wider">From date</label><input id="ledger-from-date" type="date" value={ledgerFromDate} onChange={(event) => { setLedgerFromDate(event.target.value); setLedgerPage(1); }} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-primary/20" /></div>
+                  <div className="md:col-span-3"><label htmlFor="ledger-to-date" className="text-xs font-semibold text-[#46B1B1] uppercase tracking-wider">To date</label><input id="ledger-to-date" type="date" value={ledgerToDate} onChange={(event) => { setLedgerToDate(event.target.value); setLedgerPage(1); }} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-primary/20" /></div>
+                  <div className="md:col-span-6"><label htmlFor="ledger-property" className="text-xs font-semibold text-[#46B1B1] uppercase tracking-wider">Property</label><select id="ledger-property" value={ledgerPropertyId} disabled={propertiesLoading} onChange={(event) => { setLedgerPropertyId(event.target.value); setLedgerPage(1); }} className="w-full mt-1 h-11 px-3 rounded-xl border border-[#46B1B1]/20 bg-white text-sm text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-surface-container"><option value="">All Properties</option>{properties.map((property) => <option key={property.id} value={String(property.id)}>{property.title} · {property.location}</option>)}</select></div>
                 </div>
                 {propertiesError && <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Property options could not be loaded: {propertiesError}</p>}
                 {ledgerDateError && <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{ledgerDateError}</p>}

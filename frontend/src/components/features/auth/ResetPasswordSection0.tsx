@@ -78,7 +78,7 @@ export function ResetPasswordSection0() {
                       <span className="font-caption text-caption text-on-surface-variant uppercase tracking-widest mt-0.5">Authentic Stays</span>
                     </div>
                   </Link>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-white font-label-sm text-label-sm shadow-sm truncate max-w-[160px]">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-low text-[#157375] font-label-sm text-label-sm shadow-sm truncate max-w-[160px]">
                     <Icon name="verified_user" className="material-symbols-outlined text-caption font-caption" />
                     <span className="truncate text-on-surface">{email || "account@domain.lb"}</span>
                   </div>
@@ -89,14 +89,14 @@ export function ResetPasswordSection0() {
                     <Icon name="lock_reset" className="material-symbols-outlined text-caption" />
                     <span>Credential Recovery Step 2 of 2</span>
                   </div>
-                  <h1 className="font-display text-display text-on-surface tracking-tight">Create a new password</h1>
+                  <h1 className="font-display text-display text-[#157375] tracking-tight">Create a new password</h1>
                   <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
                     Your new password must be at least 8 characters and include a mixture of numbers and symbols for account protection.
                   </p>
                 </div>
 
                 {error && (
-                  <div className="mb-4 p-3 rounded-xl bg-error-container text-white flex items-start gap-2 max-w-lg">
+                  <div className="mb-4 p-3 rounded-xl bg-error-container text-on-error-container flex items-start gap-2 max-w-lg border border-error/20">
                     <Icon name="error" className="material-symbols-outlined text-[20px] text-error shrink-0" />
                     <p className="font-label-sm text-label-sm flex-1">{error}</p>
                     <button type="button" onClick={() => setError(null)} className="p-1"><Icon name="close" className="material-symbols-outlined text-[16px]" /></button>
@@ -107,7 +107,7 @@ export function ResetPasswordSection0() {
                   <div className="space-y-2">
                     <label className="block font-label-md text-label-md text-on-surface" htmlFor="new-pass">New Password</label>
                     <div className="relative flex items-center">
-                      <input className="w-full h-12 px-4 pr-12 rounded-xl bg-surface-container-low text-white font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200" id="new-pass" placeholder="Enter strong password" required type={showNew ? "text" : "password"} value={newPass} onChange={(e) => setNewPass(e.target.value)} />
+                      <input className="w-full h-12 px-4 pr-12 rounded-xl bg-surface-container-low text-[#1E293B] placeholder:text-[#64748B]/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200" id="new-pass" placeholder="Enter strong password" required type={showNew ? "text" : "password"} value={newPass} onChange={(e) => setNewPass(e.target.value)} />
                       <button type="button" onClick={() => setShowNew(!showNew)} aria-label="Toggle password visibility" className="absolute right-3.5 p-1 rounded-lg text-outline hover:text-on-surface transition-colors">
                         <Icon name={showNew ? "visibility_off" : "visibility"} className="material-symbols-outlined text-title-md font-title-md" />
                       </button>
@@ -126,19 +126,19 @@ export function ResetPasswordSection0() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
-                      <div className={`flex items-center gap-1.5 font-caption text-caption transition-colors ${newPass.length >= 8 ? "text-secondary" : "text-outline"}`}>
+                      <div className={`flex items-center gap-1.5 font-caption text-caption transition-colors ${newPass.length >= 8 ? "text-[#157375]" : "text-outline"}`}>
                         <Icon name={newPass.length >= 8 ? "check_circle" : "radio_button_unchecked"} className="material-symbols-outlined text-label-sm font-label-sm" />
                         <span>At least 8 characters</span>
                       </div>
-                      <div className={`flex items-center gap-1.5 font-caption text-caption transition-colors ${/\d/.test(newPass) ? "text-secondary" : "text-outline"}`}>
+                      <div className={`flex items-center gap-1.5 font-caption text-caption transition-colors ${/\d/.test(newPass) ? "text-[#157375]" : "text-outline"}`}>
                         <Icon name={/\d/.test(newPass) ? "check_circle" : "radio_button_unchecked"} className="material-symbols-outlined text-label-sm font-label-sm" />
                         <span>Contains a number</span>
                       </div>
-                      <div className={`flex items-center gap-1.5 font-caption text-caption transition-colors ${/[^A-Za-z0-9]/.test(newPass) ? "text-secondary" : "text-outline"}`}>
+                      <div className={`flex items-center gap-1.5 font-caption text-caption transition-colors ${/[^A-Za-z0-9]/.test(newPass) ? "text-[#157375]" : "text-outline"}`}>
                         <Icon name={/[^A-Za-z0-9]/.test(newPass) ? "check_circle" : "radio_button_unchecked"} className="material-symbols-outlined text-label-sm font-label-sm" />
                         <span>Contains special symbol</span>
                       </div>
-                      <div className={`flex items-center gap-1.5 font-caption text-caption transition-colors ${/[A-Z]/.test(newPass) && /[a-z]/.test(newPass) ? "text-secondary" : "text-outline"}`}>
+                      <div className={`flex items-center gap-1.5 font-caption text-caption transition-colors ${/[A-Z]/.test(newPass) && /[a-z]/.test(newPass) ? "text-[#157375]" : "text-outline"}`}>
                         <Icon name={/[A-Z]/.test(newPass) && /[a-z]/.test(newPass) ? "check_circle" : "radio_button_unchecked"} className="material-symbols-outlined text-label-sm font-label-sm" />
                         <span>Mixed upper & lower case</span>
                       </div>
@@ -148,12 +148,12 @@ export function ResetPasswordSection0() {
                   <div className="space-y-2 pt-1">
                     <label className="block font-label-md text-label-md text-on-surface" htmlFor="confirm-pass">Confirm New Password</label>
                     <div className="relative flex items-center">
-                      <input className="w-full h-12 px-4 pr-12 rounded-xl bg-surface-container-low text-white font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200" id="confirm-pass" placeholder="Repeat password" required type={showConfirm ? "text" : "password"} value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} />
+                      <input className="w-full h-12 px-4 pr-12 rounded-xl bg-surface-container-low text-[#1E293B] placeholder:text-[#64748B]/70 font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200" id="confirm-pass" placeholder="Repeat password" required type={showConfirm ? "text" : "password"} value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} />
                       <button type="button" onClick={() => setShowConfirm(!showConfirm)} aria-label="Toggle confirm visibility" className="absolute right-3.5 p-1 rounded-lg text-outline hover:text-on-surface transition-colors">
                         <Icon name={showConfirm ? "visibility_off" : "visibility"} className="material-symbols-outlined text-title-md font-title-md" />
                       </button>
                     </div>
-                    <div className={`flex items-center gap-1.5 font-caption text-caption pt-1 min-h-[20px] ${confirmPass && newPass === confirmPass ? "text-secondary" : "text-outline"}`}>
+                    <div className={`flex items-center gap-1.5 font-caption text-caption pt-1 min-h-[20px] ${confirmPass && newPass === confirmPass ? "text-[#157375]" : "text-outline"}`}>
                       <Icon name={confirmPass && newPass === confirmPass ? "check_circle" : "shield"} className="material-symbols-outlined text-label-sm font-label-sm" />
                       <span>{confirmPass ? (newPass === confirmPass ? "Passwords match" : "Passwords must match exactly") : "Passwords must match exactly"}</span>
                     </div>
@@ -164,7 +164,7 @@ export function ResetPasswordSection0() {
                       <span>{loading ? "Resetting..." : "Reset Password"}</span>
                       {!loading && <Icon name="arrow_forward" className="material-symbols-outlined text-title-md font-title-md" />}
                     </button>
-                    <Link href="/auth/login" className="w-full h-12 rounded-xl bg-surface-container-low hover:bg-surface-container text-white font-label-md text-label-md flex items-center justify-center gap-2 transition-colors cursor-pointer">
+                    <Link href="/auth/login" className="w-full h-12 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-[#157375] font-label-md text-label-md flex items-center justify-center gap-2 transition-colors cursor-pointer">
                       <Icon name="arrow_back" className="material-symbols-outlined text-body-lg font-body-lg" />
                       <span>Back to Login</span>
                     </Link>

@@ -1,5 +1,5 @@
 html { scroll-behavior: smooth; }
-body { margin: 0; color: #111c2d; background: #f9f9ff; font-family: var(--font-jakarta), Inter, Arial, sans-serif; font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+body { margin: 0; color: #111c2d; background: #f9f9ff; font-family: var(--font-system); font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 button, a { touch-action: manipulation; }
 button { cursor: pointer; }
@@ -29,10 +29,19 @@ img { max-width: 100%; }
 .app-dialog::backdrop { background: #111c2d88; backdrop-filter: blur(3px); }
 .button-primary, .button-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px; padding: 11px 18px; font-size: 14px; font-weight: 600; transition: background .15s; }
 .button-primary { background: #157375; color: white; }
-.button-primary:hover { background: #0e4e50; }
-.button-secondary { background: #f0f3ff; color: #111c2d; border: 1px solid #bec9c866; }
+.button-primary:hover { background: #0e4e50; color: white; }
+.button-primary:active { background: #0e4e50; color: white; }
+.button-primary:disabled { background: #157375; color: white; opacity: .55; }
+.button-primary:focus-visible { outline: 2px solid #157375; outline-offset: 3px; color: white; }
+.button-secondary { background: #f0f3ff; color: #157375; border: 1px solid #bec9c866; }
+.button-secondary:hover { background: #e7eeff; color: #157375; }
+.button-secondary:active { background: #d8e3fb; color: #157375; }
+.button-secondary:disabled { background: #f0f3ff; color: #157375; opacity: .55; }
+.button-secondary:focus-visible { outline: 2px solid #157375; outline-offset: 3px; color: #157375; }
 .form-input { border: 1px solid #bec9c8; border-radius: 10px; background: white; padding: 11px 13px; }
-.counter-button { width: 32px; height: 32px; border: 1px solid #bec9c8; border-radius: 50%; display: grid; place-items: center; }
+.counter-button { width: 32px; height: 32px; border: 1px solid #bec9c8; border-radius: 50%; display: grid; place-items: center; color: #157375; }
+.counter-button:hover { background: #f0f3ff; color: #157375; }
+.counter-button:disabled { color: #157375; opacity: .55; }
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 100; background: #00595b; color: white; display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 12px; box-shadow: 0 8px 32px #111c2d33; max-width: calc(100vw - 32px); font-size: 14px; }
 .toast button { margin-left: 12px; }
 .skip-link { position: fixed; top: -100px; left: 16px; background: white; color: #00595b; padding: 12px; z-index: 200; }

@@ -283,7 +283,7 @@ export function BookingDetailsSection0() {
       confirmButtonColor: "#E11D48",
       cancelButtonColor: "#E2E8F0",
       customClass: {
-        popup: "rounded-2xl",
+        popup: "rounded-xl",
         title: "text-[#1E293B]",
         confirmButton: "rounded-full px-6",
         cancelButton: "rounded-full px-6 text-[#1E293B]",
@@ -354,7 +354,7 @@ export function BookingDetailsSection0() {
         icon: "success",
         confirmButtonColor: "#157375",
         confirmButtonText: "Done",
-        customClass: { popup: "rounded-2xl" },
+        customClass: { popup: "rounded-xl" },
         width: 520,
       });
     } catch (e) {
@@ -364,7 +364,7 @@ export function BookingDetailsSection0() {
         text: msg.includes("not be cancelled") || msg.includes("cannot be cancelled") ? msg : msg.includes("Refund") || msg.includes("refund") ? "We couldn't process your refund. Your booking has not been cancelled. Please try again." : msg,
         icon: "error",
         confirmButtonColor: "#157375",
-        customClass: { popup: "rounded-2xl" },
+        customClass: { popup: "rounded-xl" },
       });
     } finally {
       setCancelling(false);
@@ -373,10 +373,23 @@ export function BookingDetailsSection0() {
 
   if (loading) {
     return (
-      <main className="w-full min-h-screen bg-background flex items-center justify-center py-16">
-        <div className="flex flex-col items-center gap-3">
-          <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-slate-500">Loading booking #{bookingId}…</p>
+      <main className="w-full min-h-screen bg-[#F4F7FB] py-5 sm:py-7">
+        <div className="max-w-[1320px] mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-5">
+          <div className="bg-white rounded-[22px] border border-[#E3ECF3] p-6 sm:p-8 animate-pulse">
+            <div className="h-4 w-24 bg-[#EAF1F6] rounded" />
+            <div className="mt-3 h-8 w-72 max-w-full bg-[#EAF1F6] rounded" />
+            <div className="mt-3 h-4 w-96 max-w-full bg-[#EAF1F6] rounded" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start">
+            <div className="lg:col-span-8 space-y-5 min-w-0">
+              <div className="bg-white rounded-[22px] border border-[#E3ECF3] p-6 animate-pulse"><div className="h-52 bg-[#EAF1F6] rounded-2xl" /></div>
+              <div className="bg-white rounded-[22px] border border-[#E3ECF3] p-6 animate-pulse"><div className="h-32 bg-[#EAF1F6] rounded-2xl" /></div>
+            </div>
+            <div className="lg:col-span-4 min-w-0">
+              <div className="bg-white rounded-[22px] border border-[#E3ECF3] p-6 animate-pulse"><div className="h-40 bg-[#EAF1F6] rounded-2xl" /></div>
+            </div>
+          </div>
+          <p className="text-center text-sm text-[#64748B]">Loading booking #{bookingId}…</p>
         </div>
       </main>
     );
@@ -387,13 +400,13 @@ export function BookingDetailsSection0() {
     const isForbidden = /403|forbidden|not allowed/i.test(error);
     const isNotFound = /404|not found/i.test(error);
     return (
-      <main className="w-full min-h-screen bg-background flex items-center justify-center py-16">
-        <div className="text-center max-w-md px-6">
-          <Icon name={isNotFound ? "search_off" : isAuthError || isForbidden ? "lock" : "error"} className="material-symbols-outlined text-[36px] text-slate-400 mb-3" />
-          <h2 className="font-title-md text-title-md text-on-surface font-semibold mb-2">
+      <main className="w-full min-h-screen bg-[#F4F7FB] flex items-center justify-center py-16">
+        <div className="text-center max-w-md px-6 bg-white border border-[#E3ECF3] rounded-[22px] shadow-sm p-8 sm:p-10">
+          <Icon name={isNotFound ? "search_off" : isAuthError || isForbidden ? "lock" : "error"} className="material-symbols-outlined text-[36px] text-[#64748B] mb-3" />
+          <h2 className="text-[19px] text-[#1E293B] font-extrabold mb-2">
             {isNotFound ? "Booking not found" : isAuthError ? "Please log in" : isForbidden ? "Not authorized" : "Failed to load booking"}
           </h2>
-          <p className="text-sm text-slate-500 mb-4">{error}</p>
+          <p className="text-sm text-[#64748B] mb-4">{error}</p>
           <div className="flex items-center justify-center gap-3">
             {isAuthError ? (
               <Link href={`/auth/login?next=${encodeURIComponent(`/account/bookings/${bookingId ?? ""}`)}`} className="px-5 py-2 rounded-lg bg-primary text-white font-label-sm text-label-sm">
@@ -404,7 +417,7 @@ export function BookingDetailsSection0() {
                 Back to My Bookings
               </Link>
             )}
-            <Link href="/search" className="px-5 py-2 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm">
+            <Link href="/search" className="px-5 py-2 rounded-lg bg-primary text-white font-label-sm text-label-sm">
               Discover stays
             </Link>
           </div>
@@ -415,9 +428,9 @@ export function BookingDetailsSection0() {
 
   if (!booking) {
     return (
-      <main className="w-full min-h-screen bg-background flex items-center justify-center py-16">
-        <div className="text-center">
-          <p className="text-sm text-slate-500">No booking data available.</p>
+      <main className="w-full min-h-screen bg-[#F4F7FB] flex items-center justify-center py-16">
+        <div className="text-center bg-white border border-[#E3ECF3] rounded-[22px] shadow-sm p-8 sm:p-10">
+          <p className="text-sm text-[#64748B]">No booking data available.</p>
           <Link href="/account/bookings" className="text-primary underline mt-4 inline-block text-sm">
             Back to My Bookings
           </Link>
@@ -455,24 +468,24 @@ export function BookingDetailsSection0() {
 
   return (
     <>
-      <main className={"w-full min-h-screen bg-background flex flex-col justify-center"}>
+      <main className={"w-full min-h-screen bg-[#F4F7FB] flex flex-col"}>
         <div className={"flex flex-col w-full"}>
-          <div className={"max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8"}>
-            <div className={"flex flex-col sm:flex-row sm:items-center justify-between gap-4"}>
-              <nav className={"flex items-center space-x-2 text-on-surface-variant font-label-sm text-label-sm"}>
-                <Link href="/account/bookings" className={"hover:text-primary transition-colors flex items-center gap-1"}>
-                  <Icon name="arrow_back" className="material-symbols-outlined text-[16px]" />
+          <div className={"max-w-[1320px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-5"}>
+            <div className={"flex flex-col sm:flex-row sm:items-center justify-between gap-3"}>
+              <nav className={"flex items-center gap-2 text-[13px] font-semibold text-[#1E293B] flex-wrap"} aria-label="Breadcrumb">
+                <Link href="/account/bookings" className={"hover:text-[#157375] transition-colors flex items-center gap-1.5"}>
+                  <span aria-hidden="true">{"←"}</span>
                   <span>{"Back to My Bookings"}</span>
                 </Link>
-                <span className={"text-outline-variant"}>{"/"}</span>
-                <span className={"text-on-surface-variant truncate max-w-[150px]"}>{propertyTitle}</span>
-                <span className={"text-outline-variant"}>{"/"}</span>
-                <span className={"text-[#157375] font-semibold"}>{"Booking #SL-" + String(booking.id).padStart(4, "0")}</span>
+                <span className={"text-[#CBD5E1] font-normal"}>{"/"}</span>
+                <span className={"text-[#64748B] font-medium truncate max-w-[180px]"}>{propertyTitle}</span>
+                <span className={"text-[#CBD5E1] font-normal"}>{"/"}</span>
+                <span className={"text-[#157375] font-bold"}>{"Booking #SL-" + String(booking.id).padStart(4, "0")}</span>
               </nav>
 
-              <div className={"flex items-center space-x-2"}>
+              <div className={"flex items-center shrink-0"}>
                 <ActionButton
-                  className={"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant hover:text-primary hover:bg-surface-container font-label-sm text-label-sm shadow-sm transition-all"}
+                  className={"inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white border border-[#E3ECF3] text-[#1E293B] hover:text-[#157375] hover:border-[#46B1B1]/50 font-label-sm text-label-sm font-semibold shadow-sm transition-all"}
                   actionLabel={"print Print Receipt"}
                   aria-label={"print Print Receipt"}
                   hint={"window.print()"}
@@ -483,184 +496,209 @@ export function BookingDetailsSection0() {
               </div>
             </div>
 
-            <div className={"bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm"}>
-              <div className={"space-y-2"}>
+            <div className={"relative overflow-hidden bg-white border border-[#E3ECF3] rounded-[22px] shadow-[0_2px_14px_rgba(21,115,117,0.06)]"}>
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 right-0 w-[58%] bg-cover bg-no-repeat"
+                style={{ backgroundImage: `url("/images/header_view_booking.png")`, backgroundPosition: 'right center' }}
+              />
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white via-white/85 to-white/10" />
+              <div className={"relative p-6 sm:p-8 space-y-2"}>
+                <p className={"text-[11.5px] font-bold uppercase tracking-[0.16em] text-[#46B1B1]"}>{"Booking"}</p>
                 <div className={"flex items-center flex-wrap gap-3"}>
-                  <h1 className={"font-headline-lg text-headline-lg text-[#157375] font-bold tracking-tight"}>{"Booking Details"}</h1>
-                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-label-sm text-label-sm font-semibold tracking-wide ${badge.bg}`}>
+                  <h1 className={"text-[28px] sm:text-[34px] font-extrabold tracking-tight text-[#1E293B]"}>{"Booking Details"}</h1>
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-label-sm text-label-sm font-bold tracking-wide ${badge.bg}`}>
                     <Icon name={badge.icon} className="material-symbols-outlined text-[16px]" />
                     {badge.label}
                   </span>
                   {payment ? (
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-caption text-caption ${payBadge.bg}`}>
-                      <Icon name={payment.payment_method === "cash" ? "payments" : "credit_card"} className="material-symbols-outlined text-[14px]" />
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-label-sm text-label-sm font-bold ${payBadge.bg}`}>
+                      <Icon name={payment.payment_method === "cash" ? "payments" : "credit_card"} className="material-symbols-outlined text-[15px]" />
                       {payMethodLabel} · {payBadge.label}
                     </span>
                   ) : (
-                    <span className={"inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 font-caption text-caption"}>
-                      <Icon name="hourglass_top" className="material-symbols-outlined text-[14px]" />
+                    <span className={"inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 font-label-sm text-label-sm font-bold"}>
+                      <Icon name="hourglass_top" className="material-symbols-outlined text-[15px]" />
                       {payMethodLabel}
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-500">
-                  Booking ID: <span className="font-mono font-semibold text-on-surface">#{booking.id}</span> · Created {new Date(booking.created_at).toLocaleString()} · Property #{booking.property_id}
+                <p className="text-[12.5px] text-[#64748B]">
+                  Booking ID: <span className="font-mono font-bold text-[#1E293B]">#{booking.id}</span> <span className="mx-1 text-[#CBD5E1]">·</span> Created {new Date(booking.created_at).toLocaleString()} <span className="mx-1 text-[#CBD5E1]">·</span> Property #{booking.property_id}
                 </p>
               </div>
             </div>
 
-            <div className={"grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"}>
-              <div className={"lg:col-span-8 space-y-6"}>
-                <div className={"bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm flex flex-col sm:flex-row"}>
-                  <div className={"sm:w-2/5 relative min-h-[220px] sm:min-h-full"}>
-                    <LocalImage className={"w-full h-full object-cover"} src={cover} alt={propertyTitle} />
-                    <div className={"absolute top-3 left-3 bg-inverse-surface/80 backdrop-blur-md px-2.5 py-1 rounded-full text-inverse-on-surface font-caption text-caption uppercase tracking-wider font-semibold"}>{propertyTypeLabel}</div>
+            <div className={"grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start"}>
+              <div className={"lg:col-span-8 space-y-5 min-w-0"}>
+                <div className={"bg-white border border-[#E3ECF3] rounded-[22px] overflow-hidden shadow-[0_2px_14px_rgba(21,115,117,0.06)] flex flex-col sm:flex-row"}>
+                  <div className={"sm:w-2/5 relative min-h-[220px] sm:min-h-[240px]"}>
+                    <LocalImage className={"absolute inset-0 w-full h-full object-cover"} src={cover} alt={propertyTitle} />
+                    <div className={"absolute top-3 left-3 bg-[#1E293B]/80 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[10.5px] uppercase tracking-wider font-bold"}>{propertyTypeLabel}</div>
                   </div>
-                  <div className={"sm:w-3/5 p-6 sm:p-7 flex flex-col justify-between space-y-4"}>
+                  <div className={"sm:w-3/5 p-6 sm:p-7 flex flex-col justify-center space-y-2"}>
                     <div className={"space-y-2"}>
-                      <div className={"flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm"}>
-                        <Icon name="location_on" className="material-symbols-outlined text-primary text-[16px]" />
+                      <div className={"flex items-center gap-1.5 text-[#64748B] text-[13px]"}>
+                        <Icon name="location_on" className="material-symbols-outlined text-[#46B1B1] text-[16px]" />
                         <span>
                           {propertyLocation}
                           {propertyAddress}
                         </span>
                       </div>
-                      <h2 className={"font-title-md text-title-md text-[#157375] font-bold leading-snug"}>{propertyTitle}</h2>
+                      <h2 className={"text-[20px] font-extrabold text-[#1E293B] leading-snug"}>{propertyTitle}</h2>
                       {property && (
                         <div className={"flex items-center gap-3 pt-1"}>
-                          <div className={"flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-label-sm text-label-sm font-semibold"}>
-                            <Icon name="star" className="material-symbols-outlined text-[15px]" />
-                            <span>{"4.98"}</span>
-                          </div>
-                          <span className={"text-on-surface-variant font-caption text-caption"}>{"(48 guest reviews)"}</span>
-                          <span className={"text-outline-variant"}>{"•"}</span>
-                          <span className={"font-caption text-caption text-primary font-medium"}>{"Verified Property"}</span>
+                          <span className={"inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[11.5px] font-bold"}><Icon name="verified" className="material-symbols-outlined text-[14px]" />{"Verified Property"}</span>
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className={"bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm space-y-6"} id={"stay-details"}>
-                  <div className={"flex items-center justify-between border-b border-surface-container-high pb-4"}>
-                    <div className={"flex items-center gap-2"}>
-                      <Icon name="event_available" className="material-symbols-outlined text-primary text-[24px]" />
-                      <h3 className={"font-headline-sm text-headline-sm text-[#157375] font-bold"}>{"Stay Details"}</h3>
+                <div className={"bg-white border border-[#E3ECF3] rounded-[22px] p-6 sm:p-7 shadow-[0_2px_14px_rgba(21,115,117,0.06)] space-y-6"} id={"stay-details"}>
+                  <div className={"flex items-center justify-between gap-3 pb-4 border-b border-[#EAF1F6]"}>
+                    <div className={"flex items-center gap-2.5"}>
+                      <span className={"w-10 h-10 rounded-2xl bg-[#46B1B1]/10 flex items-center justify-center shrink-0"}>
+                        <Icon name="event_available" className="material-symbols-outlined text-[#157375] text-[22px]" />
+                      </span>
+                      <h3 className={"text-[19px] text-[#1E293B] font-extrabold tracking-tight"}>{"Stay Details"}</h3>
                     </div>
-                    <span className={"font-label-md text-label-md text-primary font-semibold bg-surface-container px-3 py-1 rounded-full"}>{nights} Nights Total</span>
+                    <span className={"text-[12.5px] text-[#157375] font-bold bg-[#46B1B1]/10 border border-[#46B1B1]/15 px-3 py-1.5 rounded-full shrink-0"}>{nights} Nights Total</span>
                   </div>
 
-                  <div className={"grid grid-cols-1 sm:grid-cols-2 gap-4"}>
-                    <div className={"bg-surface-container-low rounded-xl p-4.5 space-y-1"}>
-                      <span className={"font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold"}>{"Check-in"}</span>
-                      <p className={"font-title-md text-title-md text-[#157375] font-bold"}>{formatDateLong(booking.check_in)}</p>
-                      <p className={"font-body-md text-body-md text-on-surface-variant flex items-center gap-1"}>
-                        <Icon name="schedule" className="material-symbols-outlined text-[16px]" />
+                  <div className={"grid grid-cols-1 sm:grid-cols-2 gap-3"}>
+                    <div className={"bg-[#F4F7FB] border border-[#EAF1F6] rounded-2xl p-4 sm:p-5 space-y-1.5"}>
+                      <div className={"flex items-center gap-2"}>
+                        <span className={"w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0"}>
+                          <Icon name="calendar_month" className="material-symbols-outlined text-[19px] text-[#157375]" />
+                        </span>
+                        <span className={"text-[11px] text-[#64748B] uppercase tracking-wider font-bold"}>{"Check-in"}</span>
+                      </div>
+                      <p className={"text-[16px] text-[#1E293B] font-extrabold"}>{formatDateLong(booking.check_in)}</p>
+                      <p className={"text-[12.5px] text-[#64748B] flex items-center gap-1.5"}>
+                        <Icon name="schedule" className="material-symbols-outlined text-[15px]" />
                         {"3:00 PM onwards"}
                       </p>
                     </div>
-                    <div className={"bg-surface-container-low rounded-xl p-4.5 space-y-1"}>
-                      <span className={"font-caption text-caption text-on-surface-variant uppercase tracking-wider font-semibold"}>{"Check-out"}</span>
-                      <p className={"font-title-md text-title-md text-[#157375] font-bold"}>{formatDateLong(booking.check_out)}</p>
-                      <p className={"font-body-md text-body-md text-on-surface-variant flex items-center gap-1"}>
-                        <Icon name="schedule" className="material-symbols-outlined text-[16px]" />
+                    <div className={"bg-[#F4F7FB] border border-[#EAF1F6] rounded-2xl p-4 sm:p-5 space-y-1.5"}>
+                      <div className={"flex items-center gap-2"}>
+                        <span className={"w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center shrink-0"}>
+                          <Icon name="event" className="material-symbols-outlined text-[19px] text-[#157375]" />
+                        </span>
+                        <span className={"text-[11px] text-[#64748B] uppercase tracking-wider font-bold"}>{"Check-out"}</span>
+                      </div>
+                      <p className={"text-[16px] text-[#1E293B] font-extrabold"}>{formatDateLong(booking.check_out)}</p>
+                      <p className={"text-[12.5px] text-[#64748B] flex items-center gap-1.5"}>
+                        <Icon name="schedule" className="material-symbols-outlined text-[15px]" />
                         {"Until 11:00 AM"}
                       </p>
                     </div>
                   </div>
 
-                  <div className={"flex items-center gap-3 p-4 rounded-xl bg-surface-container-low"}>
-                    <Icon name="group" className="material-symbols-outlined text-primary text-[22px]" />
+                  <div className={"flex items-center gap-3 p-4 rounded-2xl bg-[#F4F7FB] border border-[#EAF1F6]"}>
+                    <span className={"w-10 h-10 rounded-full bg-[#46B1B1]/10 flex items-center justify-center shrink-0"}>
+                      <Icon name="group" className="material-symbols-outlined text-[#157375] text-[20px]" />
+                    </span>
                     <div>
-                      <p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Guests Registered"}</p>
-                      <p className={"font-body-md text-body-md text-on-surface-variant"}>{booking.guests} Guests · Entire Chalet reservation</p>
+                      <p className={"text-[13.5px] font-bold text-[#1E293B]"}>{"Guests Registered"}</p>
+                      <p className={"text-[13px] text-[#64748B]"}>{booking.guests} Guests · Entire Chalet reservation</p>
                     </div>
                   </div>
 
-                  <div className={"space-y-4 pt-2"}>
-                    <h4 className={"font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold"}>{"Arrival & Access Protocol"}</h4>
-                    <div className={"grid grid-cols-1 md:grid-cols-2 gap-4"}>
-                      <div className={"flex items-start space-x-3.5 p-4 rounded-xl bg-surface-container"}>
-                        <div className={"w-8 h-8 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-xs shrink-0"}>
-                          <Icon name="key" className="material-symbols-outlined text-[18px]" />
+                  <div className={"space-y-4 pt-1"}>
+                    <h4 className={"flex items-center gap-2 text-[13px] uppercase tracking-wider text-[#1E293B] font-extrabold"}><Icon name="key" className="material-symbols-outlined text-[18px] text-[#157375]" />{"Arrival & Access Protocol"}</h4>
+                    <div className={"grid grid-cols-1 md:grid-cols-2 gap-3"}>
+                      <div className={"flex items-start gap-3 p-4 rounded-2xl bg-[#F4F7FB] border border-[#EAF1F6]"}>
+                        <div className={"w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#157375] shadow-sm shrink-0"}>
+                          <Icon name="key" className="material-symbols-outlined text-[19px]" />
                         </div>
                         <div className={"space-y-0.5"}>
-                          <p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Key Handover"}</p>
-                          <p className={"font-body-md text-body-md text-on-surface-variant"}>{"Host greeting & on-site keys handover upon arrival at the gatehouse entrance."}</p>
+                          <p className={"text-[13.5px] font-bold text-[#1E293B]"}>{"Key Handover"}</p>
+                          <p className={"text-[12.5px] text-[#64748B] leading-relaxed"}>{"Host greeting & on-site keys handover upon arrival at the gatehouse entrance."}</p>
                         </div>
                       </div>
-                      <div className={"flex items-start space-x-3.5 p-4 rounded-xl bg-surface-container"}>
-                        <div className={"w-8 h-8 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-xs shrink-0"}>
-                          <Icon name="shield_person" className="material-symbols-outlined text-[18px]" />
+                      <div className={"flex items-start gap-3 p-4 rounded-2xl bg-[#F4F7FB] border border-[#EAF1F6]"}>
+                        <div className={"w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#157375] shadow-sm shrink-0"}>
+                          <Icon name="shield_person" className="material-symbols-outlined text-[19px]" />
                         </div>
                         <div className={"space-y-0.5"}>
-                          <p className={"font-label-md text-label-md font-semibold text-[#157375]"}>{"Assigned Superhosts"}</p>
-                          <p className={"font-body-md text-body-md text-on-surface-variant"}>{"Host will meet you directly at 3:00 PM on check-in day."}</p>
+                          <p className={"text-[13.5px] font-bold text-[#1E293B]"}>{"Assigned Superhosts"}</p>
+                          <p className={"text-[12.5px] text-[#64748B] leading-relaxed"}>{"Host will meet you directly at 3:00 PM on check-in day."}</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className={"space-y-3 pt-2"}>
-                    <h4 className={"font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold"}>{"Guaranteed Chalet Infrastructure"}</h4>
+                  <div className={"space-y-3 pt-1"}>
+                    <h4 className={"flex items-center gap-2 text-[13px] uppercase tracking-wider text-[#1E293B] font-extrabold"}><Icon name="home" className="material-symbols-outlined text-[18px] text-[#157375]" />{"Guaranteed Chalet Infrastructure"}</h4>
                     <div className={"grid grid-cols-1 sm:grid-cols-2 gap-3"}>
-                      <div className={"flex items-center gap-2.5 text-[#157375] font-body-md text-body-md p-2.5 rounded-lg bg-surface-container-low"}>
-                        <Icon name="solar_power" className="material-symbols-outlined text-emerald-600 text-[20px]" />
+                      <div className={"flex items-center gap-2.5 text-[#1E293B] text-[13px] font-medium p-3.5 rounded-2xl bg-[#F4F7FB] border border-[#EAF1F6]"}>
+                        <Icon name="solar_power" className="material-symbols-outlined text-emerald-600 text-[20px] shrink-0" />
                         <span>{"24/7 uninterrupted generator & solar grid"}</span>
                       </div>
-                      <div className={"flex items-center gap-2.5 text-[#157375] font-body-md text-body-md p-2.5 rounded-lg bg-surface-container-low"}>
-                        <Icon name="hot_tub" className="material-symbols-outlined text-emerald-600 text-[20px]" />
+                      <div className={"flex items-center gap-2.5 text-[#1E293B] text-[13px] font-medium p-3.5 rounded-2xl bg-[#F4F7FB] border border-[#EAF1F6]"}>
+                        <Icon name="hot_tub" className="material-symbols-outlined text-emerald-600 text-[20px] shrink-0" />
                         <span>{"Heated outdoor year-round Jacuzzi"}</span>
                       </div>
-                      <div className={"flex items-center gap-2.5 text-[#157375] font-body-md text-body-md p-2.5 rounded-lg bg-surface-container-low"}>
-                        <Icon name="fireplace" className="material-symbols-outlined text-emerald-600 text-[20px]" />
+                      <div className={"flex items-center gap-2.5 text-[#1E293B] text-[13px] font-medium p-3.5 rounded-2xl bg-[#F4F7FB] border border-[#EAF1F6]"}>
+                        <Icon name="fireplace" className="material-symbols-outlined text-emerald-600 text-[20px] shrink-0" />
                         <span>{"Indoor seasoned cedar logs for fireplace"}</span>
                       </div>
-                      <div className={"flex items-center gap-2.5 text-[#157375] font-body-md text-body-md p-2.5 rounded-lg bg-surface-container-low"}>
-                        <Icon name="wifi" className="material-symbols-outlined text-emerald-600 text-[20px]" />
+                      <div className={"flex items-center gap-2.5 text-[#1E293B] text-[13px] font-medium p-3.5 rounded-2xl bg-[#F4F7FB] border border-[#EAF1F6]"}>
+                        <Icon name="wifi" className="material-symbols-outlined text-emerald-600 text-[20px] shrink-0" />
                         <span>{"High-speed optical fiber internet (80 Mbps)"}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className={"bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm space-y-4"}>
-                  <div className={"flex items-center gap-2"}>
-                    <Icon name="policy" className="material-symbols-outlined text-primary text-[22px]" />
-                    <h3 className={"font-headline-sm text-headline-sm text-[#157375] font-bold"}>{"Chalet House Rules Reminder"}</h3>
+                <div className={"bg-white border border-[#E3ECF3] rounded-[22px] p-6 sm:p-7 shadow-[0_2px_14px_rgba(21,115,117,0.06)] space-y-4"}>
+                  <div className={"flex items-center gap-2.5"}>
+                    <span className={"w-10 h-10 rounded-2xl bg-[#46B1B1]/10 flex items-center justify-center shrink-0"}>
+                      <Icon name="policy" className="material-symbols-outlined text-[#157375] text-[21px]" />
+                    </span>
+                    <h3 className={"text-[19px] text-[#1E293B] font-extrabold tracking-tight"}>{"Chalet House Rules Reminder"}</h3>
                   </div>
-                  <div className={"grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2"}>
-                    <div className={"p-4 rounded-xl bg-surface-container-low space-y-1"}>
-                      <div className={"flex items-center gap-2 text-[#157375] font-label-md text-label-md font-semibold"}>
-                        <Icon name="volume_off" className="material-symbols-outlined text-outline text-[18px]" />
+                  <div className={"grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1"}>
+                    <div className={"p-4 rounded-2xl bg-[#46B1B1]/[0.07] border border-[#46B1B1]/15 space-y-1.5"}>
+                      <div className={"flex items-center gap-2 text-[#1E293B] text-[13.5px] font-bold"}>
+                        <span className={"w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0"}>
+                          <Icon name="volume_off" className="material-symbols-outlined text-[#157375] text-[18px]" />
+                        </span>
                         <span>{"Quiet Hours"}</span>
                       </div>
-                      <p className={"font-body-md text-body-md text-on-surface-variant"}>{"After 11:00 PM out of mountain neighborhood respect."}</p>
+                      <p className={"text-[12.5px] text-[#64748B] leading-relaxed"}>{"After 11:00 PM out of mountain neighborhood respect."}</p>
                     </div>
-                    <div className={"p-4 rounded-xl bg-surface-container-low space-y-1"}>
-                      <div className={"flex items-center gap-2 text-[#157375] font-label-md text-label-md font-semibold"}>
-                        <Icon name="smoke_free" className="material-symbols-outlined text-outline text-[18px]" />
+                    <div className={"p-4 rounded-2xl bg-[#FFF1F2] border border-[#FECDD3] space-y-1.5"}>
+                      <div className={"flex items-center gap-2 text-[#1E293B] text-[13.5px] font-bold"}>
+                        <span className={"w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0"}>
+                          <Icon name="smoke_free" className="material-symbols-outlined text-[#E11D48] text-[18px]" />
+                        </span>
                         <span>{"No Smoking"}</span>
                       </div>
-                      <p className={"font-body-md text-body-md text-on-surface-variant"}>{"Strictly non-smoking inside chalet. Allowed on open terraces."}</p>
+                      <p className={"text-[12.5px] text-[#64748B] leading-relaxed"}>{"Strictly non-smoking inside chalet. Allowed on open terraces."}</p>
                     </div>
-                    <div className={"p-4 rounded-xl bg-surface-container-low space-y-1"}>
-                      <div className={"flex items-center gap-2 text-[#157375] font-label-md text-label-md font-semibold"}>
-                        <Icon name="pets" className="material-symbols-outlined text-outline text-[18px]" />
+                    <div className={"p-4 rounded-2xl bg-[#46B1B1]/[0.07] border border-[#46B1B1]/15 space-y-1.5"}>
+                      <div className={"flex items-center gap-2 text-[#1E293B] text-[13.5px] font-bold"}>
+                        <span className={"w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0"}>
+                          <Icon name="pets" className="material-symbols-outlined text-[#157375] text-[18px]" />
+                        </span>
                         <span>{"Pets Welcome"}</span>
                       </div>
-                      <p className={"font-body-md text-body-md text-on-surface-variant"}>{"Allowed upon prior confirmation with host."}</p>
+                      <p className={"text-[12.5px] text-[#64748B] leading-relaxed"}>{"Allowed upon prior confirmation with host."}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className={"bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm space-y-6"}>
-                  <div className={"flex items-center justify-between"}>
-                    <div className={"flex items-center gap-2"}>
-                      <Icon name="event_busy" className="material-symbols-outlined text-primary text-[22px]" />
-                      <h3 className={"font-headline-sm text-headline-sm text-[#157375] font-bold"}>{"Cancellation Terms"}</h3>
+                <div className={"bg-white border border-[#E3ECF3] rounded-[22px] p-6 sm:p-7 shadow-[0_2px_14px_rgba(21,115,117,0.06)] space-y-5"}>
+                  <div className={"flex items-center justify-between gap-3"}>
+                    <div className={"flex items-center gap-2.5"}>
+                      <span className={"w-10 h-10 rounded-2xl bg-[#46B1B1]/10 flex items-center justify-center shrink-0"}>
+                        <Icon name="event_busy" className="material-symbols-outlined text-[#157375] text-[21px]" />
+                      </span>
+                      <h3 className={"text-[19px] text-[#1E293B] font-extrabold tracking-tight"}>{"Cancellation Terms"}</h3>
                     </div>
-                    <span className={`px-2.5 py-1 rounded-full font-label-sm text-label-sm font-semibold ${isCancelled ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700"}`}>{isCancelled ? "Cancelled" : "Flexible Policy"}</span>
+                    <span className={`px-3 py-1.5 rounded-full text-[12px] font-bold shrink-0 ${isCancelled ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}>{isCancelled ? "Cancelled" : "Flexible Policy"}</span>
                   </div>
                   {isCancelled ? (
                     <div className={"space-y-3"}>
@@ -672,61 +710,61 @@ export function BookingDetailsSection0() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm pt-2">
                           <div className="bg-white rounded-lg p-3">
-                            <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Original booking total</div>
+                            <div className="text-xs text-[#64748B] uppercase tracking-wider font-semibold">Original booking total</div>
                             <div className="font-semibold text-[#1E293B]">{formatPrice(booking.total_price)}</div>
                           </div>
                           <div className="bg-white rounded-lg p-3">
-                            <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Cancellation policy applied</div>
+                            <div className="text-xs text-[#64748B] uppercase tracking-wider font-semibold">Cancellation policy applied</div>
                             <div className="font-semibold text-[#1E293B]">{booking.cancellation_percentage != null ? `${Number(booking.cancellation_percentage).toFixed(0)}% deduction` : "—"}</div>
                           </div>
                           <div className="bg-white rounded-lg p-3">
-                            <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Cancellation deduction</div>
+                            <div className="text-xs text-[#64748B] uppercase tracking-wider font-semibold">Cancellation deduction</div>
                             <div className="font-semibold text-amber-700">{booking.cancellation_fee ? formatPrice(booking.cancellation_fee) : "—"}</div>
                           </div>
                           <div className="bg-white rounded-lg p-3">
-                            <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Actual refund</div>
+                            <div className="text-xs text-[#64748B] uppercase tracking-wider font-semibold">Actual refund</div>
                             <div className="font-bold text-emerald-700">{booking.refund_amount ? formatPrice(booking.refund_amount) : payment?.refunded_amount ? formatPrice(payment.refunded_amount) : payment?.payment_method === "cash" ? "$0.00" : "—"}</div>
                           </div>
                         </div>
                         {payment && (
                           <div className="flex items-center justify-between text-xs bg-white rounded-lg p-3 mt-1">
-                            <span className="text-slate-500">Payment status</span>
+                            <span className="text-[#64748B]">Payment status</span>
                             <span className={`px-2 py-0.5 rounded-full font-semibold text-xs ${paymentStatusBadge(payment.payment_status).bg}`}>{paymentStatusBadge(payment.payment_status).label}</span>
                           </div>
                         )}
                         {payment?.payment_method === "cash" && (
-                          <p className="text-xs text-slate-500">Since this cash payment was not collected, no monetary refund was required.</p>
+                          <p className="text-xs text-[#64748B]">Since this cash payment was not collected, no monetary refund was required.</p>
                         )}
                         {payment?.payment_method === "stripe" && payment?.payment_status.includes("refund") && (
                           <p className="text-xs text-emerald-700">Refund processed through the original card via Stripe.</p>
                         )}
                       </div>
-                      <p className="text-xs text-slate-500">Original booking total {formatPrice(booking.total_price)} remains visible as historical information. This booking remains in your history.</p>
+                      <p className="text-xs text-[#64748B]">Original booking total {formatPrice(booking.total_price)} remains visible as historical information. This booking remains in your history.</p>
                     </div>
                   ) : (
                     <>
-                      <div className={"p-4.5 rounded-xl bg-surface-container-low text-[#157375] space-y-2"}>
+                      <div className={"p-4 sm:p-5 rounded-2xl bg-[#46B1B1]/[0.07] border border-[#46B1B1]/15 text-[#1E293B] space-y-2"}>
                         <div className={"flex items-start gap-3"}>
-                          <Icon name="check_circle" className="material-symbols-outlined text-emerald-600 mt-0.5 text-[20px]" />
-                          <p className={"font-body-md text-body-md"}>
-                            <strong>{"Cancellation policy applies"}</strong> — booking can be cancelled before check-in with tiered fees: 0% (≥10 days), 10% (5-9 days), 30% (&lt;5 days).
+                          <Icon name="check_circle" className="material-symbols-outlined text-emerald-600 mt-0.5 text-[20px] shrink-0" />
+                          <p className={"text-[13.5px] leading-relaxed"}>
+                            <strong>{"Cancellation policy applies"}</strong> <span className="text-[#475569]">— booking can be cancelled before check-in with tiered fees: 0% (≥10 days), 10% (5-9 days), 30% (&lt;5 days).</span>
                           </p>
                         </div>
                       </div>
 
-                      <div className={"pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3"}>
-                        <p className={"font-caption text-caption text-on-surface-variant"}>{"Need to modify or cancel your reservation dates?"}</p>
+                      <div className={"pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3"}>
+                        <p className={"text-[12.5px] text-[#64748B]"}>{"Need to modify or cancel your reservation dates?"}</p>
                         {canCancel ? (
                           <button
                             type="button"
                             onClick={handleCancelClick}
                             disabled={cancelling}
-                            className={`px-4 py-2 rounded-xl font-label-md text-label-md font-semibold transition-colors shadow-sm ${cancelling ? "bg-slate-200 text-slate-500 cursor-not-allowed" : "bg-surface-container-high text-rose-700 hover:bg-rose-50 border border-rose-200"}`}
+                            className={`px-5 py-2.5 rounded-2xl text-[13.5px] font-bold transition-all shadow-sm w-full sm:w-auto ${cancelling ? "bg-slate-200 text-[#64748B] cursor-not-allowed" : "bg-[#FFF1F2] text-[#E11D48] hover:bg-[#FFE4E6] border border-[#FECDD3]"}`}
                           >
                             {cancelling ? "Processing cancellation..." : "Cancel Booking"}
                           </button>
                         ) : (
-                          <span className="text-xs text-slate-400 bg-slate-100 px-3 py-1.5 rounded-full">
+                          <span className="text-xs text-[#64748B] bg-slate-100 px-3 py-1.5 rounded-full">
                             {isPastCheckIn ? "Cancellation unavailable — check-in has passed" : `Cancellation unavailable — status: ${booking.status}`}
                           </span>
                         )}
@@ -735,13 +773,15 @@ export function BookingDetailsSection0() {
                   )}
                 </div>
                 {booking.status === "completed" && (
-                  <div className={"bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm space-y-4"}>
-                    <div className={"flex items-center gap-2"}>
-                      <Icon name="rate_review" className="material-symbols-outlined text-primary text-[22px]" />
-                      <h3 className={"font-headline-sm text-headline-sm text-[#157375] font-bold"}>{"Your Review"}</h3>
+                  <div className={"bg-white border border-[#E3ECF3] rounded-[22px] p-6 sm:p-7 shadow-[0_2px_14px_rgba(21,115,117,0.06)] space-y-4"}>
+                    <div className={"flex items-center gap-2.5"}>
+                      <span className={"w-10 h-10 rounded-2xl bg-[#46B1B1]/10 flex items-center justify-center shrink-0"}>
+                        <Icon name="rate_review" className="material-symbols-outlined text-[#157375] text-[21px]" />
+                      </span>
+                      <h3 className={"text-[19px] text-[#1E293B] font-extrabold tracking-tight"}>{"Your Review"}</h3>
                     </div>
                     {reviewLoading ? (
-                      <div className="flex items-center gap-2 py-4"><span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span className="text-sm text-slate-500">Checking review status…</span></div>
+                      <div className="flex items-center gap-2 py-4"><span className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /><span className="text-sm text-[#64748B]">Checking review status…</span></div>
                     ) : review ? (
                       <div className="space-y-4">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-label-sm text-label-sm font-semibold border border-emerald-200">
@@ -758,95 +798,105 @@ export function BookingDetailsSection0() {
                             { label: "Location", value: review.location_rating },
                             { label: "Value", value: review.value_rating },
                           ].map((r) => (
-                            <div key={r.label} className="flex items-center justify-between p-3 rounded-xl bg-surface-container-low">
-                              <span className="font-medium text-[#157375]">{r.label}</span>
+                            <div key={r.label} className="flex items-center justify-between p-3 rounded-2xl bg-[#F4F7FB] border border-[#EAF1F6]">
+                              <span className="font-semibold text-[13px] text-[#1E293B]">{r.label}</span>
                               <span className="flex items-center gap-1 font-bold text-amber-500">{r.value} <Icon name="star" className="text-[16px]" /></span>
                             </div>
                           ))}
                         </div>
                         {review.comment && (
-                          <div className="p-4 rounded-xl bg-surface-container-low">
-                            <p className="font-label-sm text-label-sm font-semibold text-[#157375] mb-1">Your comment</p>
-                            <p className="font-body-md text-body-md text-on-surface-variant italic">“{review.comment}”</p>
-                            <p className="text-xs text-slate-500 mt-2">Submitted {new Date(review.created_at).toLocaleDateString()}</p>
+                          <div className="p-4 rounded-2xl bg-[#F4F7FB] border border-[#EAF1F6]">
+                            <p className="text-[12.5px] font-bold text-[#1E293B] mb-1">Your comment</p>
+                            <p className="text-[13.5px] text-[#475569] italic">“{review.comment}”</p>
+                            <p className="text-xs text-[#64748B] mt-2">Submitted {new Date(review.created_at).toLocaleDateString()}</p>
                           </div>
                         )}
-                        {!review.comment && <p className="text-xs text-slate-500">Submitted {new Date(review.created_at).toLocaleDateString()} — no comment.</p>}
+                        {!review.comment && <p className="text-xs text-[#64748B]">Submitted {new Date(review.created_at).toLocaleDateString()} — no comment.</p>}
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        <p className="font-body-md text-body-md text-on-surface-variant">Share your verified experience for this completed stay. Your review helps future guests and will be shown on the property page.</p>
-                        <Link href={`/account/bookings/${booking.id}/review`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-label-md text-label-sm font-semibold hover:bg-primary-container transition-colors shadow-sm">
-                          <Icon name="rate_review" className="material-symbols-outlined text-[18px]" />
+                        <p className="text-[13.5px] text-[#475569] leading-relaxed">Share your verified experience for this completed stay. Your review helps future guests and will be shown on the property page.</p>
+                        <Link href={`/account/bookings/${booking.id}/review`} className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#157375] hover:bg-[#0E4E50] text-white text-[13.5px] font-bold transition-colors shadow-sm">
+                          <Icon name="rate_review" className="material-symbols-outlined text-white text-[18px]" />
                           Write a Review
                         </Link>
-                        <p className="text-xs text-slate-500">One review per completed booking. Ratings 1–5, comment optional.</p>
+                        <p className="text-xs text-[#64748B]">One review per completed booking. Ratings 1–5, comment optional.</p>
                       </div>
                     )}
                   </div>
                 )}
               </div>
 
-              <div className={"lg:col-span-4 space-y-6"}>
-                <div className={"bg-surface-container-lowest rounded-2xl p-6 sm:p-7 shadow-sm space-y-5"}>
-                  <div className={"flex items-center justify-between pb-3 border-b border-surface-container"}>
-                    <h3 className={"font-title-md text-title-md text-[#157375] font-bold"}>{"Price Summary"}</h3>
-                    <span className={"font-caption text-caption bg-surface-container-high text-primary px-2.5 py-1 rounded-full font-semibold"}>{"USD Currency"}</span>
+              <div className={"lg:col-span-4 space-y-5 min-w-0"}>
+                <div className={"bg-white border border-[#E3ECF3] rounded-[22px] p-6 shadow-[0_8px_30px_rgba(21,115,117,0.10)] space-y-5 lg:sticky lg:top-24"}>
+                  <div className={"flex items-center justify-between gap-3 pb-4 border-b border-[#EAF1F6]"}>
+                    <div className={"flex items-center gap-2.5"}>
+                      <span className={"w-10 h-10 rounded-2xl bg-[#46B1B1]/10 flex items-center justify-center shrink-0"}>
+                        <Icon name="account_balance_wallet" className="material-symbols-outlined text-[#157375] text-[21px]" />
+                      </span>
+                      <h3 className={"text-[17px] text-[#1E293B] font-extrabold tracking-tight"}>{"Price Summary"}</h3>
+                    </div>
+                    <span className={"text-[11px] bg-[#46B1B1]/10 border border-[#46B1B1]/15 text-[#157375] px-2.5 py-1 rounded-full font-bold shrink-0"}>{"USD Currency"}</span>
                   </div>
 
-                  <div className={"space-y-3 font-body-md text-body-md text-on-surface-variant"}>
-                    <div className={"flex justify-between items-center"}>
+                  <div className={"space-y-3 text-[13.5px] text-[#475569]"}>
+                    <div className={"flex justify-between items-center gap-3"}>
                       <span>
                         {formatPrice(booking.price_per_night)} × {booking.number_of_nights} nights
                       </span>
-                      <span className={"text-[#157375] font-medium"}>{formatPrice(booking.total_price)}</span>
+                      <span className={"text-[#157375] font-bold"}>{formatPrice(booking.total_price)}</span>
                     </div>
                   </div>
 
-                  <div className={"pt-4 border-t border-surface-container space-y-3"}>
-                    <div className={"flex justify-between items-baseline"}>
-                      <span className={"font-title-md text-title-md font-bold text-[#157375]"}>{"Total"}</span>
-                      <span className={"font-headline-md text-headline-md font-bold text-primary"}>{formatPrice(booking.total_price)}</span>
+                  <div className={"pt-4 border-t border-[#EAF1F6] space-y-3"}>
+                    <div className={"flex justify-between items-baseline gap-3"}>
+                      <span className={"text-[16px] font-extrabold text-[#1E293B]"}>{"Total"}</span>
+                      <span className={"text-[22px] font-extrabold text-[#157375]"}>{formatPrice(booking.total_price)}</span>
                     </div>
 
-                    <div className={"bg-surface-container-low p-3.5 rounded-xl space-y-2"}>
-                      <div className={"flex items-center justify-between text-[#157375]"}>
-                        <div className={"flex items-center gap-2 font-label-md text-label-md font-semibold"}>
-                          <Icon name={payment?.payment_method === "cash" ? "payments" : "credit_card"} className="material-symbols-outlined text-primary text-[20px]" />
+                    <div className={"bg-[#F4F7FB] border border-[#EAF1F6] p-3.5 rounded-2xl space-y-2"}>
+                      <div className={"flex items-center justify-between text-[#1E293B]"}>
+                        <div className={"flex items-center gap-2 text-[13px] font-bold"}>
+                          <Icon name={payment?.payment_method === "cash" ? "payments" : "credit_card"} className="material-symbols-outlined text-[#157375] text-[19px]" />
                           <span>{payMethodLabel}</span>
                         </div>
-                        <span className={`font-caption text-caption px-2 py-0.5 rounded font-semibold ${payBadge.bg}`}>{payBadge.label}</span>
+                        <span className={`text-[11.5px] px-2.5 py-1 rounded-full font-bold ${payBadge.bg}`}>{payBadge.label}</span>
                       </div>
                       {!payment && (
-                        <p className="font-caption text-caption text-amber-700 bg-amber-50 px-2 py-1.5 rounded-lg">
+                        <p className="text-[12px] text-amber-700 bg-amber-50 border border-amber-100 px-2.5 py-2 rounded-xl leading-relaxed">
                           {paymentMissing ? "No payment record yet for this booking. The booking is still pending and will show payment details after you choose Cash or Card at checkout." : "Payment information unavailable."}
                         </p>
                       )}
                       {isCancelled && payment && (
-                        <div className="pt-2 border-t border-slate-200 space-y-1 text-xs">
-                          <div className="flex justify-between"><span className="text-slate-500">Actual refund</span><span className="font-semibold text-emerald-700">{payment.refunded_amount && Number(payment.refunded_amount) !== 0 ? formatPrice(payment.refunded_amount) : booking.refund_amount ? formatPrice(booking.refund_amount) : payment.payment_method === "cash" ? "$0.00" : formatPrice(0)}</span></div>
+                        <div className="pt-2 border-t border-surface-container-low space-y-1 text-xs">
+                          <div className="flex justify-between"><span className="text-[#64748B]">Actual refund</span><span className="font-semibold text-emerald-700">{payment.refunded_amount && Number(payment.refunded_amount) !== 0 ? formatPrice(payment.refunded_amount) : booking.refund_amount ? formatPrice(booking.refund_amount) : payment.payment_method === "cash" ? "$0.00" : formatPrice(0)}</span></div>
                         </div>
                       )}
                     </div>
                     {isCancelled && (
-                      <p className="text-xs text-slate-500">Booking remains in your history. Original total {formatPrice(booking.total_price)} preserved.</p>
+                      <p className="text-xs text-[#64748B]">Booking remains in your history. Original total {formatPrice(booking.total_price)} preserved.</p>
                     )}
                   </div>
                 </div>
 
-                <div className={"bg-surface-container-lowest rounded-2xl p-6 shadow-sm space-y-4"}>
-                  <div className={"flex items-start gap-3"}>
-                    <div className={"w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-primary shrink-0"}>
+                <div className={"relative overflow-hidden bg-white border border-[#E3ECF3] rounded-[22px] p-6 shadow-[0_2px_14px_rgba(21,115,117,0.06)] space-y-4"}>
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-no-repeat opacity-90"
+                    style={{ backgroundImage: `url("/images/side_card.png")`, backgroundSize: 'contain', backgroundPosition: 'bottom right' }}
+                  />
+                  <div className={"relative flex items-start gap-3"}>
+                    <div className={"w-11 h-11 rounded-2xl bg-[#46B1B1]/10 flex items-center justify-center text-[#157375] shrink-0"}>
                       <Icon name="verified_user" className="material-symbols-outlined text-[22px]" />
                     </div>
                     <div className={"space-y-1"}>
-                      <h4 className={"font-title-md text-title-md font-bold text-[#157375]"}>{"StayLeb Protection Shield"}</h4>
-                      <p className={"font-body-md text-body-md text-on-surface-variant"}>{"Every reservation includes 24/7 localized Beirut mountain support, utility continuity guarantee, and emergency property rebooking assistance."}</p>
+                      <h4 className={"text-[15px] font-extrabold text-[#1E293B] tracking-tight"}>{"StayLeb Protection Shield"}</h4>
+                      <p className={"text-[12.5px] text-[#475569] leading-relaxed"}>{"Every reservation includes 24/7 localized Beirut mountain support, utility continuity guarantee, and emergency property rebooking assistance."}</p>
                     </div>
                   </div>
-                  <div className={"pt-2 border-t border-surface-container flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm"}>
+                  <div className={"relative pt-3 border-t border-[#EAF1F6] flex items-center justify-between text-[#475569] text-[12.5px]"}>
                     <span>{"Direct Support Hotline:"}</span>
-                    <span className={"font-semibold text-[#157375]"}>{"+961 1 998 877"}</span>
+                    <span className={"flex items-center gap-1.5 font-bold text-[#157375]"}><Icon name="call" className="material-symbols-outlined text-[16px]" />{"+961 1 998 877"}</span>
                   </div>
                 </div>
               </div>

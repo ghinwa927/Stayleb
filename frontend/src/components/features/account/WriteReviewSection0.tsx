@@ -153,10 +153,10 @@ export function WriteReviewSection0() {
 
   if (loading) {
     return (
-      <main className="w-full min-h-screen bg-background flex items-center justify-center py-16">
+      <main className="w-full min-h-screen bg-surface-container-low flex items-center justify-center py-16">
         <div className="flex flex-col items-center gap-3">
           <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-slate-500">Loading booking…</p>
+          <p className="text-sm text-[#64748B]">Loading booking…</p>
         </div>
       </main>
     );
@@ -164,15 +164,15 @@ export function WriteReviewSection0() {
 
   if (error) {
     return (
-      <main className="w-full min-h-screen bg-background flex items-center justify-center py-16">
+      <main className="w-full min-h-screen bg-surface-container-low flex items-center justify-center py-16">
         <div className="text-center max-w-md px-6">
           <Icon name="error" className="material-symbols-outlined text-[36px] text-amber-600 mb-3" />
           <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold mb-2">{/not eligible|completed/i.test(error) ? "Cannot review" : "Failed to load"}</h2>
-          <p className="text-sm text-slate-600 mb-4">{error}</p>
+          <p className="text-sm text-[#64748B] mb-4">{error}</p>
           <div className="flex items-center justify-center gap-3">
             <Link href="/account/bookings" className="px-5 py-2 rounded-lg bg-primary text-white text-sm">Back to My Bookings</Link>
             {booking?.status === "completed" && existingReview && (
-              <span className="text-xs text-slate-500">Already reviewed</span>
+              <span className="text-xs text-[#64748B]">Already reviewed</span>
             )}
           </div>
         </div>
@@ -182,8 +182,8 @@ export function WriteReviewSection0() {
 
   if (!booking) {
     return (
-      <main className="w-full min-h-screen bg-background flex items-center justify-center py-16">
-        <p className="text-sm text-slate-500">No booking found</p>
+      <main className="w-full min-h-screen bg-surface-container-low flex items-center justify-center py-16">
+        <p className="text-sm text-[#64748B]">No booking found</p>
       </main>
     );
   }
@@ -191,15 +191,15 @@ export function WriteReviewSection0() {
   // If already reviewed, show read-only view
   if (existingReview) {
     return (
-      <main className="w-full min-h-screen bg-background flex flex-col justify-center">
+      <main className="w-full min-h-screen bg-surface-container-low flex flex-col justify-center">
         <div className="flex flex-col w-full">
-          <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+          <div className="max-w-[1280px] mx-auto w-full px-gutter-lg py-space-lg">
             <nav aria-label="Breadcrumb" className="flex items-center space-x-2 text-on-surface-variant font-label-sm mb-6">
               <Link className="hover:text-primary transition-colors" href="/account/bookings">My Bookings</Link>
               <Icon name="chevron_right" className="material-symbols-outlined text-xs text-outline" />
               <span className="text-on-surface font-semibold">Already Reviewed</span>
             </nav>
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 sm:p-8 text-center">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 sm:p-8 text-center">
               <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-4">
                 <Icon name="check" className="material-symbols-outlined text-3xl font-bold" />
               </div>
@@ -215,8 +215,8 @@ export function WriteReviewSection0() {
                   <div>Location: <strong>{existingReview.location_rating}/5</strong></div>
                   <div>Value: <strong>{existingReview.value_rating}/5</strong></div>
                 </div>
-                {existingReview.comment && <p className="text-sm italic text-slate-600 mt-3">“{existingReview.comment}”</p>}
-                <p className="text-xs text-slate-500">Submitted {new Date(existingReview.created_at).toLocaleDateString()}</p>
+                {existingReview.comment && <p className="text-sm italic text-[#64748B] mt-3">“{existingReview.comment}”</p>}
+                <p className="text-xs text-[#64748B]">Submitted {new Date(existingReview.created_at).toLocaleDateString()}</p>
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-3 justify-center mt-6">
                 <Link href="/account/bookings" className="px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary-container">Back to My Bookings</Link>
@@ -237,9 +237,9 @@ export function WriteReviewSection0() {
 
   return (
     <>
-      <main className="w-full min-h-screen bg-background flex flex-col justify-center">
+      <main className="w-full min-h-screen bg-surface-container-low flex flex-col justify-center">
         <div className="flex flex-col w-full">
-          <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+          <div className="max-w-[1280px] mx-auto w-full px-gutter-lg py-space-lg">
             <nav aria-label="Breadcrumb" className="flex items-center space-x-2 text-on-surface-variant font-label-sm mb-6">
               <Link className="hover:text-primary transition-colors" href="/account/bookings">My Bookings</Link>
               <Icon name="chevron_right" className="material-symbols-outlined text-xs text-outline" />
@@ -249,8 +249,8 @@ export function WriteReviewSection0() {
             </nav>
 
             <div className="mb-8">
-              <h1 className="font-display text-on-surface text-2xl sm:text-3xl md:text-4xl tracking-tight mb-2">How was your stay at {propertyTitle}?</h1>
-              <p className="font-body-lg text-on-surface-variant max-w-3xl">Your verified feedback helps fellow travelers choose authentic Lebanese chalets and rewards dedicated local hosts.</p>
+              <h1 className="font-headline-lg text-headline-lg text-[#157375] tracking-tight mb-2">How was your stay at {propertyTitle}?</h1>
+              <p className="font-body-md text-[#64748B] max-w-3xl">Your verified feedback helps fellow travelers choose authentic Lebanese chalets and rewards dedicated local hosts.</p>
             </div>
 
             <div className="bg-surface-container-lowest rounded-xl p-4 sm:p-5 shadow-sm mb-8 flex flex-col sm:flex-row items-center gap-5">
@@ -296,9 +296,9 @@ export function WriteReviewSection0() {
               </div>
             </div>
 
-            <div className="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 shadow-sm" id="reviewFormSection">
+            <div className="bg-surface-container-lowest rounded-xl p-6 sm:p-8 shadow-sm" id="reviewFormSection">
               <div className="mb-6 pb-4 border-b-0">
-                <h3 className="font-headline-md text-on-surface mb-1">StayLeb Seven Evaluation Criteria</h3>
+                <h3 className="font-headline-md text-[#157375] mb-1">StayLeb Seven Evaluation Criteria</h3>
                 <p className="font-body-md text-on-surface-variant">Please rate each verified amenity strictly based on your actual stay experience.</p>
               </div>
 
@@ -307,7 +307,7 @@ export function WriteReviewSection0() {
                   <div className="max-w-md">
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-primary-container text-on-primary font-caption text-xs flex items-center justify-center font-bold">1</span>
-                      <h4 className="font-title-md text-on-surface">Overall Experience</h4>
+                      <h4 className="font-title-md text-[#1E293B]">Overall Experience</h4>
                     </div>
                     <p className="font-body-md text-on-surface-variant text-sm mt-1 ml-8">Rate your general impression of the property and stay.</p>
                   </div>
@@ -317,7 +317,7 @@ export function WriteReviewSection0() {
                   <div className="max-w-md">
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-primary-container text-on-primary font-caption text-xs flex items-center justify-center font-bold">2</span>
-                      <h4 className="font-title-md text-on-surface">Cleanliness</h4>
+                      <h4 className="font-title-md text-[#1E293B]">Cleanliness</h4>
                     </div>
                     <p className="font-body-md text-on-surface-variant text-sm mt-1 ml-8">Fresh bedding, immaculate bathrooms, clean kitchenware.</p>
                   </div>
@@ -327,7 +327,7 @@ export function WriteReviewSection0() {
                   <div className="max-w-md">
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-primary-container text-on-primary font-caption text-xs flex items-center justify-center font-bold">3</span>
-                      <h4 className="font-title-md text-on-surface">Privacy</h4>
+                      <h4 className="font-title-md text-[#1E293B]">Privacy</h4>
                     </div>
                     <p className="font-body-md text-on-surface-variant text-sm mt-1 ml-8">Seclusion, noise isolation, and private outdoor spaces.</p>
                   </div>
@@ -337,7 +337,7 @@ export function WriteReviewSection0() {
                   <div className="max-w-md">
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-primary-container text-on-primary font-caption text-xs flex items-center justify-center font-bold">4</span>
-                      <h4 className="font-title-md text-on-surface">Wi-Fi Reliability</h4>
+                      <h4 className="font-title-md text-[#1E293B]">Wi-Fi Reliability</h4>
                     </div>
                     <p className="font-body-md text-on-surface-variant text-sm mt-1 ml-8">Internet speed and connection stability.</p>
                   </div>
@@ -347,7 +347,7 @@ export function WriteReviewSection0() {
                   <div className="max-w-md">
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-primary-container text-on-primary font-caption text-xs flex items-center justify-center font-bold">5</span>
-                      <h4 className="font-title-md text-on-surface">Hot Water & 24/7 Power</h4>
+                      <h4 className="font-title-md text-[#1E293B]">Hot Water & 24/7 Power</h4>
                     </div>
                     <p className="font-body-md text-on-surface-variant text-sm mt-1 ml-8">Uninterrupted electricity, solar backup, hot water on demand.</p>
                   </div>
@@ -357,7 +357,7 @@ export function WriteReviewSection0() {
                   <div className="max-w-md">
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-primary-container text-on-primary font-caption text-xs flex items-center justify-center font-bold">6</span>
-                      <h4 className="font-title-md text-on-surface">Location & Views</h4>
+                      <h4 className="font-title-md text-[#1E293B]">Location & Views</h4>
                     </div>
                     <p className="font-body-md text-on-surface-variant text-sm mt-1 ml-8">Sea or mountain vistas, accessibility, and neighborhood.</p>
                   </div>
@@ -367,7 +367,7 @@ export function WriteReviewSection0() {
                   <div className="max-w-md">
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-primary-container text-on-primary font-caption text-xs flex items-center justify-center font-bold">7</span>
-                      <h4 className="font-title-md text-on-surface">Value for Money</h4>
+                      <h4 className="font-title-md text-[#1E293B]">Value for Money</h4>
                     </div>
                     <p className="font-body-md text-on-surface-variant text-sm mt-1 ml-8">Fairness of pricing relative to amenities provided.</p>
                   </div>
@@ -380,7 +380,7 @@ export function WriteReviewSection0() {
                 <p className="font-body-md text-on-surface-variant text-sm mb-3">What did you love most? Mention specific details like the sunset deck, pool, host hospitality, or solar reliability...</p>
                 <div className="relative">
                   <textarea
-                    className="w-full p-4 rounded-xl bg-surface-container-low text-on-surface font-body-md focus:outline-none focus:bg-surface-container transition-all resize-none shadow-inner"
+                    className="w-full p-4 rounded-xl bg-surface-container-low border border-transparent text-on-surface font-body-md focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all resize-none"
                     id="reviewComment"
                     placeholder="What did you love most? Mention specific details like the sunset deck, pool, host hospitality, or solar reliability..."
                     rows={5}
@@ -415,7 +415,7 @@ export function WriteReviewSection0() {
                   type="button"
                   onClick={handleSubmit}
                   disabled={!canSubmit}
-                  className={`w-full sm:w-auto px-8 py-3 rounded-lg font-label-md font-semibold transition-colors shadow-sm flex items-center justify-center gap-2 ${canSubmit ? "bg-primary-container text-on-primary hover:bg-primary active:scale-95" : "bg-slate-200 text-slate-400 cursor-not-allowed"}`}
+                  className={`w-full sm:w-auto px-8 py-3 rounded-lg font-label-md font-semibold transition-colors shadow-sm flex items-center justify-center gap-2 ${canSubmit ? "bg-primary-container text-on-primary hover:bg-primary active:scale-95" : "bg-surface-container-low text-[#64748B] cursor-not-allowed"}`}
                 >
                   <span>{submitting ? "Submitting…" : "Submit Review"}</span>
                   <Icon name="arrow_forward" className="material-symbols-outlined text-sm" />

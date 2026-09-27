@@ -104,7 +104,7 @@ export function OTPVerificationSection0() {
                     <span className="font-caption text-caption text-outline uppercase tracking-widest mt-0.5">Lebanon Stays</span>
                   </div>
                 </div>
-                <button type="button" onClick={() => router.back()} className="inline-flex items-center gap-1.5 font-label-md text-label-md text-white hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-surface-container-low">
+                <button type="button" onClick={() => router.back()} className="inline-flex items-center gap-1.5 font-label-md text-label-md text-[#157375] hover:text-[#46B1B1] transition-colors py-2 px-3 rounded-lg hover:bg-surface-container-low">
                   <Icon name="arrow_back" className="material-symbols-outlined text-[18px]" />
                   <span>Back</span>
                 </button>
@@ -116,13 +116,13 @@ export function OTPVerificationSection0() {
                   <span className="font-label-sm text-label-sm font-semibold tracking-wide">Two-Step Security</span>
                 </div>
 
-                <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-3">Enter verification code</h1>
+                <h1 className="font-headline-lg text-headline-lg text-[#157375] tracking-tight mb-3">Enter verification code</h1>
                 <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-8">
                   We&apos;ve sent a 6-digit code to your email address <span className="font-semibold text-on-surface">{email || "your email"}</span>. Please enter it below to confirm your identity.
                 </p>
 
                 {error && (
-                  <div className="flex items-center gap-2 p-3 bg-error-container rounded-xl text-white mb-4">
+                  <div className="flex items-center gap-2 p-3 bg-error-container rounded-xl text-on-error-container border border-error/20 mb-4">
                     <Icon name="error" className="material-symbols-outlined text-[20px] text-error" />
                     <span className="font-body-md text-body-md">{error}</span>
                   </div>
@@ -136,7 +136,7 @@ export function OTPVerificationSection0() {
                         <input
                           key={idx}
                           ref={(el) => { inputsRef.current[idx] = el; }}
-                          className="otp-digit w-12 h-14 sm:w-14 sm:h-14 text-center font-headline-md text-headline-md font-semibold text-white bg-surface-container-low rounded-xl focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_#157375] transition-all"
+                          className="otp-digit w-12 h-14 sm:w-14 sm:h-14 text-center font-headline-md text-headline-md font-semibold text-[#1E293B] bg-surface-container-low rounded-xl border border-transparent focus:bg-surface-container-lowest focus:outline-none focus:shadow-[0_0_0_2px_#157375] focus:border-primary/40 transition-all"
                           inputMode="numeric"
                           maxLength={1}
                           pattern="[0-9]*"
@@ -205,7 +205,7 @@ export function OTPVerificationSection0() {
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2">
                         <span className="font-title-md text-title-md text-on-surface">Verified Identity Protocol</span>
-                        <span className="bg-surface-container-highest text-white font-caption text-caption px-2 py-0.5 rounded-full uppercase tracking-wider">Fast-Track</span>
+                        <span className="bg-surface-container-highest text-[#157375] font-caption text-caption px-2 py-0.5 rounded-full uppercase tracking-wider">Fast-Track</span>
                       </div>
                       <p className="font-body-md text-body-md text-on-surface-variant mt-1 leading-snug">Instant access restoration for travelers and hosts across 450+ Lebanese boutique properties and heritage guesthouses.</p>
                     </div>

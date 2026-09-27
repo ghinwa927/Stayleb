@@ -68,14 +68,14 @@ export function OwnerRegistrationSection0() {
                 </div>
 
                 <div className="space-y-2 mb-8">
-                  <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">Create Your Owner Account</h1>
+                  <h1 className="font-headline-lg text-headline-lg text-[#157375] tracking-tight">Create Your Owner Account</h1>
                   <p className="font-body-md text-body-md text-on-surface-variant max-w-lg">
                     Join StayLeb to list your chalet or furnished house, set seasonal rates, and welcome travelers from around the world.
                   </p>
                 </div>
 
                 {error && (
-                  <div className="mb-4 p-3 rounded-xl bg-error-container text-white flex items-start gap-2">
+                  <div className="mb-4 p-3 rounded-xl bg-error-container text-on-error-container flex items-start gap-2 border border-error/20">
                     <Icon name="error" className="material-symbols-outlined text-[20px] text-error shrink-0" />
                     <p className="font-label-sm text-label-sm flex-1">{error}</p>
                     <button type="button" onClick={() => setError(null)} className="p-1"><Icon name="close" className="material-symbols-outlined text-[16px]" /></button>
@@ -93,7 +93,7 @@ export function OwnerRegistrationSection0() {
                     <label className="block font-label-md text-label-md text-on-surface mb-1.5" htmlFor="owner-fullName">Full Legal Name</label>
                     <div className="relative flex items-center">
                       <Icon name="person" className="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none" />
-                      <input id="owner-fullName" className="w-full h-12 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-white placeholder:text-white focus:outline-none focus:bg-surface-container-low focus:ring-2 focus:ring-primary transition-colors shadow-sm" placeholder="e.g. Tony Karam" required type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                      <input id="owner-fullName" className="w-full h-12 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-[#1E293B] placeholder:text-[#64748B]/70 focus:outline-none focus:bg-surface-container-low focus:ring-2 focus:ring-primary transition-colors shadow-sm" placeholder="e.g. Tony Karam" required type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
                     </div>
                   </div>
 
@@ -101,7 +101,7 @@ export function OwnerRegistrationSection0() {
                     <label className="block font-label-md text-label-md text-on-surface mb-1.5" htmlFor="owner-email">Email Address</label>
                     <div className="relative flex items-center">
                       <Icon name="mail" className="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none" />
-                      <input id="owner-email" className="w-full h-12 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-white placeholder:text-white focus:outline-none focus:bg-surface-container-low focus:ring-2 focus:ring-primary transition-colors shadow-sm" placeholder="tony@example.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                      <input id="owner-email" className="w-full h-12 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-[#1E293B] placeholder:text-[#64748B]/70 focus:outline-none focus:bg-surface-container-low focus:ring-2 focus:ring-primary transition-colors shadow-sm" placeholder="tony@example.com" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
                   </div>
 
@@ -112,7 +112,7 @@ export function OwnerRegistrationSection0() {
                         <span className="font-label-md text-label-md text-on-surface font-semibold">+961</span>
                       </div>
                       <div className="relative flex-1">
-                        <input id="owner-phone" className="w-full h-12 px-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-white placeholder:text-white focus:outline-none focus:bg-surface-container-low focus:ring-2 focus:ring-primary transition-colors shadow-sm" placeholder="70 987 654" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                        <input id="owner-phone" className="w-full h-12 px-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-[#1E293B] placeholder:text-[#64748B]/70 focus:outline-none focus:bg-surface-container-low focus:ring-2 focus:ring-primary transition-colors shadow-sm" placeholder="70 987 654" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                       </div>
                     </div>
                   </div>
@@ -124,7 +124,7 @@ export function OwnerRegistrationSection0() {
                     </div>
                     <div className="relative flex items-center">
                       <Icon name="lock" className="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none" />
-                      <input id="owner-password" className="w-full h-12 pl-11 pr-11 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-white placeholder:text-white focus:outline-none focus:bg-surface-container-low focus:ring-2 focus:ring-primary transition-colors shadow-sm" placeholder="Create strong password" required type={showPass ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
+                      <input id="owner-password" className="w-full h-12 pl-11 pr-11 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-[#1E293B] placeholder:text-[#64748B]/70 focus:outline-none focus:bg-surface-container-low focus:ring-2 focus:ring-primary transition-colors shadow-sm" placeholder="Create strong password" required type={showPass ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
                       <button type="button" onClick={() => setShowPass(!showPass)} aria-label="Toggle password visibility" className="absolute right-3.5 text-outline hover:text-on-surface transition-colors p-1">
                         <Icon name={showPass ? "visibility_off" : "visibility"} className="material-symbols-outlined text-[20px]" />
                       </button>
@@ -135,7 +135,7 @@ export function OwnerRegistrationSection0() {
                     <label className="block font-label-md text-label-md text-on-surface mb-1.5" htmlFor="owner-confirm">Confirm Password</label>
                     <div className="relative flex items-center">
                       <Icon name="lock_reset" className="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none" />
-                      <input id="owner-confirm" className="w-full h-12 pl-11 pr-11 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-white placeholder:text-white focus:outline-none focus:bg-surface-container-low focus:ring-2 focus:ring-primary transition-colors shadow-sm" placeholder="Confirm your password" required type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                      <input id="owner-confirm" className="w-full h-12 pl-11 pr-11 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-[#1E293B] placeholder:text-[#64748B]/70 focus:outline-none focus:bg-surface-container-low focus:ring-2 focus:ring-primary transition-colors shadow-sm" placeholder="Confirm your password" required type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                       <button type="button" onClick={() => setShowConfirm(!showConfirm)} aria-label="Toggle confirm password visibility" className="absolute right-3.5 text-outline hover:text-on-surface transition-colors p-1">
                         <Icon name={showConfirm ? "visibility_off" : "visibility"} className="material-symbols-outlined text-[20px]" />
                       </button>
@@ -167,7 +167,7 @@ export function OwnerRegistrationSection0() {
               </div>
 
               <div className="pt-8 mt-6 border-t border-transparent text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-3">
-                <p className="font-body-md text-body-md text-on-surface-variant">Already have an account? <Link className="text-white font-semibold hover:underline ml-1" href="/auth/login">Log In</Link></p>
+                <p className="font-body-md text-body-md text-on-surface-variant">Already have an account? <Link className="text-primary font-semibold hover:underline ml-1" href="/auth/login">Log In</Link></p>
                 <span className="font-caption text-caption text-outline">© StayLeb Technologies</span>
               </div>
             </div>
@@ -176,7 +176,7 @@ export function OwnerRegistrationSection0() {
               <div className="absolute inset-0 bg-cover bg-center" data-alt="Authentic traditional boutique Lebanese mountain stone guesthouse entrance at dusk with carved cedar wooden double doors, warm glowing ambient lanterns on weathered limestone, potted geraniums and olive trees, scenic view of Mount Lebanon terraces under twilight crescent moon" style={{ backgroundImage: "url('/images/81024e8176b5012f.jpg')" }}></div>
               <div className="absolute inset-0 bg-gradient-to-t from-inverse-surface/90 via-inverse-surface/40 to-transparent"></div>
               <div className="relative z-10 self-start mb-auto">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md shadow-md text-white font-label-sm text-label-sm">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md shadow-md text-[#1E293B] font-label-sm text-label-sm font-semibold">
                   <Icon name="location_on" className="material-symbols-outlined text-primary text-[18px]" />Faraya Mountain Heights, Lebanon
                 </div>
               </div>
