@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -63,11 +65,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+frontend_url = os.getenv("FRONTEND_URL")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        frontend_url,
     ],
     allow_credentials=True,
     allow_methods=["*"],
