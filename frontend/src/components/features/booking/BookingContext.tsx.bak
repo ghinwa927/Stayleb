@@ -1,0 +1,29 @@
+"use client";
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import Swal from 'sweetalert2';
+import { isAuthenticated } from '@/lib/authGuard';
+type Stay = { checkIn: string; checkOut: string; adults: number; children: number; method: 'Card' | 'Cash'; name: string; email: string; };
+const initial: Stay = { checkIn:'2026-09-25',checkOut:'2026-09-28',adults:2,children:2,method:'Card',name:'Maya Haddad',email:'maya.haddad@example.com' };
+const BookingContext = createContext<{stay:Stay;update:(patch:Partial<Stay>)=>void}>({stay:initial,update:()=>{}});
+export function BookingProvider({children}:{children:ReactNode}) {
+ const [stay,setStay]=useState(initial); const router=useRouter(); const pathname=usePathname();
+ useEffect(()=>{ if(typeof window!=='undefined' && !isAuthenticated()){
+   Swal.fire({
+     title: 'Please log in to book',
+     text: 'You need to log in before you can continue to booking. Sign in to reserve your stay.',
+     icon: 'info',
+     showCancelButton: true,
+     confirmButtonText: 'Go to Login',
+     cancelButtonText: 'Continue as Guest',
+     confirmButtonColor: '#3a9a9e',
+     cancelButtonColor: '#e7eeff',
+   }).then((result)=>{
+     if(result.isConfirmed) router.replace('/auth/login?next='+encodeURIComponent(pathname));
+     else router.replace('/search');
+   });
+ } },[pathname,router]);
+ return <BookingContext.Provider value={{stay,update:patch=>setStay(current=>({...current,...patch}))}}>{children}</BookingContext.Provider>;
+}
+export function useBooking() { const {stay,update}=useContext(BookingContext);const nights=Math.max(0,Math.round((Date.parse(stay.checkOut)-Date.parse(stay.checkIn))/86400000));const lodging=nights*220+Math.floor(nights/3)*40;return {stay,update,nights,lodging,total:lodging+40}; }
+export const money=(value:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(value);

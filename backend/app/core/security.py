@@ -2,10 +2,13 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
 
-import jwt
 from pwdlib import PasswordHash
 
 from app.config import settings
+
+from fastapi import HTTPException, status
+from jose import JWTError, jwt
+
 
 
 password_hash = PasswordHash.recommended()
@@ -59,3 +62,28 @@ def create_password_reset_token(user_id: int) -> str:
         settings.SECRET_KEY,
         algorithm=settings.ALGORITHM,
     )
+
+def verify_password_reset_token(token: str) -> int:
+    try:
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
+
+        user_id = payload.get("sub")
+        purpose = payload.get("purpose")
+
+        if not user_id or purpose != "password_reset":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid password reset token"
+            )
+
+        return int(user_id)
+
+    except (JWTError, ValueError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired password reset token"
+        )

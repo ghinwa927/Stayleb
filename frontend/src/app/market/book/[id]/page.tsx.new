@@ -1,0 +1,3 @@
+import { StaySelection } from "@/components/features/booking/StaySelection";
+import { BookingProvider } from "@/components/features/booking/BookingContext";
+export default function Page(){return <BookingProvider><StaySelection/></BookingProvider>;}

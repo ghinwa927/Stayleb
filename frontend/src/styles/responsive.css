@@ -1,0 +1,738 @@
+@media (min-width: 768px) {
+  .auth-layout {
+    height: 100svh;
+    overflow: hidden;
+  }
+  .auth-photo {
+    height: 100%;
+    min-height: 0;
+  }
+  .auth-content {
+    height: 100%;
+    overflow-y: auto;
+  }
+  .auth-inner {
+    flex-shrink: 0;
+  }
+  .auth-content:has(.success-inner) {
+    justify-content: space-between;
+  }
+  .auth-content:has(.forgot-inner) {
+    justify-content: space-between;
+  }
+}
+@media (max-width: 1279px) {
+  .desktop-nav {
+    display: none;
+  }
+  .mobile-menu-button {
+    display: block;
+  }
+  .search-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+  .search-top > small {
+    display: none;
+  }
+  .assurances article {
+    padding: 18px;
+    gap: 12px;
+  }
+  .assurances article > span {
+    width: 40px;
+    height: 40px;
+  }
+  .property-grid,
+  .destination-grid {
+    gap: 16px;
+  }
+  .property-body {
+    padding: 12px;
+  }
+  .property-body h3 {
+    font-size: 16px;
+  }
+  .property-body > p {
+    font-size: 11px;
+    white-space: normal;
+  }
+  .property-rating {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .guarantee {
+    padding: 32px;
+    gap: 24px;
+  }
+  .guarantee-stats {
+    gap: 16px;
+  }
+  .guarantee-stats > div + div {
+    padding-left: 16px;
+  }
+  .guarantee-stats small {
+    white-space: normal;
+  }
+  .secondary-badge {
+    display: none !important;
+  }
+  .photo-copy h2 {
+    font-size: 32px;
+  }
+  .auth-photo,
+  .auth-content {
+    padding: 36px;
+  }
+  .footer-bottom {
+    flex-wrap: wrap;
+  }
+  .photo-footer {
+    gap: 8px;
+    font-size: 11px;
+  }
+  .success-top .logo small {
+    max-width: 130px;
+  }
+  .success-top {
+    align-items: flex-start;
+  }
+}
+@media (max-width: 1023px) {
+  .page-container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .hero-content {
+    padding-top: 56px;
+    padding-bottom: 96px;
+  }
+  .hero-content h1 {
+    font-size: 32px;
+    line-height: 40px;
+  }
+  .assurances {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 48px;
+  }
+  .property-grid,
+  .destination-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .property-image {
+    height: 220px;
+  }
+  .property-body {
+    padding: 16px;
+  }
+  .property-body h3 {
+    font-size: 18px;
+  }
+  .property-rating {
+    flex-direction: row;
+  }
+  .property-body > p {
+    font-size: 12px;
+  }
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .guarantee {
+    grid-template-columns: 1fr;
+  }
+  .guarantee-stats small {
+    white-space: nowrap;
+  }
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .auth-content,
+  .auth-photo {
+    padding: 28px;
+  }
+  .auth-inner h1 {
+    font-size: 26px;
+    line-height: 34px;
+  }
+  .photo-copy h2 {
+    font-size: 28px;
+  }
+  .auth-login .photo-copy h2 {
+    font-size: 28px;
+  }
+  .auth-top {
+    gap: 8px;
+  }
+  .auth-top .pill {
+    font-size: 9px;
+    padding: 4px 7px;
+  }
+  .logo-partner strong {
+    font-size: 16px;
+  }
+  .verified-pill {
+    font-size: 10px;
+    padding: 7px 10px;
+  }
+  .otp-inputs {
+    gap: 7px;
+  }
+  .otp-inputs input {
+    font-size: 24px;
+  }
+  .otp-tip {
+    flex-direction: column;
+  }
+  .account-options button {
+    padding: 10px;
+    gap: 6px;
+  }
+  .account-options button.selected {
+    padding: 9px;
+  }
+  .account-options strong {
+    font-size: 12px;
+  }
+  .account-options button > svg {
+    padding: 5px;
+    width: 18px;
+  }
+  .register-inner .auth-description {
+    font-size: 14px;
+  }
+  .auth-small-footer {
+    flex-wrap: wrap;
+  }
+  .success-footer {
+    justify-content: center;
+  }
+  .success-top .logo small {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  html {
+    scroll-padding-top: 120px;
+  }
+  .auth-layout {
+    min-height: 100svh;
+    display: block;
+  }
+  .auth-photo {
+    display: none;
+  }
+  .auth-content {
+    width: 100%;
+    min-height: 100svh;
+    padding: 32px 24px;
+  }
+  .auth-inner {
+    max-width: 448px;
+  }
+  .auth-login .auth-content {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+  .auth-top .pill {
+    font-size: 11px;
+  }
+  .auth-inner h1 {
+    font-size: 28px;
+  }
+  .auth-content:has(.success-inner) {
+    justify-content: space-between;
+  }
+  .auth-small-footer {
+    margin-top: 48px;
+  }
+  .auth-top {
+    margin-bottom: 24px;
+  }
+  .verified-pill {
+    font-size: 12px;
+  }
+  .otp-inputs input {
+    height: 56px;
+    font-size: 28px;
+  }
+  .otp-tip {
+    flex-direction: row;
+  }
+  .success-top .logo small {
+    display: block;
+    max-width: none;
+  }
+  .success-inner {
+    padding: 48px 0;
+  }
+  .success-footer {
+    justify-content: center;
+    text-align: center;
+  }
+  .header-inner {
+    height: 68px;
+    padding: 0 20px;
+  }
+  .announcement {
+    font-size: 9px;
+    letter-spacing: 0;
+    line-height: 14px;
+  }
+  .locale-actions,
+  .header-avatar {
+    display: none;
+  }
+  .header-actions {
+    gap: 4px;
+  }
+  .header-login,
+  .header-signup {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .header-left {
+    gap: 12px;
+  }
+  .logo-wordmark strong {
+    font-size: 18px;
+  }
+  .hero-content {
+    padding-top: 40px;
+    padding-bottom: 80px;
+  }
+  .hero-eyebrow {
+    font-size: 10px;
+    padding: 6px 10px;
+    margin-bottom: 20px;
+  }
+  .hero-eyebrow-subtitle,
+  .hero-eyebrow b {
+    display: none;
+  }
+  .hero-content h1 {
+    font-size: 30px;
+    line-height: 38px;
+  }
+  .hero-description {
+    font-size: 14px;
+    line-height: 22px;
+    margin-bottom: 28px;
+  }
+  .search-widget {
+    padding: 12px;
+  }
+  .search-tabs {
+    width: 100%;
+    justify-content: space-between;
+    gap: 2px;
+  }
+  .search-tabs button {
+    font-size: 11px;
+    padding: 8px;
+    gap: 5px;
+  }
+  .search-tabs button > span {
+    display: none;
+  }
+  .search-tabs button svg {
+    width: 16px;
+  }
+  .search-fields {
+    gap: 8px;
+  }
+  .search-field > div,
+  .search-field > strong,
+  .search-field select {
+    font-size: 12px;
+  }
+  .popular-filters {
+    gap: 6px;
+    padding-top: 16px;
+  }
+  .popular-filters > span {
+    width: 100%;
+  }
+  .popular-filters button {
+    font-size: 10px;
+  }
+  .ai-input {
+    flex-wrap: wrap;
+    padding: 12px;
+    gap: 10px;
+  }
+  .ai-input input {
+    font-size: 14px;
+  }
+  .ai-input .search-button {
+    width: 100%;
+  }
+  .assurances {
+    gap: 12px;
+    margin-top: -24px;
+  }
+  .assurances article {
+    padding: 16px;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .assurances h2 {
+    font-size: 16px;
+    line-height: 22px;
+  }
+  .stays-section h2,
+  .destinations-section h2 {
+    font-size: 25px;
+    line-height: 32px;
+  }
+  .region-tabs button {
+    font-size: 11px;
+    padding: 8px 12px;
+  }
+  .section-heading {
+    margin-bottom: 24px;
+  }
+  .property-grid,
+  .destination-grid {
+    gap: 16px;
+  }
+  .property-image {
+    height: 190px;
+  }
+  .property-tags {
+    left: 8px;
+    top: 8px;
+    gap: 4px;
+  }
+  .property-tags > span {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+  .property-tags > span:nth-child(2) {
+    display: none;
+  }
+  .favorite {
+    top: 8px;
+    right: 8px;
+  }
+  .property-rating {
+    flex-direction: column;
+  }
+  .property-body {
+    padding: 12px;
+  }
+  .property-body h3 {
+    font-size: 16px;
+  }
+  .property-body > p {
+    font-size: 11px;
+  }
+  .property-bottom {
+    padding: 12px;
+  }
+  .property-bottom strong {
+    font-size: 17px;
+  }
+  .property-bottom button {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+  .property-status {
+    left: 8px;
+    font-size: 9px;
+  }
+  .destinations-section {
+    margin-top: 56px;
+    margin-bottom: 56px;
+  }
+  .destination-card {
+    min-height: 320px;
+  }
+  .destination-copy {
+    left: 18px;
+    right: 18px;
+    bottom: 20px;
+  }
+  .destination-copy h3 {
+    font-size: 20px;
+  }
+  .guarantee {
+    padding: 24px;
+  }
+  .guarantee-copy h2 {
+    font-size: 16px;
+    gap: 8px;
+  }
+  .guarantee-copy h3 {
+    font-size: 25px;
+    line-height: 33px;
+  }
+  .guarantee-copy > p {
+    font-size: 14px;
+    line-height: 23px;
+  }
+  .guarantee-stats {
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .guarantee-stats strong {
+    font-size: 20px;
+  }
+  .guarantee-stats small {
+    font-size: 10px;
+    white-space: normal;
+  }
+  .guarantee-stats > div + div {
+    padding-left: 14px;
+  }
+  .guarantee blockquote {
+    padding: 20px;
+  }
+  .review-stars {
+    gap: 3px;
+  }
+  .review-stars span {
+    font-size: 10px;
+  }
+  .review-stars svg {
+    width: 15px;
+  }
+  .guarantee-section {
+    margin-bottom: 56px;
+  }
+  .ai-concierge {
+    right: 16px;
+    bottom: 16px;
+  }
+  .ai-concierge small {
+    display: none;
+  }
+  .ai-concierge > button {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .ai-concierge strong {
+    font-size: 11px;
+  }
+  .footer-grid {
+    gap: 28px 20px;
+  }
+  .footer-brand {
+    grid-column: 1/-1;
+  }
+  .footer-grid h3 {
+    font-size: 12px;
+  }
+  .footer-grid ul {
+    font-size: 12px;
+  }
+  .footer-bottom {
+    font-size: 10px;
+    line-height: 16px;
+    padding-bottom: 60px;
+  }
+  .footer-bottom > span {
+    white-space: normal;
+    flex-shrink: 1;
+  }
+  .toast {
+    bottom: 84px;
+  }
+}
+@media (max-width: 479px) {
+  .page-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .header-inner {
+    padding: 0 16px;
+    gap: 8px;
+  }
+  .header-login {
+    padding: 8px;
+  }
+  .header-signup {
+    padding: 8px 10px;
+  }
+  .header-actions {
+    gap: 1px;
+  }
+  .mobile-menu-button {
+    padding: 6px;
+  }
+  .logo-wordmark {
+    gap: 5px;
+  }
+  .logo-wordmark .logo-image {
+    width: 28px;
+    height: 28px;
+  }
+  .logo-wordmark strong {
+    font-size: 17px;
+  }
+  .hero-content h1 {
+    font-size: 28px;
+    line-height: 36px;
+  }
+  .search-tabs button {
+    font-size: 10px;
+    padding: 8px 6px;
+    gap: 4px;
+  }
+  .search-tabs button svg {
+    width: 14px;
+  }
+  .search-fields {
+    grid-template-columns: 1fr;
+  }
+  .search-field > div,
+  .search-field > strong,
+  .search-field select {
+    font-size: 14px;
+  }
+  .search-button {
+    height: 48px;
+  }
+  .search-field {
+    min-height: 62px;
+  }
+  .assurances {
+    gap: 10px;
+  }
+  .assurances article {
+    padding: 14px;
+  }
+  .assurances h2 {
+    font-size: 15px;
+    line-height: 21px;
+  }
+  .assurances p {
+    font-size: 11px;
+    line-height: 17px;
+  }
+  .property-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .property-image {
+    height: 230px;
+  }
+  .property-tags > span:nth-child(2) {
+    display: block;
+  }
+  .property-tags > span {
+    font-size: 11px;
+  }
+  .property-tags {
+    left: 12px;
+    top: 12px;
+  }
+  .favorite {
+    top: 12px;
+    right: 12px;
+  }
+  .property-rating {
+    flex-direction: row;
+  }
+  .property-body {
+    padding: 16px;
+  }
+  .property-body h3 {
+    font-size: 18px;
+  }
+  .property-body > p {
+    font-size: 12px;
+  }
+  .property-status {
+    font-size: 10px;
+    left: 12px;
+  }
+  .property-bottom {
+    padding: 12px 16px;
+  }
+  .destination-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .destination-card {
+    min-height: 360px;
+  }
+  .destination-copy h3 {
+    font-size: 24px;
+  }
+  .destination-copy p {
+    font-size: 13px;
+    min-height: 0;
+  }
+  .destination-copy {
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+  }
+  .guarantee-copy h2 {
+    font-size: 15px;
+  }
+  .guarantee {
+    padding: 22px;
+  }
+  .guarantee-stats {
+    gap: 10px;
+  }
+  .guarantee-stats > div + div {
+    padding-left: 10px;
+  }
+  .guarantee-stats strong {
+    font-size: 18px;
+  }
+  .review-stars {
+    flex-wrap: wrap;
+  }
+  .review-stars span {
+    width: 100%;
+    margin: 5px 0 0;
+  }
+  .auth-content {
+    padding: 28px 20px;
+  }
+  .auth-inner h1 {
+    font-size: 27px;
+    line-height: 34px;
+  }
+  .otp-inputs {
+    gap: 8px;
+  }
+  .otp-inputs input {
+    height: 50px;
+    font-size: 25px;
+  }
+  .otp-tip {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .resend-row {
+    flex-wrap: wrap;
+  }
+  .verified-pill {
+    font-size: 10px;
+  }
+  .success-top .logo small {
+    font-size: 9px;
+  }
+  .success-top .pill {
+    font-size: 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -21,7 +21,7 @@ class Property(Base):
     description = Column(Text, nullable=False)
 
     property_type = Column(
-        Enum("chalet", "furnished_house"),
+        Enum("chalet", "furnished_house", name="property_type_enum"),
         nullable=False
     )
 
@@ -38,7 +38,7 @@ class Property(Base):
     min_nights = Column(Integer, nullable=False, default=1)
 
     status = Column(
-        Enum("pending", "approved", "rejected"),
+        Enum("pending", "approved", "rejected", name="property_status_enum"),
         nullable=False,
         default="pending"
     )
@@ -63,3 +63,46 @@ class Property(Base):
     back_populates="property",
     cascade="all, delete-orphan"
 )
+    
+    images = relationship(
+    "PropertyImage",
+    back_populates="property",
+    cascade="all, delete-orphan",
+    order_by="PropertyImage.display_order"
+)
+    
+    property_rules = relationship(
+    "PropertyRule",
+    back_populates="property",
+    cascade="all, delete-orphan"
+)
+
+    property_amenities = relationship(
+    "PropertyAmenity",
+    back_populates="property",
+    cascade="all, delete-orphan"
+)
+
+    blocked_dates = relationship(
+    "PropertyBlockedDate",
+    back_populates="property",
+    cascade="all, delete-orphan"
+)
+
+    bookings = relationship(
+    "Booking",
+    back_populates="property",
+    cascade="all, delete-orphan",
+)
+
+    favorites = relationship(
+    "Favorite",
+    back_populates="property",
+    cascade="all, delete-orphan",
+)
+    @property
+    def amenities(self):
+     return [
+        property_amenity.amenity
+        for property_amenity in self.property_amenities
+    ]

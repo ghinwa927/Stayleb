@@ -1,0 +1,3 @@
+import { PaymentMethod } from "@/components/features/booking/PaymentMethod";
+import { BookingProvider } from "@/components/features/booking/BookingContext";
+export default function Page(){return <BookingProvider><PaymentMethod/></BookingProvider>;}

@@ -1,0 +1,248 @@
+"use client";
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import { Icon } from "@/components/ui/Icon";
+import { getMyProperties, type PropertyResponse } from "@/services/owner";
+import { getPropertyBookings } from "@/services/bookings";
+import { getPaymentByBooking, type PaymentResponse } from "@/services/payments";
+
+function formatMoney(v: string | number | null | undefined) {
+  const n = Number(v ?? 0);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+}
+
+function paymentBadge(p?: PaymentResponse | null) {
+  if (!p) return { label: "No payment", cls: "bg-slate-100 text-slate-500" };
+  const s = p.payment_status.toLowerCase();
+  if (p.payment_method === "cash" && s === "pending") return { label: "Cash · Pending", cls: "bg-amber-50 text-amber-700 border border-amber-200" };
+  if (s === "paid") return { label: `${p.payment_method} · Paid`, cls: "bg-emerald-50 text-emerald-700" };
+  return { label: `${p.payment_method} · ${p.payment_status}`, cls: "bg-slate-100 text-slate-600" };
+}
+
+export function OwnerEarningsCommissionSection0() {
+  const [properties, setProperties] = useState<PropertyResponse[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [payments, setPayments] = useState<Record<string, PaymentResponse>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const props = await getMyProperties();
+        if (cancelled) return;
+        setProperties(props);
+        if (props.length === 0) {
+          setBookings([]);
+          setPayments({});
+          return;
+        }
+        const results = await Promise.all(props.map((p) => getPropertyBookings(p.id).catch(() => [])));
+        const flat = results.flat() as any[];
+        const byId = new Map<number, any>();
+        flat.forEach((b) => byId.set(b.id, b));
+        const all = Array.from(byId.values()).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        if (cancelled) return;
+        setBookings(all);
+        // fetch payments in background
+        all.forEach(async (b) => {
+          try {
+            const pay = await getPaymentByBooking(b.id);
+            if (!cancelled) setPayments((prev) => ({ ...prev, [String(b.id)]: pay }));
+          } catch {}
+        });
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load earnings");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  const stats = useMemo(() => {
+    const confirmed = bookings.filter((b) => b.status === "confirmed");
+    const gross = confirmed.reduce((sum, b) => sum + Number(b.total_price || 0), 0);
+    const net = confirmed.reduce((sum, b) => sum + Number(b.owner_earnings || 0), 0);
+    const commission = confirmed.reduce((sum, b) => sum + Number(b.commission_amount || 0), 0);
+    // Outstanding cash: confirmed cash bookings where payment is still pending
+    const outstandingList = confirmed.filter((b) => {
+      const pay = payments[String(b.id)];
+      return pay?.payment_method === "cash" && pay?.payment_status === "pending";
+    });
+    const outstandingAmount = outstandingList.reduce((sum, b) => sum + Number(b.commission_amount || 0), 0);
+    const outstandingCount = outstandingList.length;
+    return { confirmedCount: confirmed.length, gross, net, commission, outstandingAmount, outstandingCount, total: bookings.length };
+  }, [bookings, payments]);
+
+  const ledger = useMemo(() => {
+    // Show confirmed and cancelled for history, sorted by created_at desc
+    return bookings.filter((b) => b.status === "confirmed" || b.status === "pending" || b.status === "cancelled" || b.status === "rejected").slice(0, 50);
+  }, [bookings]);
+
+  if (loading) {
+    return (
+      <main className="w-full pt-6 min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-slate-500">Loading earnings…</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="w-full pt-6 min-h-screen bg-background flex items-center justify-center p-8">
+        <div className="text-center max-w-md">
+          <Icon name="error" className="material-symbols-outlined text-[28px] text-rose-400 mb-2" />
+          <p className="text-sm text-rose-600 mb-3">{error}</p>
+          <p className="text-xs text-slate-500">GET /bookings/property/{`{id}`} + GET /payments/bookings/{`{id}`}</p>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <>
+      <main className="w-full pt-6 min-h-screen bg-background">
+        <div className="flex flex-col w-full">
+          <div className="px-space-md sm:px-space-lg lg:px-margin-lg py-space-lg max-w-[1440px] mx-auto w-full flex flex-col gap-space-lg">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+              <div className="flex flex-col gap-space-xxs">
+                <div className="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+                  <Link className="hover:text-primary transition-colors" href="/owner">Dashboard</Link>
+                  <Icon name="chevron_right" className="material-symbols-outlined text-[14px] text-outline" />
+                  <span className="text-on-surface font-semibold">Earnings / Commission</span>
+                </div>
+                <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">Earnings & Platform Commission</h1>
+                <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl">Real earnings from <code className="bg-slate-100 px-1 rounded">GET /bookings/property/&#123;id&#125;</code> + payment <code className="bg-slate-100 px-1 rounded">GET /payments/bookings/&#123;id&#125;</code>. Commission is backend truth.</p>
+              </div>
+              <div className="flex items-center gap-space-xs shrink-0">
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest shadow-sm text-on-surface font-label-md text-label-md"
+                >
+                  <Icon name="download" className="material-symbols-outlined text-[18px] text-primary" />
+                  <span>Export</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+              <div className="p-space-lg rounded-[16px] bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-space-xs">
+                  <span className="font-caption text-caption uppercase tracking-wider text-on-surface-variant font-semibold">Total Gross Booking Value</span>
+                  <span className="w-8 h-8 rounded-lg bg-surface-container-low text-primary flex items-center justify-center">
+                    <Icon name="payments" className="material-symbols-outlined text-[18px]" />
+                  </span>
+                </div>
+                <div className="mt-space-md">
+                  <div className="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">{formatMoney(stats.gross)}<span className="font-caption text-caption text-on-surface-variant"> USD</span></div>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">{stats.confirmedCount} confirmed stays · {stats.total} total bookings</p>
+                </div>
+              </div>
+              <div className="p-space-lg rounded-[16px] bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-space-xs">
+                  <span className="font-caption text-caption uppercase tracking-wider text-on-surface-variant font-semibold">Net Owner Earnings</span>
+                  <span className="w-8 h-8 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                    <Icon name="savings" className="material-symbols-outlined text-[18px]" />
+                  </span>
+                </div>
+                <div className="mt-space-md">
+                  <div className="font-headline-lg text-headline-lg text-primary tracking-tight font-bold">{formatMoney(stats.net)}<span className="font-caption text-caption text-on-surface-variant"> USD</span></div>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">After platform commission</p>
+                </div>
+              </div>
+              <div className="p-space-lg rounded-[16px] bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-space-xs">
+                  <span className="font-caption text-caption uppercase tracking-wider text-on-surface-variant font-semibold">Commission Deducted</span>
+                  <span className="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center">
+                    <Icon name="percent" className="material-symbols-outlined text-[18px]" />
+                  </span>
+                </div>
+                <div className="mt-space-md">
+                  <div className="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">{formatMoney(stats.commission)}<span className="font-caption text-caption text-on-surface-variant"> USD</span></div>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">Captured at booking</p>
+                </div>
+              </div>
+              <div className="p-space-lg rounded-[16px] bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden border border-amber-200">
+                <div className="flex items-center justify-between gap-space-xs">
+                  <span className="font-caption text-caption uppercase tracking-wider text-tertiary font-semibold">Outstanding Cash Comm.</span>
+                  <span className="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-caption text-caption font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span> Owed to StayLeb
+                  </span>
+                </div>
+                <div className="mt-space-md">
+                  <div className="font-headline-lg text-headline-lg text-tertiary tracking-tight font-bold">{formatMoney(stats.outstandingAmount)}<span className="font-caption text-caption text-on-surface-variant"> USD</span></div>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">{stats.outstandingCount} pending cash bookings · via GET /payments</p>
+                </div>
+              </div>
+            </div>
+
+            {bookings.length === 0 ? (
+              <div className="p-12 bg-surface-container-lowest rounded-xl shadow-sm text-center">
+                <Icon name="inbox" className="material-symbols-outlined text-[32px] text-slate-400 mb-2" />
+                <h3 className="font-semibold text-slate-700">No bookings yet</h3>
+                <p className="text-sm text-slate-500 mt-1">Earnings will appear after clients book your properties.</p>
+                <Link href="/owner/properties" className="mt-4 inline-flex px-4 py-2 rounded-lg bg-primary text-white text-sm">View Properties</Link>
+              </div>
+            ) : (
+              <div className="rounded-[16px] bg-surface-container-lowest shadow-sm p-space-md sm:p-space-lg flex flex-col gap-space-md">
+                <div className="flex items-center gap-space-xs">
+                  <Icon name="table_rows" className="material-symbols-outlined text-primary text-[22px]" />
+                  <h2 className="font-title-md text-title-md text-on-surface font-semibold">Settlement & Earnings Ledger</h2>
+                  <span className="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-caption text-caption font-medium">{ledger.length} Records (real)</span>
+                </div>
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full text-left min-w-[900px] border-collapse">
+                    <thead>
+                      <tr className="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm">
+                        <th className="py-3 px-4 font-semibold">Booking Ref</th>
+                        <th className="py-3 px-4 font-semibold">Property</th>
+                        <th className="py-3 px-4 font-semibold">Payment</th>
+                        <th className="py-3 px-4 font-semibold text-right">Gross Value</th>
+                        <th className="py-3 px-4 font-semibold text-right">Commission</th>
+                        <th className="py-3 px-4 font-semibold text-right">Net Earnings</th>
+                        <th className="py-3 px-4 font-semibold">Booking Status</th>
+                        <th className="py-3 px-4 font-semibold">Payment Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-sm">
+                      {ledger.map((b) => {
+                        const pay = payments[String(b.id)];
+                        const badge = paymentBadge(pay);
+                        return (
+                          <tr key={b.id} className="hover:bg-slate-50">
+                            <td className="py-3 px-4 font-mono font-semibold text-primary">#SL-{String(b.id).padStart(4, "0")}</td>
+                            <td className="py-3 px-4">
+                              <div className="font-medium">{properties.find((p) => p.id === b.property_id)?.title || `Property #${b.property_id}`}</div>
+                              <div className="text-xs text-slate-500">{b.check_in} → {b.check_out} · {b.number_of_nights} nights</div>
+                            </td>
+                            <td className="py-3 px-4">
+                              {pay ? <span className={`inline-flex px-2 py-0.5 rounded-full text-xs border ${badge.cls}`}>{badge.label}</span> : <span className="text-xs text-slate-400">No payment</span>}
+                            </td>
+                            <td className="py-3 px-4 text-right font-medium">{formatMoney(b.total_price)}</td>
+                            <td className="py-3 px-4 text-right">{formatMoney(b.commission_amount)}</td>
+                            <td className="py-3 px-4 text-right font-bold text-primary">{formatMoney(b.owner_earnings)}</td>
+                            <td className="py-3 px-4"><span className={`px-2 py-1 rounded-full text-xs border font-semibold ${b.status === "confirmed" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : b.status === "pending" ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-slate-100 text-slate-600"}`}>{b.status}</span></td>
+                            <td className="py-3 px-4 text-xs">{pay ? `${pay.payment_method} · ${pay.payment_status}` : "—"}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs text-slate-500">Source: GET /bookings/property/&#123;id&#125; + GET /payments/bookings/&#123;id&#125; — no mock. Refresh preserves backend truth.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </>
+  );
+}

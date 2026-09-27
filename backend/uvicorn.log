@@ -1,0 +1,332 @@
+2026-09-20 03:52:13,290 INFO sqlalchemy.engine.Engine SELECT DATABASE()
+2026-09-20 03:52:13,301 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,302 INFO sqlalchemy.engine.Engine SELECT @@sql_mode
+2026-09-20 03:52:13,303 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,304 INFO sqlalchemy.engine.Engine SELECT @@lower_case_table_names
+2026-09-20 03:52:13,304 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,305 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:52:13,305 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`users`
+2026-09-20 03:52:13,306 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,315 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`refresh_tokens`
+2026-09-20 03:52:13,315 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,319 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`password_reset_otps`
+2026-09-20 03:52:13,320 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,323 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`bookings`
+2026-09-20 03:52:13,323 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,328 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`properties`
+2026-09-20 03:52:13,328 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,331 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`property_seasonal_prices`
+2026-09-20 03:52:13,332 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,335 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`property_images`
+2026-09-20 03:52:13,335 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,338 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`amenities`
+2026-09-20 03:52:13,338 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,341 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`property_amenities`
+2026-09-20 03:52:13,342 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,346 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`rules`
+2026-09-20 03:52:13,346 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,349 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`property_rules`
+2026-09-20 03:52:13,349 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,352 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`property_blocked_dates`
+2026-09-20 03:52:13,352 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,354 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`platform_settings`
+2026-09-20 03:52:13,355 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,357 INFO sqlalchemy.engine.Engine DESCRIBE `stayleb`.`payments`
+2026-09-20 03:52:13,357 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-09-20 03:52:13,362 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:53060 - "OPTIONS /admin/rules/4 HTTP/1.1" 200 OK
+2026-09-20 03:53:03,531 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:03,581 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:03,582 INFO sqlalchemy.engine.Engine [generated in 0.00078s] {'id_1': 6}
+2026-09-20 03:53:03,587 INFO sqlalchemy.engine.Engine SELECT rules.id AS rules_id, rules.name AS rules_name, rules.description AS rules_description, rules.category AS rules_category, rules.is_active AS rules_is_active, rules.created_at AS rules_created_at, rules.updated_at AS rules_updated_at 
+FROM rules 
+WHERE rules.id = %(id_1)s 
+ LIMIT %(param_1)s
+2026-09-20 03:53:03,587 INFO sqlalchemy.engine.Engine [generated in 0.00069s] {'id_1': 4, 'param_1': 1}
+2026-09-20 03:53:03,589 INFO sqlalchemy.engine.Engine UPDATE rules SET is_active=%(is_active)s, updated_at=now() WHERE rules.id = %(rules_id)s
+2026-09-20 03:53:03,590 INFO sqlalchemy.engine.Engine [generated in 0.00027s] {'is_active': 0, 'rules_id': 4}
+2026-09-20 03:53:03,591 INFO sqlalchemy.engine.Engine COMMIT
+2026-09-20 03:53:03,593 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:03,595 INFO sqlalchemy.engine.Engine SELECT rules.id, rules.name, rules.description, rules.category, rules.is_active, rules.created_at, rules.updated_at 
+FROM rules 
+WHERE rules.id = %(pk_1)s
+2026-09-20 03:53:03,595 INFO sqlalchemy.engine.Engine [generated in 0.00033s] {'pk_1': 4}
+INFO:     127.0.0.1:51657 - "DELETE /admin/rules/4 HTTP/1.1" 200 OK
+2026-09-20 03:53:03,598 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:03,603 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:03,604 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:03,604 INFO sqlalchemy.engine.Engine [cached since 0.023s ago] {'id_1': 6}
+2026-09-20 03:53:03,606 INFO sqlalchemy.engine.Engine SELECT rules.id AS rules_id, rules.name AS rules_name, rules.description AS rules_description, rules.category AS rules_category, rules.is_active AS rules_is_active, rules.created_at AS rules_created_at, rules.updated_at AS rules_updated_at 
+FROM rules ORDER BY rules.name ASC
+2026-09-20 03:53:03,606 INFO sqlalchemy.engine.Engine [generated in 0.00028s] {}
+INFO:     127.0.0.1:51657 - "GET /admin/rules HTTP/1.1" 200 OK
+2026-09-20 03:53:03,608 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:07,660 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:07,667 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:07,668 INFO sqlalchemy.engine.Engine [cached since 4.087s ago] {'id_1': 6}
+2026-09-20 03:53:07,672 INFO sqlalchemy.engine.Engine SELECT rules.id AS rules_id, rules.name AS rules_name, rules.description AS rules_description, rules.category AS rules_category, rules.is_active AS rules_is_active, rules.created_at AS rules_created_at, rules.updated_at AS rules_updated_at 
+FROM rules 
+WHERE rules.id = %(id_1)s 
+ LIMIT %(param_1)s
+2026-09-20 03:53:07,672 INFO sqlalchemy.engine.Engine [cached since 4.086s ago] {'id_1': 4, 'param_1': 1}
+2026-09-20 03:53:07,673 INFO sqlalchemy.engine.Engine UPDATE rules SET is_active=%(is_active)s, updated_at=now() WHERE rules.id = %(rules_id)s
+2026-09-20 03:53:07,674 INFO sqlalchemy.engine.Engine [cached since 4.084s ago] {'is_active': 1, 'rules_id': 4}
+2026-09-20 03:53:07,675 INFO sqlalchemy.engine.Engine COMMIT
+2026-09-20 03:53:07,677 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:07,678 INFO sqlalchemy.engine.Engine SELECT rules.id, rules.name, rules.description, rules.category, rules.is_active, rules.created_at, rules.updated_at 
+FROM rules 
+WHERE rules.id = %(pk_1)s
+2026-09-20 03:53:07,679 INFO sqlalchemy.engine.Engine [cached since 4.084s ago] {'pk_1': 4}
+INFO:     127.0.0.1:51657 - "PATCH /admin/rules/4 HTTP/1.1" 200 OK
+2026-09-20 03:53:07,680 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:07,684 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:07,684 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:07,685 INFO sqlalchemy.engine.Engine [cached since 4.104s ago] {'id_1': 6}
+2026-09-20 03:53:07,687 INFO sqlalchemy.engine.Engine SELECT rules.id AS rules_id, rules.name AS rules_name, rules.description AS rules_description, rules.category AS rules_category, rules.is_active AS rules_is_active, rules.created_at AS rules_created_at, rules.updated_at AS rules_updated_at 
+FROM rules ORDER BY rules.name ASC
+2026-09-20 03:53:07,688 INFO sqlalchemy.engine.Engine [cached since 4.082s ago] {}
+INFO:     127.0.0.1:51657 - "GET /admin/rules HTTP/1.1" 200 OK
+2026-09-20 03:53:07,691 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:09,567 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:09,582 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:09,583 INFO sqlalchemy.engine.Engine [cached since 6.002s ago] {'id_1': 6}
+2026-09-20 03:53:09,589 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities ORDER BY amenities.name ASC
+2026-09-20 03:53:09,590 INFO sqlalchemy.engine.Engine [generated in 0.00116s] {}
+INFO:     127.0.0.1:51657 - "GET /admin/amenities HTTP/1.1" 200 OK
+2026-09-20 03:53:09,594 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:09,596 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:09,596 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:09,597 INFO sqlalchemy.engine.Engine [cached since 6.015s ago] {'id_1': 6}
+2026-09-20 03:53:09,598 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities ORDER BY amenities.name ASC
+2026-09-20 03:53:09,598 INFO sqlalchemy.engine.Engine [cached since 0.009474s ago] {}
+INFO:     127.0.0.1:51657 - "GET /admin/amenities HTTP/1.1" 200 OK
+2026-09-20 03:53:09,600 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:51954 - "OPTIONS /admin/amenities/4 HTTP/1.1" 200 OK
+2026-09-20 03:53:13,704 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:13,705 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:13,705 INFO sqlalchemy.engine.Engine [cached since 10.12s ago] {'id_1': 6}
+2026-09-20 03:53:13,708 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities 
+WHERE amenities.id = %(id_1)s 
+ LIMIT %(param_1)s
+2026-09-20 03:53:13,708 INFO sqlalchemy.engine.Engine [generated in 0.00073s] {'id_1': 4, 'param_1': 1}
+2026-09-20 03:53:13,712 INFO sqlalchemy.engine.Engine UPDATE amenities SET is_active=%(is_active)s, updated_at=now() WHERE amenities.id = %(amenities_id)s
+2026-09-20 03:53:13,712 INFO sqlalchemy.engine.Engine [generated in 0.00061s] {'is_active': 0, 'amenities_id': 4}
+2026-09-20 03:53:13,714 INFO sqlalchemy.engine.Engine COMMIT
+2026-09-20 03:53:13,716 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:13,717 INFO sqlalchemy.engine.Engine SELECT amenities.id, amenities.name, amenities.description, amenities.category, amenities.is_active, amenities.created_at, amenities.updated_at 
+FROM amenities 
+WHERE amenities.id = %(pk_1)s
+2026-09-20 03:53:13,717 INFO sqlalchemy.engine.Engine [generated in 0.00033s] {'pk_1': 4}
+INFO:     127.0.0.1:51657 - "DELETE /admin/amenities/4 HTTP/1.1" 200 OK
+2026-09-20 03:53:13,720 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:13,723 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:13,723 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:13,724 INFO sqlalchemy.engine.Engine [cached since 10.14s ago] {'id_1': 6}
+2026-09-20 03:53:13,725 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities ORDER BY amenities.name ASC
+2026-09-20 03:53:13,726 INFO sqlalchemy.engine.Engine [cached since 4.137s ago] {}
+INFO:     127.0.0.1:51657 - "GET /admin/amenities HTTP/1.1" 200 OK
+2026-09-20 03:53:13,730 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:48,271 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:48,272 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:48,282 INFO sqlalchemy.engine.Engine [cached since 44.7s ago] {'id_1': 6}
+2026-09-20 03:53:48,292 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.password_hash AS users_password_hash, users.phone AS users_phone, users.role AS users_role, users.is_active AS users_is_active, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users ORDER BY users.created_at DESC
+2026-09-20 03:53:48,292 INFO sqlalchemy.engine.Engine [generated in 0.00039s] {}
+2026-09-20 03:53:48,292 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:48,293 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:48,294 INFO sqlalchemy.engine.Engine [cached since 44.71s ago] {'id_1': 6}
+INFO:     127.0.0.1:52692 - "GET /admin/users HTTP/1.1" 200 OK
+2026-09-20 03:53:48,294 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:48,296 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:48,298 INFO sqlalchemy.engine.Engine [cached since 44.72s ago] {'id_1': 6}
+2026-09-20 03:53:48,298 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:48,305 INFO sqlalchemy.engine.Engine SELECT properties.id AS properties_id, properties.owner_id AS properties_owner_id, properties.title AS properties_title, properties.description AS properties_description, properties.property_type AS properties_property_type, properties.location AS properties_location, properties.address AS properties_address, properties.price_per_night AS properties_price_per_night, properties.bedrooms AS properties_bedrooms, properties.beds AS properties_beds, properties.bathrooms AS properties_bathrooms, properties.max_guests AS properties_max_guests, properties.min_nights AS properties_min_nights, properties.status AS properties_status, properties.rejection_reason AS properties_rejection_reason, properties.created_at AS properties_created_at, properties.updated_at AS properties_updated_at 
+FROM properties 
+WHERE properties.status = %(status_1)s ORDER BY properties.created_at DESC
+2026-09-20 03:53:48,306 INFO sqlalchemy.engine.Engine [generated in 0.00132s] {'status_1': 'pending'}
+2026-09-20 03:53:48,317 INFO sqlalchemy.engine.Engine SELECT properties.id AS properties_id, properties.owner_id AS properties_owner_id, properties.title AS properties_title, properties.description AS properties_description, properties.property_type AS properties_property_type, properties.location AS properties_location, properties.address AS properties_address, properties.price_per_night AS properties_price_per_night, properties.bedrooms AS properties_bedrooms, properties.beds AS properties_beds, properties.bathrooms AS properties_bathrooms, properties.max_guests AS properties_max_guests, properties.min_nights AS properties_min_nights, properties.status AS properties_status, properties.rejection_reason AS properties_rejection_reason, properties.created_at AS properties_created_at, properties.updated_at AS properties_updated_at 
+FROM properties 
+WHERE properties.status = %(status_1)s ORDER BY properties.created_at DESC
+2026-09-20 03:53:48,318 INFO sqlalchemy.engine.Engine [cached since 0.01339s ago] {'status_1': 'approved'}
+2026-09-20 03:53:48,321 INFO sqlalchemy.engine.Engine SELECT property_images.id AS property_images_id, property_images.property_id AS property_images_property_id, property_images.image_url AS property_images_image_url, property_images.imagekit_file_id AS property_images_imagekit_file_id, property_images.is_primary AS property_images_is_primary, property_images.display_order AS property_images_display_order, property_images.created_at AS property_images_created_at 
+FROM property_images 
+WHERE %(param_1)s = property_images.property_id ORDER BY property_images.display_order
+2026-09-20 03:53:48,321 INFO sqlalchemy.engine.Engine [generated in 0.00043s] {'param_1': 1}
+2026-09-20 03:53:48,321 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:48,323 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:48,322 INFO sqlalchemy.engine.Engine SELECT property_images.id AS property_images_id, property_images.property_id AS property_images_property_id, property_images.image_url AS property_images_image_url, property_images.imagekit_file_id AS property_images_imagekit_file_id, property_images.is_primary AS property_images_is_primary, property_images.display_order AS property_images_display_order, property_images.created_at AS property_images_created_at 
+FROM property_images 
+WHERE %(param_1)s = property_images.property_id ORDER BY property_images.display_order
+2026-09-20 03:53:48,324 INFO sqlalchemy.engine.Engine [cached since 0.003205s ago] {'param_1': 3}
+2026-09-20 03:53:48,324 INFO sqlalchemy.engine.Engine [cached since 44.74s ago] {'id_1': 6}
+2026-09-20 03:53:48,324 INFO sqlalchemy.engine.Engine SELECT property_amenities.property_id AS property_amenities_property_id, property_amenities.amenity_id AS property_amenities_amenity_id 
+FROM property_amenities 
+WHERE %(param_1)s = property_amenities.property_id
+2026-09-20 03:53:48,325 INFO sqlalchemy.engine.Engine [generated in 0.00126s] {'param_1': 1}
+2026-09-20 03:53:48,325 INFO sqlalchemy.engine.Engine SELECT property_amenities.property_id AS property_amenities_property_id, property_amenities.amenity_id AS property_amenities_amenity_id 
+FROM property_amenities 
+WHERE %(param_1)s = property_amenities.property_id
+2026-09-20 03:53:48,326 INFO sqlalchemy.engine.Engine [cached since 0.002065s ago] {'param_1': 3}
+2026-09-20 03:53:48,326 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.password_hash AS users_password_hash, users.phone AS users_phone, users.role AS users_role, users.is_active AS users_is_active, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users ORDER BY users.created_at DESC
+2026-09-20 03:53:48,327 INFO sqlalchemy.engine.Engine [cached since 0.03593s ago] {}
+2026-09-20 03:53:48,327 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities 
+WHERE amenities.id = %(pk_1)s
+2026-09-20 03:53:48,328 INFO sqlalchemy.engine.Engine [cached since 0.0007569s ago] {'pk_1': 1}
+2026-09-20 03:53:48,327 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities 
+WHERE amenities.id = %(pk_1)s
+2026-09-20 03:53:48,328 INFO sqlalchemy.engine.Engine [generated in 0.00117s] {'pk_1': 1}
+INFO:     127.0.0.1:52692 - "GET /admin/users HTTP/1.1" 200 OK
+2026-09-20 03:53:48,332 INFO sqlalchemy.engine.Engine SELECT property_rules.id AS property_rules_id, property_rules.property_id AS property_rules_property_id, property_rules.rule_id AS property_rules_rule_id, property_rules.allowed AS property_rules_allowed, property_rules.value AS property_rules_value, property_rules.created_at AS property_rules_created_at, property_rules.updated_at AS property_rules_updated_at 
+FROM property_rules 
+WHERE %(param_1)s = property_rules.property_id
+2026-09-20 03:53:48,333 INFO sqlalchemy.engine.Engine [generated in 0.00102s] {'param_1': 1}
+2026-09-20 03:53:48,333 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:48,333 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities 
+WHERE amenities.id = %(pk_1)s
+2026-09-20 03:53:48,334 INFO sqlalchemy.engine.Engine [cached since 0.006469s ago] {'pk_1': 2}
+2026-09-20 03:53:48,335 INFO sqlalchemy.engine.Engine SELECT rules.id AS rules_id, rules.name AS rules_name, rules.description AS rules_description, rules.category AS rules_category, rules.is_active AS rules_is_active, rules.created_at AS rules_created_at, rules.updated_at AS rules_updated_at 
+FROM rules 
+WHERE rules.id = %(pk_1)s
+2026-09-20 03:53:48,335 INFO sqlalchemy.engine.Engine [generated in 0.00042s] {'pk_1': 1}
+2026-09-20 03:53:48,335 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities 
+WHERE amenities.id = %(pk_1)s
+2026-09-20 03:53:48,336 INFO sqlalchemy.engine.Engine [cached since 0.00869s ago] {'pk_1': 3}
+2026-09-20 03:53:48,337 INFO sqlalchemy.engine.Engine SELECT property_seasonal_prices.id AS property_seasonal_prices_id, property_seasonal_prices.property_id AS property_seasonal_prices_property_id, property_seasonal_prices.season_name AS property_seasonal_prices_season_name, property_seasonal_prices.start_date AS property_seasonal_prices_start_date, property_seasonal_prices.end_date AS property_seasonal_prices_end_date, property_seasonal_prices.price_per_night AS property_seasonal_prices_price_per_night, property_seasonal_prices.created_at AS property_seasonal_prices_created_at, property_seasonal_prices.updated_at AS property_seasonal_prices_updated_at 
+FROM property_seasonal_prices 
+WHERE %(param_1)s = property_seasonal_prices.property_id
+2026-09-20 03:53:48,338 INFO sqlalchemy.engine.Engine [generated in 0.00038s] {'param_1': 1}
+2026-09-20 03:53:48,338 INFO sqlalchemy.engine.Engine SELECT property_rules.id AS property_rules_id, property_rules.property_id AS property_rules_property_id, property_rules.rule_id AS property_rules_rule_id, property_rules.allowed AS property_rules_allowed, property_rules.value AS property_rules_value, property_rules.created_at AS property_rules_created_at, property_rules.updated_at AS property_rules_updated_at 
+FROM property_rules 
+WHERE %(param_1)s = property_rules.property_id
+2026-09-20 03:53:48,338 INFO sqlalchemy.engine.Engine [cached since 0.006811s ago] {'param_1': 3}
+INFO:     127.0.0.1:50080 - "GET /admin/properties?status=pending HTTP/1.1" 200 OK
+2026-09-20 03:53:48,340 INFO sqlalchemy.engine.Engine SELECT rules.id AS rules_id, rules.name AS rules_name, rules.description AS rules_description, rules.category AS rules_category, rules.is_active AS rules_is_active, rules.created_at AS rules_created_at, rules.updated_at AS rules_updated_at 
+FROM rules 
+WHERE rules.id = %(pk_1)s
+2026-09-20 03:53:48,340 INFO sqlalchemy.engine.Engine [cached since 0.00555s ago] {'pk_1': 1}
+2026-09-20 03:53:48,340 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:48,342 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:48,342 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:48,343 INFO sqlalchemy.engine.Engine [cached since 44.76s ago] {'id_1': 6}
+2026-09-20 03:53:48,343 INFO sqlalchemy.engine.Engine SELECT rules.id AS rules_id, rules.name AS rules_name, rules.description AS rules_description, rules.category AS rules_category, rules.is_active AS rules_is_active, rules.created_at AS rules_created_at, rules.updated_at AS rules_updated_at 
+FROM rules 
+WHERE rules.id = %(pk_1)s
+2026-09-20 03:53:48,343 INFO sqlalchemy.engine.Engine [cached since 0.008595s ago] {'pk_1': 4}
+2026-09-20 03:53:48,344 INFO sqlalchemy.engine.Engine SELECT property_seasonal_prices.id AS property_seasonal_prices_id, property_seasonal_prices.property_id AS property_seasonal_prices_property_id, property_seasonal_prices.season_name AS property_seasonal_prices_season_name, property_seasonal_prices.start_date AS property_seasonal_prices_start_date, property_seasonal_prices.end_date AS property_seasonal_prices_end_date, property_seasonal_prices.price_per_night AS property_seasonal_prices_price_per_night, property_seasonal_prices.created_at AS property_seasonal_prices_created_at, property_seasonal_prices.updated_at AS property_seasonal_prices_updated_at 
+FROM property_seasonal_prices 
+WHERE %(param_1)s = property_seasonal_prices.property_id
+2026-09-20 03:53:48,344 INFO sqlalchemy.engine.Engine [cached since 0.007115s ago] {'param_1': 3}
+2026-09-20 03:53:48,345 INFO sqlalchemy.engine.Engine SELECT properties.id AS properties_id, properties.owner_id AS properties_owner_id, properties.title AS properties_title, properties.description AS properties_description, properties.property_type AS properties_property_type, properties.location AS properties_location, properties.address AS properties_address, properties.price_per_night AS properties_price_per_night, properties.bedrooms AS properties_bedrooms, properties.beds AS properties_beds, properties.bathrooms AS properties_bathrooms, properties.max_guests AS properties_max_guests, properties.min_nights AS properties_min_nights, properties.status AS properties_status, properties.rejection_reason AS properties_rejection_reason, properties.created_at AS properties_created_at, properties.updated_at AS properties_updated_at 
+FROM properties 
+WHERE properties.status = %(status_1)s ORDER BY properties.created_at DESC
+2026-09-20 03:53:48,345 INFO sqlalchemy.engine.Engine [cached since 0.0408s ago] {'status_1': 'pending'}
+INFO:     127.0.0.1:58548 - "GET /admin/properties?status=approved HTTP/1.1" 200 OK
+2026-09-20 03:53:48,347 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:48,350 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-09-20 03:53:48,349 INFO sqlalchemy.engine.Engine SELECT property_images.id AS property_images_id, property_images.property_id AS property_images_property_id, property_images.image_url AS property_images_image_url, property_images.imagekit_file_id AS property_images_imagekit_file_id, property_images.is_primary AS property_images_is_primary, property_images.display_order AS property_images_display_order, property_images.created_at AS property_images_created_at 
+FROM property_images 
+WHERE %(param_1)s = property_images.property_id ORDER BY property_images.display_order
+2026-09-20 03:53:48,351 INFO sqlalchemy.engine.Engine [cached since 0.02997s ago] {'param_1': 1}
+2026-09-20 03:53:48,350 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.password_hash, users.phone, users.role, users.is_active, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(id_1)s
+2026-09-20 03:53:48,352 INFO sqlalchemy.engine.Engine [cached since 44.77s ago] {'id_1': 6}
+2026-09-20 03:53:48,352 INFO sqlalchemy.engine.Engine SELECT property_amenities.property_id AS property_amenities_property_id, property_amenities.amenity_id AS property_amenities_amenity_id 
+FROM property_amenities 
+WHERE %(param_1)s = property_amenities.property_id
+2026-09-20 03:53:48,353 INFO sqlalchemy.engine.Engine [cached since 0.02894s ago] {'param_1': 1}
+2026-09-20 03:53:48,354 INFO sqlalchemy.engine.Engine SELECT properties.id AS properties_id, properties.owner_id AS properties_owner_id, properties.title AS properties_title, properties.description AS properties_description, properties.property_type AS properties_property_type, properties.location AS properties_location, properties.address AS properties_address, properties.price_per_night AS properties_price_per_night, properties.bedrooms AS properties_bedrooms, properties.beds AS properties_beds, properties.bathrooms AS properties_bathrooms, properties.max_guests AS properties_max_guests, properties.min_nights AS properties_min_nights, properties.status AS properties_status, properties.rejection_reason AS properties_rejection_reason, properties.created_at AS properties_created_at, properties.updated_at AS properties_updated_at 
+FROM properties 
+WHERE properties.status = %(status_1)s ORDER BY properties.created_at DESC
+2026-09-20 03:53:48,354 INFO sqlalchemy.engine.Engine [cached since 0.05013s ago] {'status_1': 'approved'}
+2026-09-20 03:53:48,354 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities 
+WHERE amenities.id = %(pk_1)s
+2026-09-20 03:53:48,355 INFO sqlalchemy.engine.Engine [cached since 0.02772s ago] {'pk_1': 1}
+2026-09-20 03:53:48,356 INFO sqlalchemy.engine.Engine SELECT property_images.id AS property_images_id, property_images.property_id AS property_images_property_id, property_images.image_url AS property_images_image_url, property_images.imagekit_file_id AS property_images_imagekit_file_id, property_images.is_primary AS property_images_is_primary, property_images.display_order AS property_images_display_order, property_images.created_at AS property_images_created_at 
+FROM property_images 
+WHERE %(param_1)s = property_images.property_id ORDER BY property_images.display_order
+2026-09-20 03:53:48,356 INFO sqlalchemy.engine.Engine [cached since 0.03576s ago] {'param_1': 3}
+2026-09-20 03:53:48,356 INFO sqlalchemy.engine.Engine SELECT property_rules.id AS property_rules_id, property_rules.property_id AS property_rules_property_id, property_rules.rule_id AS property_rules_rule_id, property_rules.allowed AS property_rules_allowed, property_rules.value AS property_rules_value, property_rules.created_at AS property_rules_created_at, property_rules.updated_at AS property_rules_updated_at 
+FROM property_rules 
+WHERE %(param_1)s = property_rules.property_id
+2026-09-20 03:53:48,357 INFO sqlalchemy.engine.Engine [cached since 0.02515s ago] {'param_1': 1}
+2026-09-20 03:53:48,357 INFO sqlalchemy.engine.Engine SELECT property_amenities.property_id AS property_amenities_property_id, property_amenities.amenity_id AS property_amenities_amenity_id 
+FROM property_amenities 
+WHERE %(param_1)s = property_amenities.property_id
+2026-09-20 03:53:48,358 INFO sqlalchemy.engine.Engine [cached since 0.03406s ago] {'param_1': 3}
+2026-09-20 03:53:48,358 INFO sqlalchemy.engine.Engine SELECT rules.id AS rules_id, rules.name AS rules_name, rules.description AS rules_description, rules.category AS rules_category, rules.is_active AS rules_is_active, rules.created_at AS rules_created_at, rules.updated_at AS rules_updated_at 
+FROM rules 
+WHERE rules.id = %(pk_1)s
+2026-09-20 03:53:48,359 INFO sqlalchemy.engine.Engine [cached since 0.0242s ago] {'pk_1': 1}
+2026-09-20 03:53:48,359 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities 
+WHERE amenities.id = %(pk_1)s
+2026-09-20 03:53:48,359 INFO sqlalchemy.engine.Engine [cached since 0.03209s ago] {'pk_1': 1}
+2026-09-20 03:53:48,360 INFO sqlalchemy.engine.Engine SELECT property_seasonal_prices.id AS property_seasonal_prices_id, property_seasonal_prices.property_id AS property_seasonal_prices_property_id, property_seasonal_prices.season_name AS property_seasonal_prices_season_name, property_seasonal_prices.start_date AS property_seasonal_prices_start_date, property_seasonal_prices.end_date AS property_seasonal_prices_end_date, property_seasonal_prices.price_per_night AS property_seasonal_prices_price_per_night, property_seasonal_prices.created_at AS property_seasonal_prices_created_at, property_seasonal_prices.updated_at AS property_seasonal_prices_updated_at 
+FROM property_seasonal_prices 
+WHERE %(param_1)s = property_seasonal_prices.property_id
+2026-09-20 03:53:48,360 INFO sqlalchemy.engine.Engine [cached since 0.02242s ago] {'param_1': 1}
+2026-09-20 03:53:48,360 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities 
+WHERE amenities.id = %(pk_1)s
+2026-09-20 03:53:48,361 INFO sqlalchemy.engine.Engine [cached since 0.03346s ago] {'pk_1': 2}
+INFO:     127.0.0.1:52692 - "GET /admin/properties?status=pending HTTP/1.1" 200 OK
+2026-09-20 03:53:48,361 INFO sqlalchemy.engine.Engine SELECT amenities.id AS amenities_id, amenities.name AS amenities_name, amenities.description AS amenities_description, amenities.category AS amenities_category, amenities.is_active AS amenities_is_active, amenities.created_at AS amenities_created_at, amenities.updated_at AS amenities_updated_at 
+FROM amenities 
+WHERE amenities.id = %(pk_1)s
+2026-09-20 03:53:48,362 INFO sqlalchemy.engine.Engine [cached since 0.03485s ago] {'pk_1': 3}
+2026-09-20 03:53:48,362 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-09-20 03:53:48,363 INFO sqlalchemy.engine.Engine SELECT property_rules.id AS property_rules_id, property_rules.property_id AS property_rules_property_id, property_rules.rule_id AS property_rules_rule_id, property_rules.allowed AS property_rules_allowed, property_rules.value AS property_rules_value, property_rules.created_at AS property_rules_created_at, property_rules.updated_at AS property_rules_updated_at 
+FROM property_rules 
+WHERE %(param_1)s = property_rules.property_id
+2026-09-20 03:53:48,364 INFO sqlalchemy.engine.Engine [cached since 0.03204s ago] {'param_1': 3}
+2026-09-20 03:53:48,365 INFO sqlalchemy.engine.Engine SELECT rules.id AS rules_id, rules.name AS rules_name, rules.description AS rules_description, rules.category AS rules_category, rules.is_active AS rules_is_active, rules.created_at AS rules_created_at, rules.updated_at AS rules_updated_at 
+FROM rules 
+WHERE rules.id = %(pk_1)s
+2026-09-20 03:53:48,366 INFO sqlalchemy.engine.Engine [cached since 0.03108s ago] {'pk_1': 1}
+2026-09-20 03:53:48,367 INFO sqlalchemy.engine.Engine SELECT rules.id AS rules_id, rules.name AS rules_name, rules.description AS rules_description, rules.category AS rules_category, rules.is_active AS rules_is_active, rules.created_at AS rules_created_at, rules.updated_at AS rules_updated_at 
+FROM rules 
+WHERE rules.id = %(pk_1)s
+2026-09-20 03:53:48,367 INFO sqlalchemy.engine.Engine [cached since 0.03281s ago] {'pk_1': 4}
+2026-09-20 03:53:48,368 INFO sqlalchemy.engine.Engine SELECT property_seasonal_prices.id AS property_seasonal_prices_id, property_seasonal_prices.property_id AS property_seasonal_prices_property_id, property_seasonal_prices.season_name AS property_seasonal_prices_season_name, property_seasonal_prices.start_date AS property_seasonal_prices_start_date, property_seasonal_prices.end_date AS property_seasonal_prices_end_date, property_seasonal_prices.price_per_night AS property_seasonal_prices_price_per_night, property_seasonal_prices.created_at AS property_seasonal_prices_created_at, property_seasonal_prices.updated_at AS property_seasonal_prices_updated_at 
+FROM property_seasonal_prices 
+WHERE %(param_1)s = property_seasonal_prices.property_id
+2026-09-20 03:53:48,369 INFO sqlalchemy.engine.Engine [cached since 0.03147s ago] {'param_1': 3}
+INFO:     127.0.0.1:58548 - "GET /admin/properties?status=approved HTTP/1.1" 200 OK
+2026-09-20 03:53:48,371 INFO sqlalchemy.engine.Engine ROLLBACK
