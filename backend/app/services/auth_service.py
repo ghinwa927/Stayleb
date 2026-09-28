@@ -5,6 +5,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.core.datetime_utils import utcnow_naive
 from app.models.user import User, UserRole
 from app.models.refresh_token import RefreshToken
 from app.core.password_validation import validate_password
@@ -102,11 +103,12 @@ def login_user(db: Session, login_data: LoginRequest):
     # Hash refresh token before storing it
     refresh_token_hash = hash_refresh_token(refresh_token)
 
-    # Calculate refresh token expiration
+    # Calculate refresh token expiration (naive UTC: RefreshToken
+    # columns are stored without timezone).
     expires_at = (
-        datetime.now(timezone.utc)
+        utcnow_naive()
         + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    ).replace(tzinfo=None)
+    )
 
     # Store refresh-token session in database
     db_refresh_token = RefreshToken(

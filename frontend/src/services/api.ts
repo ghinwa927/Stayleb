@@ -1,4 +1,9 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+// Central API base URL. NEXT_PUBLIC_API_URL is baked in at build time
+// (Vercel dashboard vars override .env.production). Trailing slashes are
+// stripped so `${API_BASE_URL}/...` endpoints never double up slashes.
+export const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
+).replace(/\/+$/, "");
 
 function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -40,7 +45,7 @@ export function scheduleAutoRefresh() {
 async function doRefresh(): Promise<string> {
   if (refreshPromise) return refreshPromise;
   refreshPromise = (async () => {
-    const res = await fetch(`${API_URL}/auth/refresh`, {
+    const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: "POST",
       credentials: "include",
     });
@@ -99,7 +104,7 @@ export async function apiFetch(
       ...(options.headers as Record<string, string>),
     };
     if (token) headers["Authorization"] = `Bearer ${token}`;
-    return fetch(`${API_URL}${endpoint}`, {
+    return fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       credentials: "include",
       headers,
@@ -152,7 +157,7 @@ export async function apiFetch(
 }
 
 export async function loginRequest(email: string, password: string) {
-  const response = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -202,7 +207,7 @@ export async function registerRequest(data: {
   phone?: string;
   role: "client" | "owner";
 }) {
-  const response = await fetch(`${API_URL}/auth/register`, {
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -221,7 +226,7 @@ export async function forgotPasswordRequest(email: string) {
   const clean = email.trim().toLowerCase();
   let response: Response;
   try {
-    response = await fetch(`${API_URL}/auth/forgot-password`, {
+    response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: clean }),
@@ -243,7 +248,7 @@ export async function forgotPasswordRequest(email: string) {
 export async function verifyOtpRequest(email: string, otp: string) {
   let response: Response;
   try {
-    response = await fetch(`${API_URL}/auth/verify-reset-otp`, {
+    response = await fetch(`${API_BASE_URL}/auth/verify-reset-otp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: email.trim().toLowerCase(), otp: otp.trim() }),
@@ -261,7 +266,7 @@ export async function verifyOtpRequest(email: string, otp: string) {
 }
 
 export async function resetPasswordRequest(reset_token: string, new_password: string) {
-  const response = await fetch(`${API_URL}/auth/reset-password`, {
+  const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ reset_token, new_password }),
@@ -284,7 +289,7 @@ export async function changePasswordRequest(current_password: string, new_passwo
 }
 
 export async function logoutRequest() {
-  await fetch(`${API_URL}/auth/logout`, {
+  await fetch(`${API_BASE_URL}/auth/logout`, {
     method: "POST",
     credentials: "include",
   }).catch(() => {});
@@ -293,7 +298,7 @@ export async function logoutRequest() {
 }
 
 export async function refreshRequest() {
-  const response = await fetch(`${API_URL}/auth/refresh`, {
+  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
     method: "POST",
     credentials: "include",
   });

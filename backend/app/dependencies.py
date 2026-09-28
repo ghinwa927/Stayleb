@@ -33,6 +33,18 @@ def get_current_user(
                 detail="Invalid token"
             )
 
+        # Access-token endpoints must only accept access tokens.
+        # Other token types issued by this service (e.g. password-reset
+        # tokens, which carry purpose="password_reset" and no type claim)
+        # are rejected here. All access tokens created by
+        # create_access_token() carry type="access", so valid tokens
+        # are unaffected.
+        if payload.get("type") != "access":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token"
+            )
+
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

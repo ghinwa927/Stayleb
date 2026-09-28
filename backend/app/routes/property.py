@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status,Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from datetime import date,datetime
+from datetime import date
+
+from app.core.datetime_utils import utcnow_naive
 from decimal import Decimal
 from typing import Literal
 
@@ -231,9 +233,10 @@ def get_public_availability_route(
     #
     # pending + expires_at <= now
     #   -> does NOT block
-    # -------------------------------------------------
+    # ---------------------------------
 
-    now = datetime.now()
+    # Naive UTC, matching the stored Booking.expires_at convention.
+    now = utcnow_naive()
 
     bookings = (
         db.query(Booking)

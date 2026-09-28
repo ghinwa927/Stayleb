@@ -1,10 +1,11 @@
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 from math import ceil
 
 from sqlalchemy import asc, desc, func, or_
 from sqlalchemy.orm import Session
 
+from app.core.datetime_utils import utcnow_naive
 from app.models.booking import Booking
 from app.models.property import Property
 from app.models.property_amenity import PropertyAmenity
@@ -165,10 +166,11 @@ def search_properties(
         #     -> blocks
         #
         # pending + expires_at <= now
-        #     -> does NOT block
+        #   -> does NOT block
         # ---------------------------------
 
-        now = datetime.now()
+        # Naive UTC, matching the stored Booking.expires_at convention.
+        now = utcnow_naive()
 
         booked_property_ids = (
             db.query(Booking.property_id)

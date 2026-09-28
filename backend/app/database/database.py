@@ -3,6 +3,8 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 import os
 
+from app.config import settings
+
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -12,7 +14,7 @@ if not DATABASE_URL:
 
 engine = create_engine(
     DATABASE_URL,
-    echo=True,
+    echo=settings.sql_echo,
     pool_pre_ping=True,
 )
 

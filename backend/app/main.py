@@ -1,8 +1,8 @@
-import os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+
+from app.config import settings
 
 from app.database.database import engine
 from app.routes.auth import router as auth_router
@@ -37,43 +37,25 @@ from app.routes.owner_earnings import router as owner_earnings_router
 from app.routes.owner_settlements import router as owner_settlement_router
 from app.routes.favorites import router as favorite_router
 
-Base.metadata.create_all(bind=engine)
-
-# Attempt to migrate ENUM columns to VARCHAR for booking/payment flexibility.
-# This is safe to run on both MySQL and SQLite: ignore failures on fresh DB.
-try:
-    from sqlalchemy import text as _text
-    with engine.begin() as conn:
-        # MySQL: modify columns if they still use ENUM type
-        try:
-            conn.execute(_text("ALTER TABLE bookings MODIFY status VARCHAR(20) NOT NULL DEFAULT 'pending'"))
-        except Exception:
-            pass
-        try:
-            conn.execute(_text("ALTER TABLE payments MODIFY payment_method VARCHAR(20) NOT NULL"))
-        except Exception:
-            pass
-        try:
-            conn.execute(_text("ALTER TABLE payments MODIFY payment_status VARCHAR(20) NOT NULL DEFAULT 'pending'"))
-        except Exception:
-            pass
-except Exception:
-    pass
+# NOTE: schema changes are managed with Alembic revisions
+# (see backend/alembic/versions). Application startup must NOT mutate
+# the database schema: run `alembic upgrade head` intentionally for
+# fresh databases, and `alembic stamp <rev>` once for databases that
+# already contain the schema. The previous startup create_all() call
+# and MySQL-only ALTER TABLE statements were removed for this reason.
 
 app = FastAPI(
     title="StayLeb API",
     version="1.0.0"
 )
 
-frontend_url = os.getenv("FRONTEND_URL")
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        frontend_url,
-    ],
+    # Exact origins from settings (local defaults + CORS_ALLOWED_ORIGINS
+    # + legacy FRONTEND_URL). Never ["*"]: the frontend authenticates
+    # with an Authorization header and cookies (credentials: "include"),
+    # which browsers reject in combination with a wildcard origin.
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

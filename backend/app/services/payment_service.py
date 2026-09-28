@@ -1,6 +1,5 @@
 import os
 import stripe
-from datetime import datetime, timezone
 
 from decimal import Decimal, ROUND_HALF_UP
 from fastapi import HTTPException, status
@@ -9,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.models.booking import Booking
 from app.models.payment import Payment, PaymentMethod, PaymentStatus
 from app.models.commission_settlement import CommissionSettlement
+from app.core.datetime_utils import utcnow_naive
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
@@ -47,10 +47,11 @@ def create_payment(
         )
     
 
-    # Temporary checkout hold must still be active
+    # Temporary checkout hold must still be active.
+    # Naive UTC, matching the stored Booking.expires_at convention.
     if (
        booking.expires_at is not None
-       and booking.expires_at <= datetime.now()
+       and booking.expires_at <= utcnow_naive()
     ):
        raise HTTPException(
           status_code=status.HTTP_409_CONFLICT,
@@ -163,12 +164,13 @@ def create_stripe_payment(
 
     # ---------------------------------
     # Temporary checkout hold
-    # must still be active
+    # must still be active.
+    # Naive UTC, matching the stored Booking.expires_at convention.
     # ---------------------------------
 
     if (
         booking.expires_at is not None
-        and booking.expires_at <= datetime.now()
+        and booking.expires_at <= utcnow_naive()
     ):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -439,7 +441,7 @@ def mark_cash_payment_paid(
     # -----------------------------------------
 
     payment.payment_status = PaymentStatus.PAID.value
-    payment.paid_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    payment.paid_at = utcnow_naive()
 
 
    # -----------------------------------------

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Response, Request, HTTPException, status
 from sqlalchemy.orm import Session
+from datetime import timedelta
 
 from app.database.database import get_db
 from app.schemas.user import (
@@ -13,15 +14,17 @@ from app.schemas.user import (
 from app.services.auth_service import register_user, login_user, reset_password
 from app.dependencies import get_current_user
 
-from datetime import datetime, timezone
+from app.core.datetime_utils import utcnow_naive
 from sqlalchemy import select
 
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
 from app.core.security import (
     hash_refresh_token,
+    create_refresh_token,
     create_access_token
 )
+from app.config import settings
 
 from app.schemas.auth import ForgotPasswordRequest,VerifyOTPRequest
 from app.services.auth_service import forgot_password,verify_password_reset_otp
@@ -58,9 +61,9 @@ def login(
         key="refresh_token",
         value=result["refresh_token"],
         httponly=True,
-        secure=False,
-        samesite="lax",
-        max_age=7 * 24 * 60 * 60,
+        secure=settings.refresh_cookie_secure,
+        samesite=settings.refresh_cookie_samesite,
+        max_age=settings.refresh_cookie_max_age,
         path="/"
     )
 
@@ -75,6 +78,7 @@ def login(
 )
 def refresh_access_token(
     request: Request,
+    response: Response,
     db: Session = Depends(get_db)
 ):
     refresh_token = request.cookies.get("refresh_token")
@@ -105,7 +109,7 @@ def refresh_access_token(
             detail="Refresh token has been revoked"
         )
 
-    if stored_token.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
+    if stored_token.expires_at < utcnow_naive():
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token has expired"
@@ -128,6 +132,31 @@ def refresh_access_token(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is inactive"
         )
+
+    # Refresh-token rotation: the presented token is single-use. Revoke
+    # it and issue a fresh token, so a replayed (stolen) token fails.
+    # No schema change needed: revoked_at already exists.
+    stored_token.revoked_at = utcnow_naive()
+    new_refresh_token = create_refresh_token()
+    db.add(RefreshToken(
+        user_id=user.id,
+        token_hash=hash_refresh_token(new_refresh_token),
+        expires_at=(
+            utcnow_naive()
+            + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        ),
+    ))
+    db.commit()
+
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh_token,
+        httponly=True,
+        secure=settings.refresh_cookie_secure,
+        samesite=settings.refresh_cookie_samesite,
+        max_age=settings.refresh_cookie_max_age,
+        path="/"
+    )
 
     access_token = create_access_token({
         "sub": str(user.id),
@@ -157,18 +186,16 @@ def logout(
         stored_token = db.scalar(statement)
 
         if stored_token and stored_token.revoked_at is None:
-            stored_token.revoked_at = (
-                datetime.now(timezone.utc)
-                .replace(tzinfo=None)
-            )
+            # Naive UTC, matching the RefreshToken column convention.
+            stored_token.revoked_at = utcnow_naive()
 
             db.commit()
 
     response.delete_cookie(
         key="refresh_token",
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=settings.refresh_cookie_secure,
+        samesite=settings.refresh_cookie_samesite,
         path="/"
     )
 

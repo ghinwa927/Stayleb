@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Modal } from './Modal';
 import { usePropertyWizard } from '@/components/features/owner/PropertyWizard';
 import { useRecord } from './RecordRow';
+import { API_BASE_URL } from '@/services/api';
 
 type Feedback = { notify: (message: string) => void; query: string; setQuery: (value: string) => void; status: string; setStatus: (value: string) => void };
 const Context = createContext<Feedback>({ notify: () => {}, query: '', setQuery: () => {}, status: '', setStatus: () => {} });
@@ -130,7 +131,7 @@ export function ActionButton({ actionLabel, hint = '', children, onClick, ...pro
     if (/ai|generate|refine/.test(label)) { setDialog('StayLeb AI writing assistant'); return; }
     if (/set as primary/.test(label)) { setActive(true); notify('Primary photo updated.'); return; }
     if (/block.*dates|unblock/.test(label)) { setActive(!active); notify(label.includes('unblock') ? 'Selected dates are available again.' : 'Selected dates blocked for private use.'); return; }
-    if (/logout|sign out/.test(label)) { fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/auth/logout`, { method: "POST", credentials: "include" }).catch(()=>{}); localStorage.removeItem("stayleb_access_token"); localStorage.removeItem("stayleb_token_type"); localStorage.removeItem("stayleb_role"); sessionStorage.removeItem('stayleb-demo-session'); window.dispatchEvent(new Event("stayleb-auth")); router.push('/auth/login'); return; }
+    if (/logout|sign out/.test(label)) { fetch(`${API_BASE_URL}/auth/logout`, { method: "POST", credentials: "include" }).catch(()=>{}); localStorage.removeItem("stayleb_access_token"); localStorage.removeItem("stayleb_token_type"); localStorage.removeItem("stayleb_role"); sessionStorage.removeItem('stayleb-demo-session'); window.dispatchEvent(new Event("stayleb-auth")); router.push('/auth/login'); return; }
     if (/^\d+$|chevron_left|chevron_right|^previous$|^next$|^west$|^east$/.test(label)) { setActive(!active); const scroll = ref.current?.closest('section')?.querySelector<HTMLElement>('.overflow-x-auto'); scroll?.scrollBy({left:label.includes('left')?-320:320,behavior:'smooth'}); return; }
     setActive(!active);
   }

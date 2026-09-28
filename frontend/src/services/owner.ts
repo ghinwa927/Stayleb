@@ -1,7 +1,5 @@
 "use client";
-import { apiFetch } from "@/services/api";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+import { apiFetch, API_BASE_URL } from "@/services/api";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -165,7 +163,7 @@ export async function uploadPropertyImage(file: File): Promise<{ imagekit_file_i
   const token = getToken();
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch(`${API_URL}/images/property`, {
+  const res = await fetch(`${API_BASE_URL}/images/property`, {
     method: "POST",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: form,

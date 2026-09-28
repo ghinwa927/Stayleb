@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { RecordStatus } from "@/components/ui/RecordRow";
-import { ActionButton, LocalForm } from "@/components/ui/Interactions";
+import { ActionButton } from "@/components/ui/Interactions";
 import { getMyProfile, updateMyProfile, type UserProfile, type UpdateProfilePayload } from "@/services/user";
 import { changePasswordRequest } from "@/services/api";
 import Swal from "sweetalert2";
@@ -93,7 +93,7 @@ export function ClientProfileAccountSection0() {
       const payload: UpdateProfilePayload = {};
       if (formData.full_name !== initialData.full_name) payload.full_name = formData.full_name;
       if (formData.email !== initialData.email) payload.email = formData.email;
-      if (formData.phone !== initialData.phone) payload.phone = formData.phone || undefined;
+      if (formData.phone !== initialData.phone) payload.phone = formData.phone;
 
       const updated = await updateMyProfile(payload);
       setProfile(updated);
@@ -323,7 +323,7 @@ export function ClientProfileAccountSection0() {
                       </div>
                     </div>
 
-                    <LocalForm onSubmit={handleSave} className="space-y-5" id="profileForm">
+                    <form onSubmit={handleSave} className="space-y-5" id="profileForm">
                       <div>
                         <label className="block text-[14px] font-bold text-[#0F2432] mb-1" htmlFor="fullName">
                           Full Legal Name
@@ -402,16 +402,15 @@ export function ClientProfileAccountSection0() {
                       </div>
 
                       <div className="pt-5 mt-1 border-t border-[#EEF2F6] flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3">
-                        <ActionButton
-                          className="px-6 py-3 rounded-xl bg-[#EEF2F7] hover:bg-[#E2E8F0] text-[#334155] text-[14px] font-semibold transition-all"
+                        <button
+                          className="px-6 py-3 rounded-xl bg-[#EEF2F7] hover:bg-[#E2E8F0] text-[#334155] text-[14px] font-semibold transition-all disabled:opacity-60"
                           type="button"
-                          actionLabel="Cancel"
                           aria-label="Cancel"
                           onClick={handleCancel}
                           disabled={saving}
                         >
                           Cancel
-                        </ActionButton>
+                        </button>
                         <ActionButton
                           className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#46B1B1] to-[#157375] hover:brightness-[1.05] text-white text-[14px] font-bold shadow-[0_8px_20px_rgba(21,115,117,0.3)] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                           type="submit"
@@ -423,7 +422,7 @@ export function ClientProfileAccountSection0() {
                           <span>{saving ? "Saving…" : "Save Changes"}</span>
                         </ActionButton>
                       </div>
-                    </LocalForm>
+                    </form>
                   </div>
 
                   {/* Account Status */}

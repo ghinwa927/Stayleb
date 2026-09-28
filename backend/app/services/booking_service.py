@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 import stripe
 from sqlalchemy import or_
+from sqlalchemy.exc import OperationalError
 
 from app.models.booking import Booking
 from app.models.property import Property
@@ -12,8 +13,23 @@ from app.models.platform_setting import PlatformSetting
 from app.schemas.booking import BookingCreate
 from app.services.pricing_service import calculate_stay_price
 from app.models.payment import Payment,PaymentStatus,PaymentMethod
+from app.core.datetime_utils import utcnow_naive
 from datetime import date, datetime
 from decimal import Decimal, ROUND_HALF_UP
+
+def _is_lock_contention(exc: BaseException) -> bool:
+    """True only for lock-wait/deadlock failures, never for real outages."""
+    orig = getattr(exc, "orig", None)
+    code = getattr(orig, "pgcode", None) or getattr(orig, "sqlstate", None)
+    if code in ("55P03", "40P01"):
+        return True
+    msg = str(exc).lower()
+    return (
+        "lock wait timeout" in msg
+        or "deadlock" in msg
+        or "database is locked" in msg
+    )
+
 
 def create_booking(
     db: Session,
@@ -21,14 +37,43 @@ def create_booking(
     client_id: int,
 ):
     # ---------------------------------
+    # 0. Serialize concurrent creators.
+    # ---------------------------------
+    # This SELECT ... FOR UPDATE is the FIRST statement of the
+    # request transaction, so it both starts the transaction and
+    # takes an exclusive row lock on the Property row.
+    #
+    # Why the Property row (and not booking rows):
+    # a conflicting booking row may not exist yet (e.g. both
+    # requests are the first booking for these dates), but the
+    # Property row always exists, so it is a stable lock point.
+    # Every concurrent create_booking for the same property
+    # queues on this lock; the winner runs check -> insert ->
+    # commit atomically, and the loser re-checks availability
+    # AFTER the winner commits (READ COMMITTED sees the latest
+    # committed rows), so it hits the existing 409 path below.
+    # Fully supported on PostgreSQL (production database);
+    # silently ignored on dialects without FOR UPDATE support.
+
+    try:
+        property = (
+            db.query(Property)
+            .filter(Property.id == booking_data.property_id)
+            .with_for_update()
+            .first()
+        )
+    except OperationalError as exc:
+        db.rollback()
+        if _is_lock_contention(exc):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="The selected dates are no longer available.",
+            )
+        raise
+
+    # ---------------------------------
     # 1. Find property
     # ---------------------------------
-
-    property = (
-        db.query(Property)
-        .filter(Property.id == booking_data.property_id)
-        .first()
-    )
 
     if property is None:
         raise HTTPException(
@@ -128,7 +173,10 @@ def create_booking(
     # 8. Check existing bookings
     # ---------------------------------
 
-    now = datetime.now()
+    # Naive UTC: Booking.expires_at is stored without timezone,
+    # so the comparison value must be naive UTC as well (never
+    # server-local time).
+    now = utcnow_naive()
 
     conflicting_booking = (
     db.query(Booking)
@@ -232,7 +280,7 @@ def create_booking(
     )
 
     checkout_expires_at = (
-    datetime.now()
+    utcnow_naive()
     + timedelta(minutes=15)
 )
 
@@ -404,7 +452,8 @@ def preview_booking(
     #   -> does NOT block
     # ---------------------------------
 
-    now = datetime.now()
+    # Naive UTC, matching the stored Booking.expires_at convention.
+    now = utcnow_naive()
 
     conflicting_booking = (
         db.query(Booking)
@@ -808,7 +857,8 @@ def cancel_booking(
             booking.cancellation_commission_amount = Decimal("0.00")
             booking.owner_cancellation_earnings = Decimal("0.00")
 
-            PaymentStatus.CANCELLED.value
+            payment.payment_status = PaymentStatus.CANCELLED.value
+            payment.refunded_amount = Decimal("0.00")
 
             db.commit()
             db.refresh(booking)

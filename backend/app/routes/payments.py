@@ -1,8 +1,9 @@
 import os
 import stripe
-from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, status, Request, HTTPException, Header
 from sqlalchemy.orm import Session
+
+from app.core.datetime_utils import utcnow_naive
 
 from app.database.database import get_db
 from app.schemas.payment import (
@@ -162,9 +163,9 @@ async def stripe_webhook(
         if payment.payment_status == "paid":
             return {"received": True}
 
-        # Update payment
+        # Update payment (naive UTC: paid_at is stored without timezone).
         payment.payment_status = "paid"
-        payment.paid_at = datetime.now(timezone.utc)
+        payment.paid_at = utcnow_naive()
 
         # Update associated booking
         booking = (

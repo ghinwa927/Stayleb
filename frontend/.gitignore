@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the production defaults file (public, non-secret values only):
+# committed so builds and Vercel preview deploys share the production API URL.
+# Real secrets must only ever live in Vercel dashboard environment variables.
+!.env.production
 
 # vercel
 .vercel
