@@ -464,7 +464,7 @@ def mark_cash_payment_paid(
           status="unpaid",
      )
 
-    db.add(settlement)
+      db.add(settlement)
 
 
    # -----------------------------------------

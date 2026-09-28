@@ -285,7 +285,7 @@ export function RulesManagementSection0() {
               </div>
               <h3 className="font-display font-bold text-[19px] tracking-tight text-[#46B1B1]">{confirmRule.is_active === false ? "Activate Rule?" : "Deactivate Rule?"}</h3>
               <p className="text-sm text-[#46B1B1]/70 mt-2 leading-relaxed">
-                Are you sure you want to <span className="font-semibold text-[#46B1B1]">{confirmRule.is_active === false ? "activate" : "deactivate"}</span> <span className="font-semibold text-[#46B1B1]">"{confirmRule.name}"</span>?
+                Are you sure you want to <span className="font-semibold text-[#46B1B1]">{confirmRule.is_active === false ? "activate" : "deactivate"}</span> <span className="font-semibold text-[#46B1B1]">&quot;{confirmRule.name}&quot;</span>?
               </p>
             </div>
             <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-center gap-3">

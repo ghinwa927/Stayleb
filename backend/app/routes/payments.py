@@ -18,6 +18,7 @@ from app.services.payment_service import (
 )
 
 from app.dependencies import require_client, get_current_user,require_owner
+from app.models.user import User
 from app.models.payment import Payment
 from app.models.booking import Booking
 from app.models.property import Property

@@ -12,11 +12,15 @@ a redeploy, which is required for them to take effect).
 ## 1. Service settings (Render Dashboard)
 
 - **Root Directory:** `backend`
+- **Runtime:** `Python 3` (version pinned by `backend/.python-version`;
+  alternative: `PYTHON_VERSION` env var — see section 10)
 - **Build Command:** `pip install -r requirements.txt`
 - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Health Check Path:** `/health` (Settings → Health Checks; returns
+  `{"status":"ok"}` without touching the database)
 - Do NOT add `--reload` in production.
 - Do NOT add `alembic upgrade head` (or any migration command) to the
-  start command.
+  start command (see section 3 for the one-time procedure).
 
 ## 2. Required environment variables (Render)
 
@@ -39,26 +43,46 @@ prefer `CORS_ALLOWED_ORIGINS`).
 
 ## 3. Database migrations (Alembic)
 
-- Baseline revision: `8372f2bcb026` (full schema snapshot, single head).
-- Production already contains this schema, so it must be **stamped, not upgraded**.
-- **One-time operation** (run once, after deploying the code that ships
-  `backend/alembic/`). From a machine with `DATABASE_URL` pointed at
-  production (e.g. Render Shell), in `backend/`:
-  ```
-  alembic stamp 8372f2bcb026
-  ```
-- Verify afterward with:
-  ```
-  alembic current
-  ```
-  Expected: `8372f2bcb026`. Then confirm application tables are unchanged
-  (row counts / `\dt` identical before and after — stamping only writes
-  the single `alembic_version` row).
+- Revision chain (verified with `alembic history` + `alembic check`):
+  `<base> -> 8372f2bcb026` (baseline full-schema snapshot)
+  `-> 9f4c2a7e1b63` (head: adds `rate_limit_counters` only).
+- Fresh databases (local dev, scratch): `alembic upgrade head`
+  (creates the full schema including `rate_limit_counters`).
+- Existing production database (already contains the baseline schema):
+  1. **Verify first — never blindly stamp.** From Render Shell (or any
+     machine with `DATABASE_URL` pointed at production), in `backend/`:
+     ```
+     alembic current
+     alembic history
+     ```
+     Confirm the database already has every baseline table
+     (`users`, `properties`, `bookings`, `payments`, `refresh_tokens`,
+     `reviews`, `commission_settlements`, ...) with its data intact,
+     and that `alembic_version` is empty/missing (unstamped).
+     If any baseline table is missing or the schema differs, STOP:
+     stamping would permanently record a lie. Resolve the schema
+     difference first, then continue.
+  2. **One-time stamp** (records the baseline without touching data):
+     ```
+     alembic stamp 8372f2bcb026
+     ```
+     Stamping only writes the single `alembic_version` row — confirm
+     application tables/row counts are unchanged afterward.
+  3. **Then upgrade to head** (creates ONLY the new table):
+     ```
+     alembic upgrade head
+     ```
+     This adds `rate_limit_counters` (used by auth rate limiting).
+     Verify with `alembic current` → expected `9f4c2a7e1b63`.
+- Why the upgrade matters: without `rate_limit_counters`, the rate
+  limiter fails OPEN (requests are allowed; a
+  `Rate limiter unavailable, failing open` warning is logged). Login /
+  register / OTP endpoints would run WITHOUT throttling. Alert on that
+  log line in the Render stream.
 - **Never run `alembic upgrade head` on the existing production database**
-  before that initial stamp.
-- Fresh databases: `alembic upgrade head`.
+  before that initial stamp (it would try to re-create tables).
 - Future model changes: `alembic revision --autogenerate -m "..."`,
-  review the diff, then upgrade dev first.
+  review the diff, upgrade dev first, then apply to production.
 
 ## 4. Stripe Dashboard
 
@@ -104,8 +128,36 @@ in logs.
 
 Application logs are single-line JSON on stdout with passwords, tokens,
 cookies, OTP codes, and card numbers redacted; Render collects the
-stream automatically. Optional: set `LOG_LEVEL=DEBUG` temporarily for
-diagnostics (default `INFO`). This is NOT hosted alerting — to add
-Sentry: `pip install sentry-sdk`, pin it in `requirements.txt`, set
-`SENTRY_DSN`, initialize `sentry_sdk` in `app/main.py`, then trigger a
-test error and confirm it arrives in Sentry before relying on it.
+ stream automatically. Optional: set `LOG_LEVEL=DEBUG` temporarily for
+ diagnostics (default `INFO`). This is NOT hosted alerting — to add
+ Sentry: `pip install sentry-sdk`, pin it in `requirements.txt`, set
+ `SENTRY_DSN`, initialize `sentry_sdk` in `app/main.py`, then trigger a
+ test error and confirm it arrives in Sentry before relying on it.
+ Alert on the `Rate limiter unavailable, failing open` warning (see
+ section 3): it means throttling is silently disabled.
+
+## 10. Python version
+
+Pinned by `backend/.python-version` (`3.14`, resolving to the latest
+3.14.x patch on Render; local development verified on 3.14.7).
+Render reads this file from the service Root Directory (`backend/`).
+Alternative (higher precedence): set the `PYTHON_VERSION` environment
+variable to a fully qualified version (e.g. `3.14.3`). If neither is
+set, Render falls back to its service-creation-date default, which may
+be older — keep the pin.
+
+## 11. Frontend (Vercel) settings — summary
+
+Dashboard-only (no repo config file). In Vercel → Project → Settings:
+
+- **Root Directory:** `frontend`
+- **Framework Preset:** Next.js (auto-detected)
+- **Install Command:** `npm install` (default; `package-lock.json` committed)
+- **Build Command:** `npm run build` (default `next build`)
+- **Output Directory:** `.next` (default)
+- **Node.js Version:** `24.x` default (Next 16 requires ≥ 20.9.0)
+- **Environment Variables (Production):**
+  `NEXT_PUBLIC_API_URL=https://stayleb.onrender.com` (backend origin,
+  no trailing slash) and `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=<live
+  publishable key>`. Changing values requires a redeploy
+  (`NEXT_PUBLIC_*` is baked in at build time).

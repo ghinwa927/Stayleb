@@ -93,7 +93,7 @@ export function AISearchSection() {
               AI Search Results
             </h2>
             <p className="text-[13.5px] text-[#64748B] mt-1">
-              Found <strong className="text-[#157375]">{results.total}</strong> {results.total === 1 ? "stay" : "stays"} for <strong>"{currentQuery}"</strong>
+              Found <strong className="text-[#157375]">{results.total}</strong> {results.total === 1 ? "stay" : "stays"} for <strong>&quot;{currentQuery}&quot;</strong>
             </p>
           </div>
           <button

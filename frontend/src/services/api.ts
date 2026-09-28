@@ -111,7 +111,7 @@ export async function apiFetch(
     });
   };
 
-  let token = getAccessToken();
+  const token = getAccessToken();
   let response = await makeRequest(token);
 
   // If 401 and not an auth endpoint, try to refresh once and retry

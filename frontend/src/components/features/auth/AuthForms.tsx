@@ -97,7 +97,7 @@ export function LoginForm() {
     setBusy(true);
     try {
       const data = await loginRequest(email.trim(), password);
-      let payload = parseJwt(data.access_token) as { role?: string; sub?: string };
+      const payload = parseJwt(data.access_token) as { role?: string; sub?: string };
       let role = (payload.role as string) || "";
       try {
         const me = (await apiFetch("/users/me")) as { role: string; id: number; full_name: string; email: string };
@@ -430,7 +430,7 @@ export function RegisterForm({ initialRole = "client" }: { readonly initialRole?
         <form noValidate onSubmit={(e) => { e.preventDefault(); goToStep(3); }} className="flex flex-col flex-1">
           <div className="mb-6">
             <h1 className="font-headline-lg text-headline-lg text-[#157375] font-bold tracking-tight">Tell us about yourself</h1>
-            <p className="font-body-md text-body-md text-[#64748B] mt-2">We'll use these details to set up your StayLeb account.</p>
+            <p className="font-body-md text-body-md text-[#64748B] mt-2">We&apos;ll use these details to set up your StayLeb account.</p>
           </div>
           <FormMessage message={errors.form || ""} />
           <div className="flex flex-col gap-4 flex-1">
@@ -615,7 +615,7 @@ export function ForgotForm() {
       </Link>
       <h1 className="font-headline-lg text-headline-lg text-[#157375] font-bold tracking-tight">Forgot your password?</h1>
       <p className="font-body-md text-body-md text-[#64748B] mt-2 mb-7">
-        Enter your email and we'll send you a reset code.
+        Enter your email and if it is registered we&apos;ll send you a reset code.
       </p>
       <form noValidate onSubmit={submit} className="flex flex-col gap-5">
         <Field

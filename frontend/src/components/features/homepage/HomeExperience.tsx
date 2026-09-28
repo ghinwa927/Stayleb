@@ -71,7 +71,7 @@ export function HomeExperience({ children }: { readonly children: ReactNode }) {
               </div>
               <h3 className="text-headline-sm font-headline-sm text-[#157375] font-semibold">Find stays with natural language</h3>
               <p className="text-body-md font-body-md text-on-surface-variant leading-relaxed">
-                Describe your ideal stay in your own words — "chalet in Faraya with fireplace for 4 guests" — and let AI find the perfect match.
+                Describe your ideal stay in your own words — &quot;chalet in Faraya with fireplace for 4 guests&quot; — and let AI find the perfect match.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3 shrink-0">

@@ -283,7 +283,7 @@ export function AmenitiesManagementSection0() {
               </div>
               <h3 className="font-display font-bold text-[19px] tracking-tight text-[#46B1B1]">{confirmAmenity.is_active === false ? "Activate Amenity?" : "Deactivate Amenity?"}</h3>
               <p className="text-sm text-[#46B1B1]/70 mt-2 leading-relaxed">
-                Are you sure you want to <span className="font-semibold text-[#46B1B1]">{confirmAmenity.is_active === false ? "activate" : "deactivate"}</span> <span className="font-semibold text-[#46B1B1]">"{confirmAmenity.name}"</span>?
+                Are you sure you want to <span className="font-semibold text-[#46B1B1]">{confirmAmenity.is_active === false ? "activate" : "deactivate"}</span> <span className="font-semibold text-[#46B1B1]">&quot;{confirmAmenity.name}&quot;</span>?
                 <br />
                 {confirmAmenity.is_active === false ? "It will become available for owners to assign to their properties." : "It will be hidden from new listings. Existing assignments remain."}
               </p>

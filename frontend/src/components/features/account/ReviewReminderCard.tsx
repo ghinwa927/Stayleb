@@ -41,7 +41,7 @@ export function ReviewReminderCard({ latestStay, additionalCount }: ReviewRemind
               Thank you for staying at {latestStay.property.title}
             </h3>
             <p className="text-body-md text-[#64748B] mt-1 max-w-xl">
-              We'd appreciate your review. Share your experience with other StayLeb guests.
+              We&apos;d appreciate your review. Share your experience with other StayLeb guests.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[#64748B]">
               <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-low">

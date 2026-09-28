@@ -51,7 +51,7 @@ export function SuccessContent() {
         <span className="h-px flex-1 bg-slate-200" aria-hidden="true" />
       </div>
       <p className="mt-5 text-center font-body-md text-body-md text-[#64748B]">
-        Didn't initiate this change?{" "}
+        Didn&apos;t initiate this change?{" "}
         <LocalAction message="Contact support at +961 9 546 800 for assistance." className="inline-flex items-center gap-1 font-semibold text-[#157375] hover:underline">
           Contact Support Desk <ArrowRight size={14} />
         </LocalAction>

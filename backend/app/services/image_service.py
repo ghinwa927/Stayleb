@@ -2,9 +2,12 @@ from uuid import uuid4
 
 from fastapi import UploadFile
 from imagekitio import ImageKit
+import logging
 
 from app.config import settings
 
+
+logger = logging.getLogger(__name__)
 
 imagekit = ImageKit(
     private_key=settings.imagekit_private_key
@@ -61,7 +64,7 @@ async def upload_property_image(file: UploadFile):
         }
 
     except Exception as e:
-        print("IMAGEKIT UPLOAD ERROR:", repr(e))
+        logger.warning("ImageKit upload failed: %s", e)
 
         raise ValueError(
             f"Image upload failed: {str(e)}"
@@ -75,7 +78,4 @@ def delete_property_image(file_id: str):
         )
 
     except Exception as e:
-        print(
-            f"IMAGEKIT DELETE ERROR for {file_id}:",
-            repr(e)
-        )
+        logger.warning("ImageKit delete failed for %s: %s", file_id, e)

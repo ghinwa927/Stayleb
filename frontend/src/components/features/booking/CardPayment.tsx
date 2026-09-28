@@ -203,7 +203,17 @@ export function CardPayment() {
             {!bookingLoading &&
               !error &&
               clientSecret &&
-              booking && (
+              booking &&
+              (stripePromise === null ? (
+                <div
+                  role="alert"
+                  className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-sm text-amber-800"
+                >
+                  Online card payment is currently unavailable (payment
+                  service not configured). Please choose cash payment or
+                  try again later — your booking hold is unaffected.
+                </div>
+              ) : (
                 <Elements
                   stripe={stripePromise}
                   options={{
@@ -227,6 +237,7 @@ export function CardPayment() {
                     totalLabel={money(booking.total_price)}
                   />
                 </Elements>
+                )
               )}
 
             {booking && (

@@ -20,7 +20,7 @@ export function LoginSection0() {
     setLoading(true);
     try {
       const data = await loginRequest(email.trim(), password);
-      let payload = parseJwt(data.access_token) as { role?: string; sub?: string };
+      const payload = parseJwt(data.access_token) as { role?: string; sub?: string };
       let role = (payload.role as string) || "";
 
       // verify role via backend profile (source of truth) — fallback to JWT

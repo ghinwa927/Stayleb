@@ -2,3 +2,7 @@
 .env
 __pycache__/
 *.pyc
+# Runtime logs (never commit)
+uvicorn.log
+uvicorn_error.log
+*.log

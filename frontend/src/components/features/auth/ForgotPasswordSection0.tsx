@@ -64,7 +64,7 @@ export function ForgotPasswordSection0() {
                     </div>
                     <h1 className="font-headline-lg text-headline-lg text-[#157375] tracking-tight mb-3">Forgot your password?</h1>
                     <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                      Enter the email address associated with your StayLeb account. We&apos;ll send a 6-digit verification code to reset your password.
+                      Enter the email address associated with your StayLeb account. If it is registered, we&apos;ll send a 6-digit verification code to reset your password.
                     </p>
                   </div>
 

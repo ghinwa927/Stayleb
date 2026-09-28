@@ -2,8 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Property photos are served by ImageKit; hero/marketing art is local
+    // (public/). External property images render via LocalImage with
+    // unoptimized, but keep the allowlist tight for any optimized usage.
+    // Covers the ImageKit default hosts; add a custom CNAME here only if
+    // IMAGEKIT_URL_ENDPOINT is ever moved to one.
     remotePatterns: [
-      { protocol: "https", hostname: "**" },
+      { protocol: "https", hostname: "ik.imagekit.io" },
+      { protocol: "https", hostname: "imagekit.io" },
     ],
   },
   async redirects() {
