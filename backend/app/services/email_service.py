@@ -69,7 +69,16 @@ def send_email(to: str, subject: str, html_content: str):
         logger.warning(f"Failed to attach logo: {e}. Sending email without logo.")
 
     try:
-        with smtplib.SMTP_SSL(email_host, email_port) as server:
+        # Port 465 uses implicit TLS (e.g. Gmail SSL). Any other port
+        # (e.g. 587) uses explicit TLS via STARTTLS.
+        server = (
+            smtplib.SMTP_SSL(email_host, email_port)
+            if email_port == 465
+            else smtplib.SMTP(email_host, email_port)
+        )
+        with server:
+            if email_port != 465:
+                server.starttls()
             server.login(email_user, email_pass)
 
             server.sendmail(

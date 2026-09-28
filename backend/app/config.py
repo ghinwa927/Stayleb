@@ -70,6 +70,13 @@ class Settings(BaseSettings):
     # security. Local development keeps the default.
     environment: Literal["development", "production"] = "development"
 
+    # Number of trusted reverse proxies in front of the app (Render
+    # terminates TLS and proxies requests). Used to extract the real
+    # client IP from X-Forwarded-For for rate limiting: with N trusted
+    # hops, the client IP is the Nth address from the right. Spoofed
+    # left-side entries can therefore never impersonate another client.
+    trusted_proxy_hops: int = 1
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore"

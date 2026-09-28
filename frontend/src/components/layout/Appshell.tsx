@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, type ReactNode } from 'react';
 import { Icon } from '@/components/ui/Icon';
-import { ActionButton } from '@/components/ui/Interactions';
 import { logoutRequest } from '@/services/api';
 import { FavoritesProvider } from "@/components/features/market/ListingSearch";
 
@@ -88,7 +87,7 @@ export function AppShell({ area, children }: { area: Area; children: ReactNode }
         <div className="flex items-center gap-3">
           {!workspace && !authed && <><Link href="/auth/login" className="hidden sm:block text-xs text-[#46B1B1]/70 hover:text-[#46B1B1]">Log In</Link><Link href="/auth/role" className="bg-primary text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-primary">Sign Up</Link></>}
           {!workspace && authed && <><Link href="/" className="hidden sm:block text-xs text-[#46B1B1] hover:underline">Explore stays</Link><button onClick={handleLogout} className="hidden sm:block text-xs text-[#46B1B1]/70 hover:text-[#46B1B1]">Log Out</button></>}
-          {(area !== 'admin' && (workspace || isAccount)) && <ActionButton actionLabel="notifications" aria-label="Notifications" className="p-2 text-[#46B1B1] bg-transparent hover:bg-transparent"><Icon name="notifications" /></ActionButton>}
+          {(area !== 'admin' && (workspace || isAccount)) && <span className="p-2 text-[#46B1B1]/40" title="Notifications coming soon"><Icon name="notifications" /></span>}
           <div className="relative">
             <button aria-label="Account and workspace menu" aria-expanded={profile} className="w-9 h-9 rounded-full bg-primary text-white !text-white text-xs font-bold hover:bg-primary flex items-center justify-center" onClick={()=>setProfile(!profile)}>{workspace || isAccount ? initials : <Icon name="person" className="text-lg text-white" />}</button>
             {profile && (

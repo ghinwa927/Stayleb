@@ -79,3 +79,33 @@ prefer `CORS_ALLOWED_ORIGINS`).
 
 Frontend `http://localhost:3000` + backend `http://127.0.0.1:8000`
 keep working with no code changes (localhost origins are built in).
+
+## 7. Auth rate limiting (built in, no extra services)
+
+Sensitive endpoints are throttled with database-backed fixed windows
+(shared across all backend instances — no Redis needed):
+login 10/10min per IP + per email; register 10/hour per IP, 5/hour per
+email; forgot-password 5/10min per IP + email; verify-OTP 10/10min per
+IP + email (the 5-attempt OTP cap still applies); reset-password
+10/10min per IP. Violations return `429` with a `Retry-After` header.
+Client IPs come from `X-Forwarded-For` using `TRUSTED_PROXY_HOPS=1`
+(correct behind Render's proxy). No dashboard action required.
+
+## 8. Email (Gmail)
+
+Password-reset mail uses port `465` with implicit TLS, or STARTTLS on
+any other port (e.g. `587`). For Gmail set `EMAIL_PORT=465` (or `587`).
+If SMTP is unset, sends are skipped with a warning and the endpoint
+still returns the generic "If that email exists..." message; SMTP
+failures raise (logged without secrets) so missing codes are visible
+in logs.
+
+## 9. Logging and monitoring
+
+Application logs are single-line JSON on stdout with passwords, tokens,
+cookies, OTP codes, and card numbers redacted; Render collects the
+stream automatically. Optional: set `LOG_LEVEL=DEBUG` temporarily for
+diagnostics (default `INFO`). This is NOT hosted alerting — to add
+Sentry: `pip install sentry-sdk`, pin it in `requirements.txt`, set
+`SENTRY_DSN`, initialize `sentry_sdk` in `app/main.py`, then trigger a
+test error and confirm it arrives in Sentry before relying on it.

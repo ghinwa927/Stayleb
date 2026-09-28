@@ -15,6 +15,7 @@ from app.services.auth_service import register_user, login_user, reset_password
 from app.dependencies import get_current_user
 
 from app.core.datetime_utils import utcnow_naive
+from app.core.rate_limit import rate_limit
 from sqlalchemy import select
 
 from app.models.refresh_token import RefreshToken
@@ -38,7 +39,11 @@ router = APIRouter(
 @router.post(
     "/register",
     response_model=UserResponse,
-    status_code=201
+    status_code=201,
+    dependencies=[Depends(rate_limit(
+        limit=10, window_seconds=3600, scope="register",
+        email_field="email", email_limit=5, email_window_seconds=3600,
+    ))],
 )
 def register(
     user_data: RegisterRequest,
@@ -48,7 +53,11 @@ def register(
 
 @router.post(
     "/login",
-    response_model=TokenResponse
+    response_model=TokenResponse,
+    dependencies=[Depends(rate_limit(
+        limit=10, window_seconds=600, scope="login",
+        email_field="email", email_limit=10, email_window_seconds=600,
+    ))],
 )
 def login(
     login_data: LoginRequest,
@@ -203,7 +212,13 @@ def logout(
         "message": "Logged out successfully"
     }
 
-@router.post("/forgot-password")
+@router.post(
+    "/forgot-password",
+    dependencies=[Depends(rate_limit(
+        limit=5, window_seconds=600, scope="forgot-password",
+        email_field="email", email_limit=5, email_window_seconds=600,
+    ))],
+)
 def forgot_password_route(
     data: ForgotPasswordRequest,
     db: Session = Depends(get_db),
@@ -214,7 +229,13 @@ def forgot_password_route(
         "message": "If that email exists, an OTP has been sent."
     }
 
-@router.post("/verify-reset-otp")
+@router.post(
+    "/verify-reset-otp",
+    dependencies=[Depends(rate_limit(
+        limit=10, window_seconds=600, scope="verify-reset-otp",
+        email_field="email", email_limit=10, email_window_seconds=600,
+    ))],
+)
 def verify_reset_otp_route(
     data: VerifyOTPRequest,
     db: Session = Depends(get_db),
@@ -260,7 +281,12 @@ def change_password_route(
     db.commit()
     return {"message": "Password updated successfully"}
 
-@router.post("/reset-password")
+@router.post(
+    "/reset-password",
+    dependencies=[Depends(rate_limit(
+        limit=10, window_seconds=600, scope="reset-password",
+    ))],
+)
 def reset_password_route(
     data: ResetPasswordRequest,
     db: Session = Depends(get_db),

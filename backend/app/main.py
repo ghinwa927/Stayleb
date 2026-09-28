@@ -1,8 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+import logging
 
 from app.config import settings
+from app.core.logging_config import configure_logging
+
+configure_logging()
+logger = logging.getLogger("stayleb.startup")
+logger.info("Starting StayLeb API (environment=%s)", settings.environment)
 
 from app.database.database import engine
 from app.routes.auth import router as auth_router
