@@ -83,9 +83,33 @@ export function getCachedSearch(params: PropertySearchParams): PropertySearchRes
 
 export async function getPublicProperty(
   id: number | string,
-  options?: RequestInit,
+  init?: CachedFetchInit,
 ): Promise<PropertyResponse> {
-  return apiFetch(`/properties/public/${id}`, options);
+  const key = publicPropertyKey(id);
+  return dedupedFetch<PropertyResponse>(
+    key,
+    (signal) => apiFetch(`/properties/public/${id}`, { signal }),
+    { ttlMs: PUBLIC_PROPERTY_TTL_MS, signal: init?.signal, forceRefresh: init?.forceRefresh },
+  );
+}
+
+/**
+ * Short-lived cache for public property *display* details (title, images,
+ * base nightly price). Property details change rarely, so identical
+ * `/properties/public/{id}` requests share one network call and reuse fresh
+ * responses briefly. Never use this for booking status, payments, or
+ * availability checks — those must always hit the server (see
+ * `getAvailability`, intentionally uncached).
+ */
+export const PUBLIC_PROPERTY_TTL_MS = 60_000;
+
+export function publicPropertyKey(id: number | string): string {
+  return `GET:/properties/public/${id}`;
+}
+
+/** Synchronous read of fresh cached property details, if any. No network. */
+export function getCachedPublicProperty(id: number | string): PropertyResponse | null {
+  return getCached<PropertyResponse>(publicPropertyKey(id));
 }
 
 // Availability must always be fresh: never route through the shared cache.

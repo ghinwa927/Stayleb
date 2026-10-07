@@ -10,7 +10,7 @@ import { isAbortError } from '@/lib/request-cache';
 import { propertySearchQuery, readPropertySearch, searchValidation, propertyDetailsHref } from '@/lib/property-search';
 import { useAmenities } from '@/hooks/useAmenities';
 import { PropertySearchForm } from './PropertySearchForm';
-import { favoritesIdentity, getFavoritesCached, addFavorite, invalidateFavoritesCache, removeFavorite } from '@/services/favorites';
+import { favoritesIdentity, getFavoritesCached, addFavorite, invalidateFavoritesCache, removeFavorite, type FavoritePropertyItem } from '@/services/favorites';
 import Swal from 'sweetalert2';
 
 type ListingState = { filters: PropertySearchParams; update: (patch: PropertySearchParams) => void; reset: () => void; retry: () => void; results: PropertySearchResponse | null; loading: boolean; error: string | null };
@@ -72,6 +72,8 @@ function ListingRequest({ query, children }: { query: string; children: ReactNod
 // Favorites context for sharing favorites state across components
 type FavoritesState = {
   favorites: Set<number>;
+  /** Full favorite entries, kept in sync with `favorites` (see toggleFavorite). */
+  favoriteItems: FavoritePropertyItem[];
   loading: boolean;
   error: string | null;
   refreshFavorites: () => Promise<void>;
@@ -87,6 +89,9 @@ export function useFavorites() {
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  // Full entries backing `favorites`, so consumers rendering cards/counts
+  // stay synchronized after add/remove without another list fetch.
+  const [favoriteItems, setFavoriteItems] = useState<FavoritePropertyItem[]>([]);
   // Anonymous visitors never load: start idle, not loading, so favorite
   // buttons stay interactive and no 401 request is ever sent. Signed-in
   // visitors start loading until the fetch below resolves.
@@ -109,6 +114,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         // Logged out: clear user-specific state here (in the event handler,
         // not in an effect) and skip the request entirely.
         setFavorites(new Set());
+        setFavoriteItems([]);
         setError(null);
         setLoading(false);
       } else {
@@ -133,6 +139,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     // Never request favorites anonymously (avoids the 401 entirely).
     if (!current) {
       setFavorites(new Set());
+      setFavoriteItems([]);
       setError(null);
       setLoading(false);
       return;
@@ -146,6 +153,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       if (favoritesIdentity() !== current) return;
       const favSet = new Set(response.items.map(item => item.property.id));
       setFavorites(favSet);
+      setFavoriteItems(response.items);
     } catch (e) {
       if (isAbortError(e)) return;
       if (favoritesIdentity() !== current) return;
@@ -154,6 +162,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       if (favoritesIdentity() === current) setLoading(false);
       else {
         setFavorites(new Set());
+        setFavoriteItems([]);
         setLoading(false);
       }
     }
@@ -168,6 +177,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     getFavoritesCached({ signal: controller.signal }).then(response => {
       if (!cancelled && favoritesIdentity() === wanted) {
         setFavorites(new Set(response.items.map(item => item.property.id)));
+        setFavoriteItems(response.items);
         setLoading(false);
       }
     }).catch((e: unknown) => {
@@ -181,8 +191,9 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const toggleFavorite = async (propertyId: number) => {
     const currentlyFavorite = favorites.has(propertyId);
-    
-    // Optimistic update
+    const current = favoritesIdentity();
+
+    // Optimistic update (rolls back below on failure).
     const newFavorites = new Set(favorites);
     if (currentlyFavorite) {
       newFavorites.delete(propertyId);
@@ -190,12 +201,27 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       newFavorites.add(propertyId);
     }
     setFavorites(newFavorites);
+    const previousItems = favoriteItems;
+    if (currentlyFavorite) {
+      // Removal needs no server data: drop the card synchronously so every
+      // mounted consumer stays in sync without another list fetch.
+      setFavoriteItems(previousItems.filter(item => item.property.id !== propertyId));
+    }
 
     try {
       if (currentlyFavorite) {
         await removeFavorite(propertyId);
       } else {
         await addFavorite(propertyId);
+        // Addition needs the full property object, which the toggle caller
+        // does not have: revalidate the shared list once in the background
+        // (shared cache, no independent polling) so cards/counts converge.
+        // The optimistic count above already updated synchronously.
+        const response = await getFavoritesCached({ forceRefresh: true });
+        if (favoritesIdentity() === current) {
+          setFavorites(new Set(response.items.map(item => item.property.id)));
+          setFavoriteItems(response.items);
+        }
       }
       Swal.fire({
         title: currentlyFavorite ? 'Removed from favorites' : 'Saved to favorites',
@@ -206,6 +232,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       // Rollback on error
       setFavorites(favorites);
+      setFavoriteItems(previousItems);
       const msg = e instanceof Error ? e.message : 'Failed to update favorites';
       Swal.fire({
         title: 'Error',
@@ -219,7 +246,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const isFavorite = (propertyId: number) => favorites.has(propertyId);
 
   return (
-    <FavoritesContext.Provider value={{ favorites, loading, error, refreshFavorites: () => loadFavorites({ forceRefresh: true }), toggleFavorite, isFavorite }}>
+    <FavoritesContext.Provider value={{ favorites, favoriteItems, loading, error, refreshFavorites: () => loadFavorites({ forceRefresh: true }), toggleFavorite, isFavorite }}>
       {children}
     </FavoritesContext.Provider>
   );

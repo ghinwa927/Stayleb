@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LocalImage } from "@/components/ui/LocalImage";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
@@ -7,11 +7,11 @@ import { FavoriteButton } from "@/components/features/market/ListingSearch";
 import { ActionButton } from "@/components/ui/Interactions";
 import { getMyBookings } from "@/services/bookings";
 import type { BookingResponse } from "@/services/bookings";
-import { getPublicProperty } from "@/services/properties";
+import { getPublicProperty, getCachedPublicProperty } from "@/services/properties";
 import type { PropertyResponse } from "@/services/owner";
 import { getReviewByBooking, type Review } from "@/services/reviews";
-import { getFavoritesCached, favoritesIdentity, type FavoritePropertyItem } from "@/services/favorites";
-import { isAbortError } from "@/lib/request-cache";
+import { useFavorites } from "@/components/features/market/ListingSearch";
+import { getCachedFavorites } from "@/services/favorites";
 import { AISearchSection } from "@/components/features/market/AISearchSection";
 import { BookingStatusOverview } from "@/components/features/account/BookingStatusOverview";
 import { ReviewReminderCard } from "@/components/features/account/ReviewReminderCard";
@@ -34,91 +34,116 @@ export function ClientDashboardSection0() {
   const [error, setError] = useState<string | null>(null);
   const [propsMap, setPropsMap] = useState<Record<number, PropertyResponse>>({});
   const [reviewMap, setReviewMap] = useState<Record<number, Review | null | undefined>>({});
-  const [favorites, setFavorites] = useState<FavoritePropertyItem[]>([]);
-  const [favoritesLoading, setFavoritesLoading] = useState(true);
+  // Favorites come from FavoritesProvider (mounted by AppShell above this
+  // page): one shared request, synchronized cards/counts after add/remove,
+  // per-user isolation and logout clearing handled by the provider.
+  const { favoriteItems, loading: favoritesLoading } = useFavorites();
+
+  // Booking cards read through this lookup, which layers favorite property
+  // data over fetched details. Derived (not stored) so later-arriving
+  // favorites enrich cards automatically without extra requests or effects.
+  const enrichedPropsMap = useMemo(() => {
+    const next: Record<number, PropertyResponse> = { ...propsMap };
+    for (const item of favoriteItems) {
+      if (next[item.property.id] === undefined) {
+        next[item.property.id] = item.property;
+      }
+    }
+    return next;
+  }, [propsMap, favoriteItems]);
 
   useEffect(() => {
     let cancelled = false;
+    const propController = new AbortController();
+    async function loadProperties(propertyIds: number[]) {
+      // Reuse property objects already in hand (favorites payload or an
+      // existing cache entry): fetch only missing unique IDs, without
+      // waiting for any in-flight favorites request. Cached reads resolve
+      // synchronously, so repeat visits and already-seen properties issue
+      // no network calls at all.
+      const known = new Set<number>();
+      for (const item of getCachedFavorites()?.items ?? []) {
+        if (propertyIds.includes(item.property.id)) known.add(item.property.id);
+      }
+      const cachedEntries: Record<number, PropertyResponse> = {};
+      const missing = propertyIds.filter((pid) => {
+        if (known.has(pid)) return false;
+        const hit = getCachedPublicProperty(pid);
+        if (hit) {
+          cachedEntries[pid] = hit;
+          return false;
+        }
+        return true;
+      });
+      if (!cancelled && Object.keys(cachedEntries).length > 0) {
+        setPropsMap((prev) => {
+          let changed = false;
+          const next: Record<number, PropertyResponse> = { ...prev };
+          for (const [key, prop] of Object.entries(cachedEntries)) {
+            const pid = Number(key);
+            if (next[pid] === undefined) {
+              next[pid] = prop;
+              changed = true;
+            }
+          }
+          return changed ? next : prev;
+        });
+      }
+      // Enrich cards progressively as each detail resolves; a missing or
+      // unavailable property keeps its stable placeholder (see render).
+      await Promise.all(
+        missing.map(async (pid) => {
+          try {
+            const p = await getPublicProperty(pid, { signal: propController.signal });
+            if (!cancelled) {
+              setPropsMap((prev) => (prev[pid] === undefined ? { ...prev, [pid]: p } : prev));
+            }
+          } catch {}
+        })
+      );
+    }
+    async function loadReviews(completed: BookingResponse[]) {
+      if (completed.length === 0) return;
+      // Review checks need only booking IDs: each reminder appears as its
+      // check resolves. A 404 simply means "no review yet" and keeps the
+      // reminder eligible (see eligibleUnreviewedStays).
+      await Promise.all(
+        completed.map(async (b) => {
+          let review: Review | null;
+          try {
+            review = await getReviewByBooking(b.id);
+          } catch {
+            review = null;
+          }
+          if (!cancelled) {
+            setReviewMap((prev) => (prev[b.id] === undefined ? { ...prev, [b.id]: review } : prev));
+          }
+        })
+      );
+    }
     async function load() {
       setLoading(true);
       setError(null);
       try {
         const data = await getMyBookings();
-        if (!cancelled) setBookings(data);
+        if (cancelled) return;
+        setBookings(data);
+        // Booking summaries render now; property details and review checks
+        // enrich their sections independently as they resolve.
+        setLoading(false);
         const unique = [...new Set(data.map((b) => b.property_id))];
         const completed = data.filter((b) => b.status === "completed");
-        // Property cards and review checks only need booking IDs/property IDs,
-        // so both fan out together once bookings arrive instead of reviews
-        // waiting for unrelated property responses.
-        const [map, reviewEntries] = await Promise.all([
-          (async () => {
-            const m: Record<number, PropertyResponse> = {};
-            await Promise.all(
-              unique.map(async (pid) => {
-                try {
-                  const p = await getPublicProperty(pid);
-                  m[pid] = p;
-                } catch {}
-              })
-            );
-            return m;
-          })(),
-          (async () => {
-            if (completed.length === 0) return [] as { id: number; review: Review | null }[];
-            return Promise.all(
-              completed.map(async (b) => {
-                try {
-                  const r = await getReviewByBooking(b.id);
-                  return { id: b.id, review: r };
-                } catch {
-                  return { id: b.id, review: null };
-                }
-              })
-            );
-          })(),
-        ]);
-        if (!cancelled) {
-          setPropsMap(map);
-          const m: Record<number, Review | null> = {};
-          reviewEntries.forEach(({ id, review }) => { m[id] = review; });
-          setReviewMap(m);
-        }
+        loadProperties(unique);
+        loadReviews(completed);
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load dashboard");
-      } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Failed to load dashboard");
+          setLoading(false);
+        }
       }
     }
     load();
-    return () => { cancelled = true; };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-    // Same cached helper as FavoritesProvider (mounted by AppShell above
-    // this page), so concurrent loads share one network request instead of
-    // issuing a second expensive call.
-    const current = favoritesIdentity();
-    async function loadFavorites() {
-      if (!current) {
-        if (!cancelled) setFavoritesLoading(false);
-        return;
-      }
-      setFavoritesLoading(true);
-      try {
-        const response = await getFavoritesCached({ signal: controller.signal });
-        // An account switch during the flight must not write another
-        // user's data here.
-        if (!cancelled && favoritesIdentity() === current) setFavorites(response.items);
-      } catch (e) {
-        if (!cancelled && !isAbortError(e)) console.error('Failed to load favorites:', e);
-      } finally {
-        if (!cancelled) setFavoritesLoading(false);
-      }
-    }
-    loadFavorites();
-    return () => { cancelled = true; controller.abort(); };
+    return () => { cancelled = true; propController.abort(); };
   }, []);
 
   if (loading) {
@@ -166,13 +191,17 @@ export function ClientDashboardSection0() {
   const latestReviewStay = eligibleUnreviewedStays[0]
     ? {
         booking: eligibleUnreviewedStays[0],
-        property: propsMap[eligibleUnreviewedStays[0].property_id],
+        property: enrichedPropsMap[eligibleUnreviewedStays[0].property_id],
       }
     : null;
+  // The reminder card needs property details: it appears once they arrive
+  // rather than blocking on (or crashing without) them.
+  const readyReviewStay =
+    latestReviewStay && latestReviewStay.property ? { booking: latestReviewStay.booking, property: latestReviewStay.property } : null;
   const additionalReviewCount = Math.max(0, eligibleUnreviewedStays.length - 1);
 
   const recentCompleted = completed.slice(0, 1);
-  const favProperties = favorites.slice(0, 3).map((item) => item.property);
+  const favProperties = favoriteItems.slice(0, 3).map((item) => item.property);
   const singleFav = favProperties.length === 1 ? favProperties[0] ?? null : null;
 
   return (
@@ -254,7 +283,7 @@ export function ClientDashboardSection0() {
                     <span className="px-2.5 py-0.5 rounded-full bg-[#FFFBEB] border border-[#FDE68A]/60 text-[#B45309] text-[11px] font-bold">{pendingCount} pending</span>
                   </div>
                   <p className="text-[13.5px] text-[#64748B] mt-1 max-w-2xl">
-                    You have {pendingCount} {pendingCount === 1 ? "booking" : "bookings"} awaiting payment{firstPending ? <> — including <strong className="text-[#0F2432]">{propsMap[firstPending.property_id]?.title || `Property #${firstPending.property_id}`}</strong></> : ""}. Complete payment to secure {pendingCount === 1 ? "it" : "them"}.
+                    You have {pendingCount} {pendingCount === 1 ? "booking" : "bookings"} awaiting payment{firstPending ? <> — including <strong className="text-[#0F2432]">{enrichedPropsMap[firstPending.property_id]?.title || `Property #${firstPending.property_id}`}</strong></> : ""}. Complete payment to secure {pendingCount === 1 ? "it" : "them"}.
                   </p>
                 </div>
                 <Link className="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-[#157375] hover:bg-[#0f5f61] text-white text-[13.5px] font-semibold shadow-[0_8px_20px_rgba(21,115,117,0.25)] transition-all active:scale-[0.98] shrink-0 text-center w-full md:w-auto" href={`/account/bookings/${firstPending.id}?booking_id=${firstPending.id}`}>View booking</Link>
@@ -266,7 +295,7 @@ export function ClientDashboardSection0() {
           {recentCompleted.length > 0 && (
             <section className="bg-white rounded-[20px] shadow-[0_4px_20px_rgba(15,40,50,0.06)] p-5 sm:p-6 border border-[#E9EEF3]">
               {recentCompleted.map((b) => {
-                const prop = propsMap[b.property_id];
+                const prop = enrichedPropsMap[b.property_id];
                 const review = reviewMap[b.id];
                 return (
                   <div key={b.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
@@ -301,9 +330,9 @@ export function ClientDashboardSection0() {
             )}
 
           {/* 5. Thank You / Review Reminder */}
-          {latestReviewStay && (
+          {readyReviewStay && (
             <ReviewReminderCard
-              latestStay={latestReviewStay}
+              latestStay={readyReviewStay}
               additionalCount={additionalReviewCount}
             />
           )}
@@ -316,13 +345,18 @@ export function ClientDashboardSection0() {
                 <h2 className="text-[24px] sm:text-[28px] font-extrabold text-[#0F2432] tracking-tight leading-tight">Your Saved Properties</h2>
                 <p className="text-[13.5px] text-[#64748B]">Chalets and seaside villas you have favorited.</p>
               </div>
-              <ActionButton className="text-[13.5px] text-[#157375] font-bold hover:underline flex items-center gap-1 shrink-0" actionLabel={`View All Favorites (${favorites.length}) chevron_right`} aria-label={`View All Favorites (${favorites.length}) chevron_right`}>
-                <span>View All Favorites ({favorites.length})</span>
+              <ActionButton className="text-[13.5px] text-[#157375] font-bold hover:underline flex items-center gap-1 shrink-0" actionLabel={`View All Favorites (${favoriteItems.length}) chevron_right`} aria-label={`View All Favorites (${favoriteItems.length}) chevron_right`}>
+                <span>View All Favorites ({favoriteItems.length})</span>
                 <Icon name="chevron_right" className="material-symbols-outlined text-[18px]" />
               </ActionButton>
             </div>
 
-            {favorites.length === 0 ? (
+            {favoritesLoading ? (
+              <div role="status" aria-label="Loading saved stays" className="p-10 sm:p-14 bg-white rounded-[22px] shadow-[0_4px_20px_rgba(15,40,50,0.06)] border border-[#E9EEF3] text-center flex flex-col items-center justify-center space-y-4 animate-pulse">
+                <div className="w-16 h-16 rounded-full bg-[#E6F4F4]" />
+                <p className="text-[13.5px] text-[#64748B]">Loading saved stays…</p>
+              </div>
+            ) : favoriteItems.length === 0 ? (
               <div className="p-10 sm:p-14 bg-white rounded-[22px] shadow-[0_4px_20px_rgba(15,40,50,0.06)] border border-[#E9EEF3] text-center flex flex-col items-center justify-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-[#E6F4F4] flex items-center justify-center text-[#157375]">
                   <Icon name="favorite_border" className="material-symbols-outlined text-[30px]" />
