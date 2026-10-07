@@ -81,11 +81,27 @@ def get_favorites(
     db: Session,
     client_id: int,
 ):
+    from sqlalchemy.orm import contains_eager, selectinload
+
+    property_loader = contains_eager(Favorite.property)
+    amenity_class = Property.property_amenities.property.mapper.class_
+    rule_class = Property.property_rules.property.mapper.class_
+
     favorites = (
         db.query(Favorite)
         .join(
             Property,
             Property.id == Favorite.property_id,
+        )
+        .options(
+            property_loader.selectinload(Property.images),
+            property_loader.selectinload(Property.seasonal_prices),
+            property_loader.selectinload(
+                Property.property_amenities
+            ).selectinload(amenity_class.amenity),
+            property_loader.selectinload(
+                Property.property_rules
+            ).selectinload(rule_class.rule),
         )
         .filter(
             Favorite.client_id == client_id,
@@ -106,7 +122,6 @@ def get_favorites(
             for favorite in favorites
         ]
     }
-
 # =========================================================
 # REMOVE FAVORITE
 # =========================================================
