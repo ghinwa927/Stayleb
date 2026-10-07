@@ -12,7 +12,6 @@ from app.models.property_amenity import PropertyAmenity
 from app.models.property_blocked_date import PropertyBlockedDate
 from app.services.pricing_service import calculate_stay_price
 
-
 def search_properties(
     db: Session,
     location: str | None = None,
@@ -30,119 +29,66 @@ def search_properties(
     page: int = 1,
     page_size: int = 12,
 ):
-    # ---------------------------------
-    # Base query
-    # Only approved properties are public
-    # ---------------------------------
+    from math import ceil
 
-    query = db.query(Property).filter(
-        Property.status == "approved"
-    )
+    from sqlalchemy import asc, desc, func, or_
+    from sqlalchemy.orm import selectinload
 
-    # ---------------------------------
-    # Destination
-    # ---------------------------------
+    from app.core.datetime_utils import utcnow_naive
+    from app.models.booking import Booking
+    from app.models.property import Property
+    from app.models.property_amenity import PropertyAmenity
+    from app.models.property_blocked_date import PropertyBlockedDate
+    from app.services.pricing_service import calculate_stay_price
+
+    has_dates = check_in is not None and check_out is not None
+
+    query = db.query(Property).filter(Property.status == "approved")
 
     if location:
         search_term = f"%{location.strip()}%"
-
-        query = query.filter(
-            Property.location.ilike(search_term)
-        )
-
-    # ---------------------------------
-    # Guests
-    # ---------------------------------
+        query = query.filter(Property.location.ilike(search_term))
 
     if guests is not None:
-        query = query.filter(
-            Property.max_guests >= guests
-        )
-
-    # ---------------------------------
-    # Property type
-    # ---------------------------------
+        query = query.filter(Property.max_guests >= guests)
 
     if property_type is not None:
-        query = query.filter(
-            Property.property_type == property_type
-        )
-
-    # ---------------------------------
-    # Bedrooms
-    # ---------------------------------
+        query = query.filter(Property.property_type == property_type)
 
     if bedrooms is not None:
-        query = query.filter(
-            Property.bedrooms >= bedrooms
-        )
-
-    # ---------------------------------
-    # Bathrooms
-    # ---------------------------------
+        query = query.filter(Property.bedrooms >= bedrooms)
 
     if bathrooms is not None:
-        query = query.filter(
-            Property.bathrooms >= bathrooms
-        )
-
-    # ---------------------------------
-    # Beds
-    # ---------------------------------
+        query = query.filter(Property.bathrooms >= bathrooms)
 
     if beds is not None:
-        query = query.filter(
-            Property.beds >= beds
-        )
-
-    # ---------------------------------
-    # Amenities
-    #
-    # Property must contain ALL selected
-    # amenities.
-    # ---------------------------------
+        query = query.filter(Property.beds >= beds)
 
     if amenity_ids:
         amenity_ids = list(set(amenity_ids))
 
         query = (
-            query
-            .join(
+            query.join(
                 PropertyAmenity,
                 PropertyAmenity.property_id == Property.id,
             )
-            .filter(
-                PropertyAmenity.amenity_id.in_(amenity_ids)
-            )
+            .filter(PropertyAmenity.amenity_id.in_(amenity_ids))
             .group_by(Property.id)
             .having(
                 func.count(
-                    func.distinct(
-                        PropertyAmenity.amenity_id
-                    )
+                    func.distinct(PropertyAmenity.amenity_id)
                 ) == len(amenity_ids)
             )
         )
 
-    # ---------------------------------
-    # Dates / availability
-    # ---------------------------------
-
-    if check_in is not None and check_out is not None:
-
+    if has_dates:
         if check_out <= check_in:
             raise ValueError(
                 "Check-out date must be after check-in date"
             )
 
-        # ---------------------------------
-        # Owner-blocked dates
-        # ---------------------------------
-
         blocked_property_ids = (
-            db.query(
-                PropertyBlockedDate.property_id
-            )
+            db.query(PropertyBlockedDate.property_id)
             .filter(
                 PropertyBlockedDate.start_date < check_out,
                 PropertyBlockedDate.end_date > check_in,
@@ -153,22 +99,6 @@ def search_properties(
             ~Property.id.in_(blocked_property_ids)
         )
 
-        # ---------------------------------
-        # Existing active bookings
-        #
-        # confirmed
-        #     -> always blocks
-        #
-        # pending + expires_at IS NULL
-        #     -> blocks
-        #
-        # pending + expires_at > now
-        #     -> blocks
-        #
-        # pending + expires_at <= now
-        #   -> does NOT block
-        # ---------------------------------
-
         # Naive UTC, matching the stored Booking.expires_at convention.
         now = utcnow_naive()
 
@@ -177,7 +107,6 @@ def search_properties(
             .filter(
                 or_(
                     Booking.status == "confirmed",
-
                     (
                         (Booking.status == "pending")
                         & (
@@ -186,7 +115,6 @@ def search_properties(
                         )
                     ),
                 ),
-
                 Booking.check_in < check_out,
                 Booking.check_out > check_in,
             )
@@ -196,30 +124,12 @@ def search_properties(
             ~Property.id.in_(booked_property_ids)
         )
 
-        # ---------------------------------
-        # Minimum-night requirement
-        # ---------------------------------
-
-        requested_nights = (
-            check_out - check_in
-        ).days
-
+        requested_nights = (check_out - check_in).days
         query = query.filter(
             Property.min_nights <= requested_nights
         )
 
-    # ---------------------------------
-    # Base price filtering
-    #
-    # Only use base price when dates
-    # were NOT selected.
-    #
-    # When dates are selected, seasonal
-    # pricing is handled after the query.
-    # ---------------------------------
-
-    if check_in is None or check_out is None:
-
+    if not has_dates:
         if min_price is not None:
             query = query.filter(
                 Property.price_per_night >= min_price
@@ -230,68 +140,70 @@ def search_properties(
                 Property.price_per_night <= max_price
             )
 
-    # ---------------------------------
-    # Database sorting
-    #
-    # Without dates:
-    # price sorting uses base price.
-    #
-    # With dates:
-    # price sorting happens later using
-    # the actual stay pricing.
-    # ---------------------------------
-
     if sort == "price_low":
-
-        if check_in is None or check_out is None:
+        if not has_dates:
             query = query.order_by(
                 asc(Property.price_per_night)
             )
-
     elif sort == "price_high":
-
-        if check_in is None or check_out is None:
+        if not has_dates:
             query = query.order_by(
                 desc(Property.price_per_night)
             )
-
     elif sort == "newest":
-
-        query = query.order_by(
-            desc(Property.created_at)
-        )
-
+        query = query.order_by(desc(Property.created_at))
     else:
-        # Temporary behavior for "recommended".
-        query = query.order_by(
-            desc(Property.created_at)
-        )
+        query = query.order_by(desc(Property.created_at))
 
-    # ---------------------------------
-    # Execute database query
-    # ---------------------------------
+    eager_options = (
+        selectinload(Property.images),
+        selectinload(Property.seasonal_prices),
+        selectinload(Property.property_amenities).selectinload(
+            Property.property_amenities.property.mapper.class_.amenity
+        ),
+        selectinload(Property.property_rules).selectinload(
+            Property.property_rules.property.mapper.class_.rule
+        ),
+    )
 
-    properties = query.all()
+    if not has_dates:
+        # Count the filtered query, including grouped amenity matches,
+        # without loading Property objects or their relationships.
+        total = query.order_by(None).count()
 
-    # ---------------------------------
-    # Build search results
-    #
-    # When dates are selected, calculate
-    # actual stay pricing using base +
-    # seasonal prices.
-    # ---------------------------------
+        start = (page - 1) * page_size
+        end = start + page_size
 
-    search_results = []
+        # Match the original Python slice, including negative indices
+        # and zero/negative page sizes, without adding validation rules.
+        slice_start, slice_stop, _ = slice(start, end).indices(total)
 
-    for property in properties:
+        if slice_stop > slice_start:
+            properties = (
+                query.options(*eager_options)
+                .offset(slice_start)
+                .limit(slice_stop - slice_start)
+                .all()
+            )
+        else:
+            properties = []
 
-        stay_pricing = None
+        paginated_results = [
+            {
+                "property": property,
+                "stay_pricing": None,
+            }
+            for property in properties
+        ]
+    else:
+        # Keep pricing evaluation across all matching properties:
+        # its filters, sort keys, and possible errors must retain
+        # their original behavior before pagination.
+        properties = query.options(*eager_options).all()
 
-        if (
-            check_in is not None
-            and check_out is not None
-        ):
+        search_results = []
 
+        for property in properties:
             stay_pricing = calculate_stay_price(
                 db=db,
                 property=property,
@@ -299,83 +211,41 @@ def search_properties(
                 check_out=check_out,
             )
 
-            lowest_price = stay_pricing[
-                "lowest_nightly_price"
-            ]
+            lowest_price = stay_pricing["lowest_nightly_price"]
+            highest_price = stay_pricing["highest_nightly_price"]
 
-            highest_price = stay_pricing[
-                "highest_nightly_price"
-            ]
-
-            # ---------------------------------
-            # Date-aware minimum price
-            # ---------------------------------
-
-            if (
-                min_price is not None
-                and lowest_price < min_price
-            ):
+            if min_price is not None and lowest_price < min_price:
                 continue
 
-            # ---------------------------------
-            # Date-aware maximum price
-            # ---------------------------------
-
-            if (
-                max_price is not None
-                and highest_price > max_price
-            ):
+            if max_price is not None and highest_price > max_price:
                 continue
 
-        search_results.append(
-            {
-                "property": property,
-                "stay_pricing": stay_pricing,
-            }
-        )
-
-    # ---------------------------------
-    # Date-aware price sorting
-    # ---------------------------------
-
-    if (
-        check_in is not None
-        and check_out is not None
-    ):
-
-        if sort == "price_low":
-
-            search_results.sort(
-                key=lambda result: result[
-                    "stay_pricing"
-                ]["average_price_per_night"]
+            search_results.append(
+                {
+                    "property": property,
+                    "stay_pricing": stay_pricing,
+                }
             )
 
-        elif sort == "price_high":
-
+        if sort == "price_low":
             search_results.sort(
-                key=lambda result: result[
-                    "stay_pricing"
-                ]["average_price_per_night"],
+                key=lambda result: result["stay_pricing"][
+                    "average_price_per_night"
+                ]
+            )
+        elif sort == "price_high":
+            search_results.sort(
+                key=lambda result: result["stay_pricing"][
+                    "average_price_per_night"
+                ],
                 reverse=True,
             )
 
-    # ---------------------------------
-    # Pagination
-    #
-    # Pagination happens AFTER
-    # seasonal-price filtering and
-    # date-aware sorting.
-    # ---------------------------------
+        total = len(search_results)
 
-    total = len(search_results)
-
-    start = (page - 1) * page_size
-    end = start + page_size
-
-    paginated_results = search_results[
-        start:end
-    ]
+        start = (page - 1) * page_size
+        end = start + page_size
+        paginated_results = search_results[start:end]
 
     total_pages = (
         ceil(total / page_size)
@@ -383,55 +253,23 @@ def search_properties(
         else 0
     )
 
-    # ---------------------------------
-    # Build API response items
-    # ---------------------------------
-
     items = []
 
     for result in paginated_results:
-
         property = result["property"]
 
         property_data = {
-            column.name: getattr(
-                property,
-                column.name,
-            )
+            column.name: getattr(property, column.name)
             for column in Property.__table__.columns
         }
 
-        # Relationships expected by
-        # PropertyResponse.
-
-        property_data["images"] = (
-            property.images
-        )
-
-        property_data["amenities"] = (
-            property.amenities
-        )
-
-        property_data["property_rules"] = (
-            property.property_rules
-        )
-
-        property_data["seasonal_prices"] = (
-            property.seasonal_prices
-        )
-
-        # Search-specific calculated
-        # pricing.
-
-        property_data["stay_pricing"] = (
-            result["stay_pricing"]
-        )
+        property_data["images"] = property.images
+        property_data["amenities"] = property.amenities
+        property_data["property_rules"] = property.property_rules
+        property_data["seasonal_prices"] = property.seasonal_prices
+        property_data["stay_pricing"] = result["stay_pricing"]
 
         items.append(property_data)
-
-    # ---------------------------------
-    # Final response
-    # ---------------------------------
 
     return {
         "items": items,
