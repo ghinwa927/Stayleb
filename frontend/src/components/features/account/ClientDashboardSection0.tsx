@@ -10,7 +10,8 @@ import type { BookingResponse } from "@/services/bookings";
 import { getPublicProperty } from "@/services/properties";
 import type { PropertyResponse } from "@/services/owner";
 import { getReviewByBooking, type Review } from "@/services/reviews";
-import { getFavorites, type FavoritePropertyItem } from "@/services/favorites";
+import { getFavoritesCached, favoritesIdentity, type FavoritePropertyItem } from "@/services/favorites";
+import { isAbortError } from "@/lib/request-cache";
 import { AISearchSection } from "@/components/features/market/AISearchSection";
 import { BookingStatusOverview } from "@/components/features/account/BookingStatusOverview";
 import { ReviewReminderCard } from "@/components/features/account/ReviewReminderCard";
@@ -45,33 +46,42 @@ export function ClientDashboardSection0() {
         const data = await getMyBookings();
         if (!cancelled) setBookings(data);
         const unique = [...new Set(data.map((b) => b.property_id))];
-        const map: Record<number, PropertyResponse> = {};
-        await Promise.all(
-          unique.map(async (pid) => {
-            try {
-              const p = await getPublicProperty(pid);
-              map[pid] = p;
-            } catch {}
-          })
-        );
-        if (!cancelled) setPropsMap(map);
         const completed = data.filter((b) => b.status === "completed");
-        if (completed.length > 0) {
-          const reviews = await Promise.all(
-            completed.map(async (b) => {
-              try {
-                const r = await getReviewByBooking(b.id);
-                return { id: b.id, review: r };
-              } catch {
-                return { id: b.id, review: null };
-              }
-            })
-          );
-          if (!cancelled) {
-            const m: Record<number, Review | null> = {};
-            reviews.forEach(({ id, review }) => { m[id] = review; });
-            setReviewMap(m);
-          }
+        // Property cards and review checks only need booking IDs/property IDs,
+        // so both fan out together once bookings arrive instead of reviews
+        // waiting for unrelated property responses.
+        const [map, reviewEntries] = await Promise.all([
+          (async () => {
+            const m: Record<number, PropertyResponse> = {};
+            await Promise.all(
+              unique.map(async (pid) => {
+                try {
+                  const p = await getPublicProperty(pid);
+                  m[pid] = p;
+                } catch {}
+              })
+            );
+            return m;
+          })(),
+          (async () => {
+            if (completed.length === 0) return [] as { id: number; review: Review | null }[];
+            return Promise.all(
+              completed.map(async (b) => {
+                try {
+                  const r = await getReviewByBooking(b.id);
+                  return { id: b.id, review: r };
+                } catch {
+                  return { id: b.id, review: null };
+                }
+              })
+            );
+          })(),
+        ]);
+        if (!cancelled) {
+          setPropsMap(map);
+          const m: Record<number, Review | null> = {};
+          reviewEntries.forEach(({ id, review }) => { m[id] = review; });
+          setReviewMap(m);
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load dashboard");
@@ -85,19 +95,30 @@ export function ClientDashboardSection0() {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    // Same cached helper as FavoritesProvider (mounted by AppShell above
+    // this page), so concurrent loads share one network request instead of
+    // issuing a second expensive call.
+    const current = favoritesIdentity();
     async function loadFavorites() {
+      if (!current) {
+        if (!cancelled) setFavoritesLoading(false);
+        return;
+      }
       setFavoritesLoading(true);
       try {
-        const response = await getFavorites();
-        if (!cancelled) setFavorites(response.items);
+        const response = await getFavoritesCached({ signal: controller.signal });
+        // An account switch during the flight must not write another
+        // user's data here.
+        if (!cancelled && favoritesIdentity() === current) setFavorites(response.items);
       } catch (e) {
-        console.error('Failed to load favorites:', e);
+        if (!cancelled && !isAbortError(e)) console.error('Failed to load favorites:', e);
       } finally {
         if (!cancelled) setFavoritesLoading(false);
       }
     }
     loadFavorites();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; controller.abort(); };
   }, []);
 
   if (loading) {
