@@ -1,6 +1,12 @@
 "use client";
 import { apiFetch } from "@/services/api";
 import { propertySearchQuery } from "@/lib/property-search";
+import {
+  AMENITIES_TTL_MS,
+  PROPERTY_SEARCH_TTL_MS,
+  dedupedFetch,
+  getCached,
+} from "@/lib/request-cache";
 import type { PropertyResponse } from "@/services/owner";
 
 export type PropertySearchParams = {
@@ -34,20 +40,73 @@ export type AvailabilityResponse = {
   booked_dates: { id: number; check_in: string; check_out: string; status: string }[];
 };
 
-export async function searchProperties(params: PropertySearchParams): Promise<PropertySearchResponse> {
+export type CachedFetchInit = {
+  /** Per-caller abort signal. Safe with shared requests (see request-cache). */
+  signal?: AbortSignal;
+  /** Skip the cache read and fetch again. Concurrent identical callers still share one request. */
+  forceRefresh?: boolean;
+};
+
+/**
+ * Cache key covering every search parameter. Amenity ids are sorted so
+ * semantically identical searches share one entry regardless of order.
+ */
+export function propertySearchKey(params: PropertySearchParams): string {
+  const normalized: PropertySearchParams = {
+    ...params,
+    amenity_ids: params.amenity_ids ? [...params.amenity_ids].sort((a, b) => a - b) : undefined,
+  };
+  const query = propertySearchQuery(normalized);
+  return `GET:/properties${query ? `?${query}` : ""}`;
+}
+
+export const AMENITIES_CACHE_KEY = "GET:/amenities/public";
+
+export async function searchProperties(
+  params: PropertySearchParams,
+  init?: CachedFetchInit,
+): Promise<PropertySearchResponse> {
+  const key = propertySearchKey(params);
   const query = propertySearchQuery(params);
   const suffix = query ? `?${query}` : "";
-  return apiFetch(`/properties${suffix}`);
+  return dedupedFetch<PropertySearchResponse>(
+    key,
+    (signal) => apiFetch(`/properties${suffix}`, { signal }),
+    { ttlMs: PROPERTY_SEARCH_TTL_MS, signal: init?.signal, forceRefresh: init?.forceRefresh },
+  );
 }
 
-export async function getPublicProperty(id: number | string): Promise<PropertyResponse> {
-  return apiFetch(`/properties/public/${id}`);
+/** Synchronous read of a fresh cached search response, if any. No network. */
+export function getCachedSearch(params: PropertySearchParams): PropertySearchResponse | null {
+  return getCached<PropertySearchResponse>(propertySearchKey(params));
 }
 
-export async function getAvailability(id: number | string): Promise<AvailabilityResponse> {
-  return apiFetch(`/properties/${id}/availability`);
+export async function getPublicProperty(
+  id: number | string,
+  options?: RequestInit,
+): Promise<PropertyResponse> {
+  return apiFetch(`/properties/public/${id}`, options);
 }
 
-export async function getPublicAmenities(): Promise<import("@/services/owner").Amenity[]> {
-  return apiFetch(`/amenities/public`);
+// Availability must always be fresh: never route through the shared cache.
+export async function getAvailability(
+  id: number | string,
+  options?: RequestInit,
+): Promise<AvailabilityResponse> {
+  return apiFetch(`/properties/${id}/availability`, options);
+}
+
+export async function getPublicAmenities(
+  init?: CachedFetchInit,
+): Promise<import("@/services/owner").Amenity[]> {
+  return dedupedFetch<import("@/services/owner").Amenity[]>(
+    AMENITIES_CACHE_KEY,
+    (signal) => apiFetch(`/amenities/public`, { signal }),
+    { ttlMs: AMENITIES_TTL_MS, signal: init?.signal, forceRefresh: init?.forceRefresh },
+  );
+}
+
+/** Synchronous read of fresh cached amenities, if any. No network. */
+export function getCachedAmenities(): import("@/services/owner").Amenity[] | null {
+  return getCached<import("@/services/owner").Amenity[]>(AMENITIES_CACHE_KEY);
 }

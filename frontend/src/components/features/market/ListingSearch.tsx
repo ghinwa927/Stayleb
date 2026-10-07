@@ -1,15 +1,16 @@
 "use client";
-import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode, type SelectHTMLAttributes, type FormEvent } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode, type SelectHTMLAttributes, type FormEvent } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/ui/Icon';
 import { LocalImage } from '@/components/ui/LocalImage';
 import { requireAuth } from '@/lib/authGuard';
-import { searchProperties, type PropertySearchParams, type PropertySearchResponse } from '@/services/properties';
+import { getCachedSearch, searchProperties, type PropertySearchParams, type PropertySearchResponse } from '@/services/properties';
+import { isAbortError } from '@/lib/request-cache';
 import { propertySearchQuery, readPropertySearch, searchValidation, propertyDetailsHref } from '@/lib/property-search';
 import { useAmenities } from '@/hooks/useAmenities';
 import { PropertySearchForm } from './PropertySearchForm';
-import { getFavorites, addFavorite, removeFavorite, type FavoriteListResponse } from '@/services/favorites';
+import { favoritesIdentity, getFavoritesCached, addFavorite, invalidateFavoritesCache, removeFavorite } from '@/services/favorites';
 import Swal from 'sweetalert2';
 
 type ListingState = { filters: PropertySearchParams; update: (patch: PropertySearchParams) => void; reset: () => void; retry: () => void; results: PropertySearchResponse | null; loading: boolean; error: string | null };
@@ -29,25 +30,42 @@ function ListingRequest({ query, children }: { query: string; children: ReactNod
   const pathname = usePathname();
   const [filters] = useState(() => readPropertySearch(new URLSearchParams(query)));
   const validation = searchValidation(filters);
-  const [results, setResults] = useState<PropertySearchResponse | null>(null);
+  // Reuse a fresh cached response so remounts and back-navigation render
+  // instantly without another network request.
+  const [initialResults] = useState<PropertySearchResponse | null>(
+    () => (validation ? null : getCachedSearch(filters)),
+  );
+  const [results, setResults] = useState<PropertySearchResponse | null>(initialResults);
   const [error, setError] = useState<string | null>(validation);
-  const [loading, setLoading] = useState(!validation);
+  const [loading, setLoading] = useState(!validation && initialResults === null);
   const [attempt, setAttempt] = useState(0);
+  // Monotonic id so a slow earlier response can never overwrite newer results.
+  const requestId = useRef(0);
+  // Set by retry() so only the retry-triggered fetch bypasses the cache.
+  const forceNextRef = useRef(false);
   useEffect(() => {
     if (validation) return;
-    let active = true;
-    searchProperties(filters).then(data => {
-      if (active) { setResults(data); setLoading(false); }
-    }).catch(() => {
-      if (active) { setError('We couldn’t load stays. Please try again.'); setLoading(false); }
+    const id = ++requestId.current;
+    // Strict Mode runs this effect twice in development; both runs share one
+    // network request through the cached fetcher, and only the latest
+    // request id may write state.
+    const forceRefresh = forceNextRef.current;
+    forceNextRef.current = false;
+    let cancelled = false;
+    const controller = new AbortController();
+    searchProperties(filters, { signal: controller.signal, forceRefresh }).then(data => {
+      if (!cancelled && id === requestId.current) { setResults(data); setLoading(false); }
+    }).catch((fetchError: unknown) => {
+      if (cancelled || isAbortError(fetchError)) return;
+      if (id === requestId.current) { setError('We couldn’t load stays. Please try again.'); setLoading(false); }
     });
-    return () => { active = false; };
+    return () => { cancelled = true; controller.abort(); };
   }, [filters, validation, attempt]);
   function update(patch: PropertySearchParams) {
     const next = { ...filters, ...patch, page: patch.page ?? 1 };
     router.push(`${pathname}?${propertySearchQuery(next)}`, { scroll: false });
   }
-  const retry = () => { if (!validation) { setError(null); setLoading(true); setAttempt(value => value + 1); } };
+  const retry = () => { if (!validation) { forceNextRef.current = true; setError(null); setLoading(true); setAttempt(value => value + 1); } };
   return <ListingContext.Provider value={{ filters, update, reset: () => router.push(pathname, { scroll: false }), retry, results, loading, error }}>{children}</ListingContext.Provider>;
 }
 
@@ -69,26 +87,97 @@ export function useFavorites() {
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  const [loading, setLoading] = useState(true);
+  // Anonymous visitors never load: start idle, not loading, so favorite
+  // buttons stay interactive and no 401 request is ever sent. Signed-in
+  // visitors start loading until the fetch below resolves.
+  const [loading, setLoading] = useState<boolean>(() => favoritesIdentity() !== null);
   const [error, setError] = useState<string | null>(null);
+  // Signed-in identity (null when anonymous). Changes on login/logout and
+  // across tabs; the favorites fetch below follows it.
+  const [identity, setIdentity] = useState<string | null>(() => favoritesIdentity());
+  const identityRef = useRef<string | null>(identity);
 
-  const loadFavorites = async () => {
+  useEffect(() => {
+    const syncIdentity = () => {
+      const next = favoritesIdentity();
+      if (identityRef.current === next) return;
+      identityRef.current = next;
+      // Drop cached entries on every account transition so favorites can
+      // never leak from one account (or session) into another.
+      invalidateFavoritesCache();
+      if (next === null) {
+        // Logged out: clear user-specific state here (in the event handler,
+        // not in an effect) and skip the request entirely.
+        setFavorites(new Set());
+        setError(null);
+        setLoading(false);
+      } else {
+        // Signing in (or switching accounts) shows loading until the fetch
+        // effect below resolves.
+        setError(null);
+        setLoading(true);
+      }
+      setIdentity(next);
+    };
+    syncIdentity();
+    window.addEventListener("stayleb-auth", syncIdentity);
+    window.addEventListener("storage", syncIdentity);
+    return () => {
+      window.removeEventListener("stayleb-auth", syncIdentity);
+      window.removeEventListener("storage", syncIdentity);
+    };
+  }, []);
+
+  const loadFavorites = async (options?: { forceRefresh?: boolean }) => {
+    const current = favoritesIdentity();
+    // Never request favorites anonymously (avoids the 401 entirely).
+    if (!current) {
+      setFavorites(new Set());
+      setError(null);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       setError(null);
-      const response = await getFavorites();
+      const response = await getFavoritesCached({ forceRefresh: options?.forceRefresh });
+      // An account switch (or logout) during the flight must not write
+      // another user's data into this provider.
+      if (favoritesIdentity() !== current) return;
       const favSet = new Set(response.items.map(item => item.property.id));
       setFavorites(favSet);
     } catch (e) {
+      if (isAbortError(e)) return;
+      if (favoritesIdentity() !== current) return;
       setError(e instanceof Error ? e.message : 'Failed to load favorites');
     } finally {
-      setLoading(false);
+      if (favoritesIdentity() === current) setLoading(false);
+      else {
+        setFavorites(new Set());
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadFavorites();
-  }, []);
+    // Anonymous: nothing to fetch (state is cleared in the auth handler).
+    if (!identity) return;
+    let cancelled = false;
+    const controller = new AbortController();
+    const wanted = identity;
+    getFavoritesCached({ signal: controller.signal }).then(response => {
+      if (!cancelled && favoritesIdentity() === wanted) {
+        setFavorites(new Set(response.items.map(item => item.property.id)));
+        setLoading(false);
+      }
+    }).catch((e: unknown) => {
+      if (cancelled || isAbortError(e)) return;
+      if (favoritesIdentity() !== wanted) return;
+      setError(e instanceof Error ? e.message : 'Failed to load favorites');
+      setLoading(false);
+    });
+    return () => { cancelled = true; controller.abort(); };
+  }, [identity]);
 
   const toggleFavorite = async (propertyId: number) => {
     const currentlyFavorite = favorites.has(propertyId);
@@ -130,7 +219,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const isFavorite = (propertyId: number) => favorites.has(propertyId);
 
   return (
-    <FavoritesContext.Provider value={{ favorites, loading, error, refreshFavorites: loadFavorites, toggleFavorite, isFavorite }}>
+    <FavoritesContext.Provider value={{ favorites, loading, error, refreshFavorites: () => loadFavorites({ forceRefresh: true }), toggleFavorite, isFavorite }}>
       {children}
     </FavoritesContext.Provider>
   );

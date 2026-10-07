@@ -1,18 +1,18 @@
 "use client";
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Waves, Mountain, Castle, Trees } from 'lucide-react';
 import { Icon } from '@/components/ui/Icon';
-import { searchProperties, type PropertySearchResponse } from '@/services/properties';
+import { getCachedSearch, searchProperties, type PropertySearchResponse } from '@/services/properties';
+import { isAbortError } from '@/lib/request-cache';
 import { propertySearchQuery } from '@/lib/property-search';
 import { PropertySearchForm } from '@/components/features/market/PropertySearchForm';
 import { PropertyCard } from './PropertyCard';
 import { useAmenities } from '@/hooks/useAmenities';
 import { AISearchSection } from '@/components/features/market/AISearchSection';
 import { isAuthenticated } from '@/lib/authGuard';
-import { useEffect as useEffectHook, useState as useStateHook } from 'react';
 
 const destinations = [
   { location: 'Batroun', title: 'Batroun', eyebrow: 'Coast & Souks', description: 'Old souks and Mediterranean coastal walks.', image: '/images/stayleb-12.jpg', icon: Waves },
@@ -22,20 +22,77 @@ const destinations = [
 ];
 
 function HomeStays({ location }: { location?: string }) {
-  const [result, setResult] = useState<PropertySearchResponse | null>(null);
+  const params = { location, page: 1, page_size: 8, sort: 'newest' as const };
+  const [result, setResult] = useState<PropertySearchResponse | null>(() => getCachedSearch(params));
+  // Refreshing keeps the previous grid on screen while new params load.
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshFailed, setRefreshFailed] = useState(false);
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  // Monotonic id so a slow earlier response can never overwrite newer results.
+  const requestId = useRef(0);
+  // Set by retry() so only the retry-triggered fetch bypasses the cache.
+  const forceNextRef = useRef(false);
+  // Latest result for the effect below (kept outside deps to avoid refetch loops).
+  const resultRef = useRef(result);
   useEffect(() => {
-    let active = true;
-    searchProperties({ location, page: 1, page_size: 8, sort: 'newest' }).then(data => {
-      if (active) setResult(data);
-    }).catch(() => { if (active) setError(true); });
-    return () => { active = false; };
+    resultRef.current = result;
+  });
+  useEffect(() => {
+    const id = ++requestId.current;
+    // Strict Mode runs this effect twice in development; both runs share one
+    // network request through the cached fetcher, and only the latest
+    // request id may write state.
+    const forceRefresh = forceNextRef.current;
+    forceNextRef.current = false;
+    let cancelled = false;
+    const controller = new AbortController();
+    const hadData = resultRef.current !== null;
+    if (hadData) {
+      setRefreshing(true);
+      setRefreshFailed(false);
+      setError(false);
+    }
+    searchProperties(params, { signal: controller.signal, forceRefresh }).then(data => {
+      if (!cancelled && id === requestId.current) {
+        resultRef.current = data;
+        setResult(data);
+        setRefreshing(false);
+        setRefreshFailed(false);
+        setError(false);
+      }
+    }).catch((fetchError: unknown) => {
+      if (cancelled || isAbortError(fetchError)) return;
+      if (id !== requestId.current) return;
+      if (resultRef.current) {
+        setRefreshing(false);
+        setRefreshFailed(true);
+      } else {
+        setError(true);
+      }
+    });
+    return () => { cancelled = true; controller.abort(); };
+    // params is a fresh object each render; compare by serialized identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, attempt]);
-  if (error) return <div role="alert" className="panel text-center space-y-3"><p>We couldn’t load stays right now.</p><button className="secondary-button" onClick={() => { setError(false); setResult(null); setAttempt(value => value + 1); }}>Try again</button></div>;
+  const retry = () => {
+    forceNextRef.current = true;
+    setError(false);
+    setRefreshFailed(false);
+    if (!resultRef.current) setResult(null);
+    setAttempt(value => value + 1);
+  };
+  if (error) return <div role="alert" className="panel text-center space-y-3"><p>We couldn’t load stays right now.</p><button className="secondary-button" onClick={retry}>Try again</button></div>;
   if (!result) return <div role="status" aria-label="Loading stays" className="property-grid">{[0, 1, 2, 3].map(id => <div key={id} className="rounded-xl bg-white animate-pulse overflow-hidden"><div className="aspect-[4/3] bg-surface-container"/><p className="p-6 text-sm">Loading stays…</p></div>)}</div>;
-  if (!result.items.length) return <div className="panel text-center py-10"><h3 className="font-semibold">No stays to show here yet</h3><p className="text-sm text-on-surface-variant mt-2">Explore another region or browse all stays.</p><Link className="primary-button mt-4" href="/search">Browse stays</Link></div>;
-  return <><div className="property-grid">{result.items.map(property => <PropertyCard key={property.id} property={property}/>)}</div><div className="mt-6 text-center"><Link className="secondary-button" href={`/search?${propertySearchQuery({ location, sort: 'newest' })}`}>Explore all stays <ArrowRight size={16}/></Link></div></>;
+  if (!result.items.length && !refreshing) return <div className="panel text-center py-10"><h3 className="font-semibold">No stays to show here yet</h3><p className="text-sm text-on-surface-variant mt-2">Explore another region or browse all stays.</p><Link className="primary-button mt-4" href="/search">Browse stays</Link></div>;
+  return <>
+    <div aria-busy={refreshing} aria-live="polite">
+      {refreshing && <p role="status" className="text-[13px] text-[#64748B] mb-3 animate-pulse">Updating stays…</p>}
+      {refreshFailed && !refreshing && <p role="alert" className="text-[13px] text-[#64748B] mb-3">Couldn’t refresh stays. <button onClick={retry} className="underline text-[#157375] font-semibold">Try again</button></p>}
+      <div className={`property-grid${refreshing ? ' opacity-70 pointer-events-none' : ''}`}>{result.items.map(property => <PropertyCard key={property.id} property={property}/>)}</div>
+    </div>
+    <div className="mt-6 text-center"><Link className="secondary-button" href={`/search?${propertySearchQuery({ location, sort: 'newest' })}`}>Explore all stays <ArrowRight size={16}/></Link></div>
+  </>;
 }
 
 export function HomeExperience({ children }: { readonly children: ReactNode }) {
@@ -83,7 +140,7 @@ export function HomeExperience({ children }: { readonly children: ReactNode }) {
     )}
     <section id="stays" className="page-container stays-section">
       <div className="section-heading"><div><p className="section-eyebrow"><span>EXPLORE STAYS</span></p><h2>Find Your Lebanese Getaway</h2></div><div className="region-tabs">{[['Faraya', 'Faraya'], ['Batroun', 'Batroun'], ['', 'All regions']].map(([value, label]) => <button key={value} aria-pressed={region === value} onClick={() => setRegion(value)}>{label}</button>)}</div></div>
-      <HomeStays key={region} location={region || undefined}/>
+      <HomeStays location={region || undefined}/>
     </section>
     <section id="destinations" className="page-container destinations-section">
       <p className="section-eyebrow"><span>DESTINATIONS</span></p><h2>Explore Lebanese Regions</h2><p className="section-description">From the Mediterranean coastline to mountain villages.</p>
