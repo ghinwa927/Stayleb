@@ -4,6 +4,7 @@ import './globals.css';
 import '../styles/screen-details.css';
 import '../styles/application.css';
 import '../styles/homepage.css';
+import '../styles/cinema-home.css';
 import '../styles/responsive.css';
 import { InteractionProvider } from '@/components/ui/Interactions';
 import { FeedbackProvider } from '@/components/ui/Feedback';
