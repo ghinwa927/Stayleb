@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import {
   createTimeline,
+  createFlowTimeline,
   sceneAt,
   documentPosition,
   cardProgress,
@@ -151,12 +152,20 @@ export function CinematicHome() {
   const aiCards = useRef<HTMLDivElement>(null);
   const aiWindow = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
-  const [wide, setWide] = useState(false);
+  // Mount gate (NOT a viewport gate): server and first client render are
+  // identically static, so hydration can never diverge. After mount the full
+  // cinematic experience enables on every screen size; only an explicit
+  // reduced-motion preference keeps the static fallback.
+  const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(0);
   const activeRef = useRef(0);
   const [viewport, setViewport] = useState(800);
   const [travel, setTravel] = useState(0);
   const [aiTravel, setAiTravel] = useState(0);
+  const [flowGeom, setFlowGeom] = useState<{
+    total: number;
+    scenes: { top: number; height: number }[];
+  } | null>(null);
   const [navigation, setNavigation] = useState<{
     scene: number;
     progress?: number;
@@ -165,7 +174,7 @@ export function CinematicHome() {
   } | null>(null);
   const enterBusy = useRef(false);
   const enterTimer = useRef<number | null>(null);
-  const animated = wide && !reduced;
+  const animated = mounted && !reduced;
   // Auth resolves after mount ("loading" on server and first client render,
   // so gated UI never diverges during hydration).
   const authStatus = useAuthStatus();
@@ -233,24 +242,79 @@ export function CinematicHome() {
     setAttempt(value => value + 1);
   };
 
+  // Stacked-flow layout on narrow viewports (normal document flow,
+  // content-sized scenes) vs pinned track on wide screens. Independent of
+  // animation: reduced-motion keeps the static stacking everywhere.
+  const [narrow, setNarrow] = useState(false);
+  // Measured-geometry math whenever the layout stacks (narrow screens, or
+  // reduced-motion static mode) — this also corrects navigation math there.
+  const useFlowTimeline = narrow || !animated;
   const timeline = useMemo(
-    () => createTimeline(viewport, travel, aiTravel),
-    [viewport, travel, aiTravel],
+    () =>
+      useFlowTimeline && flowGeom
+        ? createFlowTimeline(viewport, flowGeom.total, flowGeom.scenes)
+        : createTimeline(viewport, travel, aiTravel),
+    [viewport, travel, aiTravel, useFlowTimeline, flowGeom],
   );
+  // Viewport height drives every timeline distance, so it tracks the visual
+  // viewport (mobile address-bar show/hide), window resizes, and explicit
+  // orientation changes. Same values feed both modes; static mode ignores
+  // them for motion but they cost nothing to keep fresh.
+  const viewportHeight = () =>
+    Math.max(1, Math.round(window.visualViewport?.height ?? window.innerHeight));
   useEffect(() => {
-    const media = matchMedia("(min-width: 860px) and (min-height: 600px)");
     const sync = () => {
-      setWide(media.matches);
-      setViewport(window.innerHeight);
+      setMounted(true);
+      setViewport(viewportHeight());
     };
+    const syncNarrow = () => setNarrow(matchMedia("(max-width: 859px)").matches);
     sync();
-    media.addEventListener("change", sync);
+    syncNarrow();
+    const narrowQuery = matchMedia("(max-width: 859px)");
+    const onNarrowChange = () => setNarrow(narrowQuery.matches);
+    narrowQuery.addEventListener("change", onNarrowChange);
     window.addEventListener("resize", sync);
+    window.addEventListener("orientationchange", sync);
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", sync);
     return () => {
-      media.removeEventListener("change", sync);
+      narrowQuery.removeEventListener("change", onNarrowChange);
       window.removeEventListener("resize", sync);
+      window.removeEventListener("orientationchange", sync);
+      vv?.removeEventListener("resize", sync);
     };
   }, []);
+  // Flow geometry is measured from the real stacked layout (scene tops and
+  // heights relative to the track) whenever it is in use, so fades, stops
+  // and navigation always match visible content — after API results, image
+  // and font loads, rotation, or viewport changes. Observing the track
+  // covers all of those without extra dependencies.
+  useEffect(() => {
+    if (!useFlowTimeline) return;
+    const order = ["hero", "stays", "destinations", "search", "plan"];
+    const measure = () => {
+      const trackEl = track.current;
+      if (!trackEl) return;
+      const trackTop = trackEl.getBoundingClientRect().top + window.scrollY;
+      const scenes: { top: number; height: number }[] = [];
+      for (const id of order) {
+        const el = document.getElementById(id);
+        if (!(el instanceof HTMLElement) || !trackEl.contains(el)) return;
+        const rect = el.getBoundingClientRect();
+        scenes.push({
+          top: rect.top + window.scrollY - trackTop,
+          height: rect.height,
+        });
+      }
+      setFlowGeom({ total: trackEl.scrollHeight, scenes });
+    };
+    measure();
+    const trackEl = track.current;
+    if (!trackEl) return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(trackEl);
+    return () => observer.disconnect();
+  }, [useFlowTimeline, viewport]);
   const { scrollYProgress } = useScroll({
     target: track,
     offset: ["start start", "end end"],
@@ -607,13 +671,21 @@ export function CinematicHome() {
   }
   const today = new Date().toLocaleDateString("en-CA");
   const stays = result?.items ?? [];
+  // Narrow + animated viewports stack scenes in normal flow (cinema-flow);
+  // reduced motion keeps the static stacking. The pinned inline track height
+  // only applies to the wide animated regime.
+  const rootClass = !animated
+    ? "cinema-home cinema-static"
+    : narrow
+      ? "cinema-home cinema-mode cinema-flow"
+      : "cinema-home cinema-mode";
   return (
-    <div className={`${animated ? "cinema-home cinema-mode" : "cinema-home cinema-static"} ${cinemaFontVariables}`}>
+    <div className={`${rootClass} ${cinemaFontVariables}`}>
       <CinemaNav onNavigate={navigate} />
       <main
         ref={track}
         className="film-track"
-        style={animated ? { height: timeline.trackHeight } : undefined}
+        style={animated && !narrow ? { height: timeline.trackHeight } : undefined}
       >
         <div className="film-viewport">
           <Scenery

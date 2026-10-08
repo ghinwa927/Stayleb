@@ -42,8 +42,8 @@ export function createTimeline(viewportHeight: number, cardTravel: number, aiTra
 }
 
 export function sceneAt(progress: number, timeline: Timeline) {
-  return timeline.switches.findIndex(stop => progress < stop) === -1
-    ? 3 : timeline.switches.findIndex(stop => progress < stop);
+  const index = timeline.switches.findIndex(stop => progress < stop);
+  return index === -1 ? timeline.switches.length : index;
 }
 export function documentPosition(trackTop: number, timeline: Timeline, progress: number) {
   return trackTop + timeline.distance * Math.max(0, Math.min(1, progress));
@@ -57,4 +57,59 @@ export function searchCardProgress(offset: number, timeline: Timeline) {
   if (timeline.aiTravel === 0) return timeline.stops[3];
   const fraction = Math.max(0, Math.min(1, offset / timeline.aiTravel));
   return timeline.aiBrowse[0] + (timeline.aiBrowse[1] - timeline.aiBrowse[0]) * fraction;
+}
+
+export type SceneGeometry = { top: number; height: number };
+
+/**
+ * Stacked-flow regime for narrow viewports (and anywhere the layout stacks,
+ * e.g. reduced-motion): scenes sit in normal document flow, sized by their
+ * content, and the camera becomes fades/slides driven by measured geometry
+ * instead of a pinned track. Returns the same Timeline shape (zeroed list
+ * travel, collapsed browse windows), so navigation, Enter-key flow, focus
+ * helpers and the scenery transitions keep working unchanged.
+ */
+export function createFlowTimeline(
+  viewportHeight: number,
+  trackHeight: number,
+  scenes: SceneGeometry[],
+): Timeline {
+  const viewport = Math.max(1, viewportHeight);
+  const total = Math.max(1, trackHeight);
+  const distance = Math.max(1, total - viewport);
+  const ranges: SceneRange[] = scenes.map((s) => {
+    const a = (s.top - viewport * 0.9) / distance;
+    const d = (s.top + s.height - viewport * 0.1) / distance;
+    const f = Math.min((d - a) / 2, (viewport * 0.45) / distance);
+    let b = a + f;
+    let c = d - f;
+    if (b > c) {
+      const m = (a + d) / 2;
+      b = m;
+      c = m;
+    }
+    const range: SceneRange = [a, b, c, d];
+    return range;
+  });
+  ranges[0][0] = -0.01;
+  ranges[0][1] = 0;
+  const last = ranges.length - 1;
+  ranges[last][3] = 1.01;
+  if (ranges[last][2] > ranges[last][3]) ranges[last][2] = ranges[last][3];
+  const stops = scenes.map((s, i) => (i === 0 ? 0 : Math.min(1, Math.max(0, s.top / distance))));
+  const switches = stops.slice(1).map((s, i) => (stops[i] + s) / 2);
+  const z = 0;
+  return {
+    distance,
+    trackHeight: total,
+    travel: z,
+    ranges,
+    browse: [z, z] as [number, number],
+    aiTravel: z,
+    aiBrowse: [z, z] as [number, number],
+    stops,
+    switches,
+    mountainTransition: [ranges[0][2], ranges[1][1]] as [number, number],
+    coastTransition: [ranges[1][2], ranges[2][1]] as [number, number],
+  };
 }
